@@ -107,15 +107,15 @@ func categoryToSkeleton(category model.Characteristic, out *interface{}, idToPtr
 	return nil
 }
 
-func ContentToSkeleton(content model.ContentVariable) (out *interface{}, idToPtr map[string]*interface{}, err error) {
-	idToPtr = map[string]*interface{}{}
+func ContentToSkeleton(content model.ContentVariable) (out *interface{}, idToPtr map[string][]*interface{}, err error) {
+	idToPtr = map[string][]*interface{}{}
 	var t interface{}
 	out = &t
 	err = contentToSkeleton(content, out, &idToPtr)
 	return
 }
 
-func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr *map[string]*interface{}) (err error) {
+func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr *map[string][]*interface{}) (err error) {
 	switch content.Type {
 	case model.Float, model.Integer:
 		if content.Value != nil {
@@ -127,7 +127,7 @@ func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr 
 		} else {
 			*out = float64(0)
 		}
-		(*idToPtr)[content.CharacteristicId] = out
+		(*idToPtr)[content.CharacteristicId] = append((*idToPtr)[content.CharacteristicId], out)
 	case model.String:
 		if content.Value != nil {
 			var ok bool
@@ -138,7 +138,7 @@ func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr 
 		} else {
 			*out = ""
 		}
-		(*idToPtr)[content.CharacteristicId] = out
+		(*idToPtr)[content.CharacteristicId] = append((*idToPtr)[content.CharacteristicId], out)
 	case model.Boolean:
 		if content.Value != nil {
 			var ok bool
@@ -149,11 +149,11 @@ func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr 
 		} else {
 			*out = false
 		}
-		(*idToPtr)[content.CharacteristicId] = out
+		(*idToPtr)[content.CharacteristicId] = append((*idToPtr)[content.CharacteristicId], out)
 	case model.Structure:
 		if len(content.SubContentVariables) == 1 && content.SubContentVariables[0].Name == VAR_LEN_PLACEHOLDER {
 			*out = map[string]interface{}{}
-			(*idToPtr)[content.CharacteristicId] = out
+			(*idToPtr)[content.CharacteristicId] = append((*idToPtr)[content.CharacteristicId], out)
 		} else {
 			*out = map[string]interface{}{}
 			for _, sub := range content.SubContentVariables {
@@ -168,7 +168,7 @@ func contentToSkeleton(content model.ContentVariable, out *interface{}, idToPtr 
 	case model.List:
 		if len(content.SubContentVariables) == 1 && content.SubContentVariables[0].Name == VAR_LEN_PLACEHOLDER {
 			*out = []interface{}{}
-			(*idToPtr)[content.CharacteristicId] = out
+			(*idToPtr)[content.CharacteristicId] = append((*idToPtr)[content.CharacteristicId], out)
 		} else {
 			*out = make([]interface{}, len(content.SubContentVariables))
 			for _, sub := range content.SubContentVariables {

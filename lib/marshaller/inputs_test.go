@@ -176,7 +176,7 @@ func ExampleMarshalMultiInput1() {
 	fmt.Println(result, err)
 
 	//output:
-	//map[body:{"color":{"blue":100,"green":0,"red":255}},"color_2":{"blue":100,"green":0,"red":255}}] <nil>
+	//map[body:{"color":{"blue":100,"green":0,"red":255},"color_2":{"blue":100,"green":0,"red":255}}] <nil>
 }
 
 func ExampleMarshalMultiInput2() {
@@ -248,7 +248,7 @@ func ExampleMarshalMultiInput2() {
 	fmt.Println(result, err)
 
 	//output:
-	//map[body:{"color":{"blue":100,"green":0,"red":255}},"color_2":"#ff0064"}] <nil>
+	//map[body:{"color":{"blue":100,"green":0,"red":255},"color_2":"#ff0064"}] <nil>
 }
 
 func ExampleMarshalInput2() {

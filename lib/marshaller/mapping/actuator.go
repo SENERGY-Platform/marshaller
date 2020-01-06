@@ -47,12 +47,14 @@ func createContentIndex(in *map[string]model.ContentVariable, content model.Cont
 	return *in
 }
 
-func castToContent(in interface{}, variable model.Characteristic, set map[string]*interface{}, content map[string]model.ContentVariable) error {
+func castToContent(in interface{}, variable model.Characteristic, set map[string][]*interface{}, content map[string]model.ContentVariable) error {
 	switch variable.Type {
 	case model.String, model.Integer, model.Float, model.Boolean:
 		ref, ok := set[variable.Id]
 		if ok {
-			*ref = in
+			for _, assignment := range ref {
+				*assignment = in
+			}
 		} else {
 			debug.PrintStack()
 			return errors.New("unable to find target exact_match '" + variable.Id + "' in setter")
@@ -80,7 +82,9 @@ func castToContent(in interface{}, variable model.Characteristic, set map[string
 			}
 			ref, ok := set[variable.Id]
 			if ok {
-				*ref = temp
+				for _, assignment := range ref {
+					*assignment = temp
+				}
 			} else {
 				debug.PrintStack()
 				return errors.New("unable to find target exact_match '" + variable.Id + "' in setter")
@@ -118,7 +122,9 @@ func castToContent(in interface{}, variable model.Characteristic, set map[string
 			}
 			ref, ok := set[variable.Id]
 			if ok {
-				*ref = temp
+				for _, assignment := range ref {
+					*assignment = temp
+				}
 			} else {
 				debug.PrintStack()
 				return errors.New("unable to find target exact_match '" + variable.Id + "' in setter")

@@ -256,7 +256,7 @@ func TestSimpleStringSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["fid"]) = "bar"
+	*(set["fid"][0]) = "bar"
 
 	if v, ok := (*out).(string); !ok {
 		t.Fatal()
@@ -272,7 +272,7 @@ func TestSimpleIntSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["fid"]) = int64(42)
+	*(set["fid"][0]) = int64(42)
 
 	if v, ok := (*out).(int64); !ok {
 		t.Fatal()
@@ -288,7 +288,7 @@ func TestSimpleFloatSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["fid"]) = float64(4.2)
+	*(set["fid"][0]) = float64(4.2)
 
 	if v, ok := (*out).(float64); !ok {
 		t.Fatal()
@@ -304,7 +304,7 @@ func TestSimpleBoolSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["fid"]) = true
+	*(set["fid"][0]) = true
 
 	if v, ok := (*out).(bool); !ok {
 		t.Fatal()
@@ -340,9 +340,9 @@ func TestStructSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["r"]) = int64(255)
-	*(set["g"]) = int64(100)
-	*(set["b"]) = int64(0)
+	*(set["r"][0]) = int64(255)
+	*(set["g"][0]) = int64(100)
+	*(set["b"][0]) = int64(0)
 
 	if m, ok := (*out).(map[string]interface{}); !ok {
 		t.Fatal()
@@ -411,7 +411,7 @@ func TestStructDefaultSkeletonContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	*(set["g"]) = float64(100)
+	*(set["g"][0]) = float64(100)
 
 	if m, ok := (*out).(map[string]interface{}); !ok {
 		t.Fatal()
