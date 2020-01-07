@@ -16,7 +16,9 @@
 
 package configurables
 
-import "github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+import (
+	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+)
 
 type Configurable struct {
 	CharacteristicId string                            `json:"characteristic_id"`

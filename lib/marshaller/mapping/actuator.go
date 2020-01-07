@@ -24,17 +24,30 @@ import (
 	"strconv"
 )
 
-func MapActuator(in interface{}, category model.Characteristic, content model.ContentVariable) (out interface{}, err error) {
-	content, err = completeContentVariableCharacteristicId(content, category)
+type Partial = *PartialStruct
+type PartialStruct struct {
+	Value *interface{}
+}
+
+func NewPartial() Partial {
+	return &PartialStruct{}
+}
+
+func MapActuator(in interface{}, characteristic model.Characteristic, content model.ContentVariable, partial Partial) (out interface{}, err error) {
+	if partial == nil {
+		partial = NewPartial()
+	}
+	content, err = completeContentVariableCharacteristicId(content, characteristic)
 	if err != nil {
 		return nil, err
 	}
-	temp, set, err := ContentToSkeleton(content)
+	var set map[string][]*interface{}
+	_, set, err = ContentToSkeleton(content, partial)
 	if err != nil {
 		return nil, err
 	}
-	err = castToContent(in, category, set, createContentIndex(&map[string]model.ContentVariable{}, content))
-	out = *temp
+	err = castToContent(in, characteristic, set, createContentIndex(&map[string]model.ContentVariable{}, content))
+	out = partial.Value
 	return
 
 }
@@ -74,7 +87,7 @@ func castToContent(in interface{}, variable model.Characteristic, set map[string
 			}
 			temp := map[string]interface{}{}
 			for key, sub := range m {
-				out, err := MapActuator(sub, variable.SubCharacteristics[0], category)
+				out, err := MapActuator(sub, variable.SubCharacteristics[0], category, nil)
 				if err != nil {
 					return err
 				}
@@ -114,7 +127,7 @@ func castToContent(in interface{}, variable model.Characteristic, set map[string
 			}
 			temp := []interface{}{}
 			for _, sub := range l {
-				out, err := MapActuator(sub, variable.SubCharacteristics[0], category)
+				out, err := MapActuator(sub, variable.SubCharacteristics[0], category, nil)
 				if err != nil {
 					return err
 				}
