@@ -140,6 +140,10 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if len(configurables) != 1 {
+		t.Fatal(configurables)
+	}
+
 	assert.ListContains(configurables, Configurable{
 		CharacteristicId: color.Rgb,
 		Values: []ConfigurableCharacteristicValue{

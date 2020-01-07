@@ -59,7 +59,11 @@ func MarshalInputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, ser
 				return result, err
 			}
 			assignConfigurableValues(setter, characteristic, configurable.Values)
-			resultPart, err = partialInputMarshalling(conceptRepo, content.ContentVariable, partial, configurable.CharacteristicId, *skeleton, content.Serialization)
+			value, err := normalize(skeleton)
+			if err != nil {
+				return result, err
+			}
+			resultPart, err = partialInputMarshalling(conceptRepo, content.ContentVariable, partial, configurable.CharacteristicId, value, content.Serialization)
 		}
 		resultPart, err = partialInputMarshalling(conceptRepo, content.ContentVariable, partial, inputCharacteristicId, input, content.Serialization)
 		if err != nil {
