@@ -18,18 +18,31 @@ package configurables
 
 import (
 	"errors"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/casting/base"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
 	"strings"
 )
 
-func FindConfigurables(characteristicId string, services []model.Service) (result Configurables, err error) {
-	return FindIntersectingConfigurables(characteristicId, services)
+type ConceptRepo interface {
+	GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error)
+	GetCharacteristic(id string) (model.Characteristic, error)
+	GetConcept(id string) (concept model.Concept, err error)
 }
 
-func FindIntersectingConfigurables(notCharacteristicId string, services []model.Service) (result Configurables, err error) {
-	notConcept, err := base.ConceptRepo.GetConceptOfCharacteristic(notCharacteristicId)
+type ConfigurableService struct {
+	conceptrepo ConceptRepo
+}
+
+func New(repo ConceptRepo) *ConfigurableService {
+	return &ConfigurableService{conceptrepo: repo}
+}
+
+func (this *ConfigurableService) Find(notCharacteristicId string, services []model.Service) (result Configurables, err error) {
+	return FindIntersectingConfigurables(this.conceptrepo, notCharacteristicId, services)
+}
+
+func FindIntersectingConfigurables(repo ConceptRepo, notCharacteristicId string, services []model.Service) (result Configurables, err error) {
+	notConcept, err := repo.GetConceptOfCharacteristic(notCharacteristicId)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +53,7 @@ func FindIntersectingConfigurables(notCharacteristicId string, services []model.
 			characteristics = append(characteristics, characteristicsInContentVariable(content.ContentVariable)...)
 		}
 		for _, characteristic := range characteristics {
-			concept, err := base.ConceptRepo.GetConceptOfCharacteristic(characteristic)
+			concept, err := repo.GetConceptOfCharacteristic(characteristic)
 			if err != nil {
 				return nil, err
 			}
@@ -53,7 +66,7 @@ func FindIntersectingConfigurables(notCharacteristicId string, services []model.
 	serviceCount := len(services)
 	for conceptId, servicesUsingConcept := range invertedIndex {
 		if conceptId != notConcept && len(servicesUsingConcept) == serviceCount {
-			configurable, err := createConfigurable(conceptId)
+			configurable, err := createConfigurable(repo, conceptId)
 			if err != nil {
 				return nil, err
 			}
@@ -63,8 +76,8 @@ func FindIntersectingConfigurables(notCharacteristicId string, services []model.
 	return result, nil
 }
 
-func createConfigurable(conceptId string) (result Configurable, err error) {
-	concept, err := base.ConceptRepo.GetConcept(conceptId)
+func createConfigurable(repo ConceptRepo, conceptId string) (result Configurable, err error) {
+	concept, err := repo.GetConcept(conceptId)
 	if err != nil {
 		return result, err
 	}
@@ -75,7 +88,7 @@ func createConfigurable(conceptId string) (result Configurable, err error) {
 	if characteristicId == "" {
 		characteristicId = concept.CharacteristicIds[0]
 	}
-	characteristic, err := base.ConceptRepo.GetCharacteristic(characteristicId)
+	characteristic, err := repo.GetCharacteristic(characteristicId)
 	if err != nil {
 		return result, err
 	}

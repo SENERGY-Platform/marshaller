@@ -20,8 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/casting"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/casting/base"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization"
@@ -31,26 +29,16 @@ import (
 	"strings"
 )
 
-type ConceptRepo interface {
-	GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error)
-	GetCharacteristic(id CharacteristicId) (model.Characteristic, error)
-	GetRootCharacteristics(ids []CharacteristicId) (result []CharacteristicId)
-}
-
 type CharacteristicId = string
 type ConceptId = string
 
-func MarshalInputs(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, configurables ...configurables.Configurable) (result map[string]string, err error) {
-	return MarshalInputsWithRepo(casting.ConceptRepo, protocol, service, input, inputCharacteristicId, configurables...)
-}
-
-func MarshalInputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, configurables ...configurables.Configurable) (result map[string]string, err error) {
+func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, configurables ...configurables.Configurable) (result map[string]string, err error) {
 	result = map[string]string{}
 	for _, content := range service.Inputs {
 		partial := mapping.NewPartial()
 		var resultPart = ""
 		for _, configurable := range configurables {
-			characteristic, err := base.ConceptRepo.GetCharacteristic(configurable.CharacteristicId)
+			characteristic, err := this.ConceptRepo.GetCharacteristic(configurable.CharacteristicId)
 			if err != nil {
 				return result, err
 			}
@@ -63,9 +51,9 @@ func MarshalInputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, ser
 			if err != nil {
 				return result, err
 			}
-			resultPart, err = partialInputMarshalling(conceptRepo, content.ContentVariable, partial, configurable.CharacteristicId, value, content.Serialization)
+			resultPart, err = this.partialInputMarshalling(content.ContentVariable, partial, configurable.CharacteristicId, value, content.Serialization)
 		}
-		resultPart, err = partialInputMarshalling(conceptRepo, content.ContentVariable, partial, inputCharacteristicId, input, content.Serialization)
+		resultPart, err = this.partialInputMarshalling(content.ContentVariable, partial, inputCharacteristicId, input, content.Serialization)
 		if err != nil {
 			return result, err
 		}
@@ -79,28 +67,28 @@ func MarshalInputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, ser
 	return result, err
 }
 
-func partialInputMarshalling(repo ConceptRepo, variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId string) (result string, err error) {
-	inputCharacteristic, err := repo.GetCharacteristic(inputCharacteristicId)
+func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId string) (result string, err error) {
+	inputCharacteristic, err := this.ConceptRepo.GetCharacteristic(inputCharacteristicId)
 	if err != nil {
 		return result, err
 	}
 	if !reflect.DeepEqual(inputCharacteristic, model.NullCharacteristic) {
-		conceptId, variableCharacteristicIds, err := getMatchingVariableRootCharacteristic(repo, variable, inputCharacteristicId)
+		_, variableCharacteristicIds, err := this.getMatchingVariableRootCharacteristic(variable, inputCharacteristicId)
 		if err != nil {
 			return result, err
 		}
 		for _, variableCharacteristicId := range variableCharacteristicIds {
-			variableCharacteristic, err := repo.GetCharacteristic(variableCharacteristicId)
+			variableCharacteristic, err := this.ConceptRepo.GetCharacteristic(variableCharacteristicId)
 			if err != nil {
 				return result, err
 			}
-			result, err = MarshalInput(partial, input, conceptId, inputCharacteristic, variableCharacteristic, variable, serializationId)
+			result, err = this.MarshalInput(partial, input, inputCharacteristic, variableCharacteristic, variable, serializationId)
 			if err != nil {
 				return result, err
 			}
 		}
 	} else {
-		result, err = MarshalInput(partial, input, model.NullConcept.Id, inputCharacteristic, model.NullCharacteristic, variable, serializationId)
+		result, err = this.MarshalInput(partial, input, inputCharacteristic, model.NullCharacteristic, variable, serializationId)
 	}
 	return
 }
@@ -127,16 +115,16 @@ func assignConfigurableValue(setter map[string]*interface{}, characteristic mode
 	}
 }
 
-func getMatchingVariableRootCharacteristic(repo ConceptRepo, variable model.ContentVariable, matchingId CharacteristicId) (conceptId string, matchingVariableRootCharacteristic []CharacteristicId, err error) {
-	conceptId, err = repo.GetConceptOfCharacteristic(matchingId)
+func (this *Marshaller) getMatchingVariableRootCharacteristic(variable model.ContentVariable, matchingId CharacteristicId) (conceptId string, matchingVariableRootCharacteristic []CharacteristicId, err error) {
+	conceptId, err = this.ConceptRepo.GetConceptOfCharacteristic(matchingId)
 	if err != nil {
 		return
 	}
 	variableCharacteristics := getVariableCharacteristics(variable)
-	rootCharacteristics := repo.GetRootCharacteristics(variableCharacteristics)
+	rootCharacteristics := this.ConceptRepo.GetRootCharacteristics(variableCharacteristics)
 	resultSet := map[string]bool{}
 	for _, candidate := range rootCharacteristics {
-		conceptA, err := repo.GetConceptOfCharacteristic(candidate)
+		conceptA, err := this.ConceptRepo.GetConceptOfCharacteristic(candidate)
 		if err != nil {
 			return conceptId, matchingVariableRootCharacteristic, err
 		}
@@ -163,9 +151,9 @@ func getVariableCharacteristics(variable model.ContentVariable) (result []Charac
 	return result
 }
 
-func MarshalInput(partial mapping.Partial, inputCharacteristicValue interface{}, conceptId string, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId string) (result string, err error) {
+func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristicValue interface{}, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId string) (result string, err error) {
 	serviceCharacteristicValue := inputCharacteristicValue
-	serviceCharacteristicValue, err = casting.Cast(inputCharacteristicValue, conceptId, inputCharacteristic.Id, serviceCharacteristic.Id)
+	serviceCharacteristicValue, err = this.converter.Cast(inputCharacteristicValue, inputCharacteristic.Id, serviceCharacteristic.Id)
 	if err != nil {
 		return result, err
 	}

@@ -18,24 +18,19 @@ package marshaller
 
 import (
 	"errors"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/casting"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization"
 	"runtime/debug"
 )
 
-func UnmarshalOutputs(protocol model.Protocol, service model.Service, output map[string]string, outputCharacteristicId CharacteristicId) (result interface{}, err error) {
+func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId) (result interface{}, err error) {
 	if outputCharacteristicId == "" {
 		return nil, nil
 	}
-	if len(output) == 0 {
+	if len(outputMap) == 0 {
 		return nil, nil
 	}
-	return UnmarshalOutputsWithRepo(casting.ConceptRepo, protocol, service, output, outputCharacteristicId)
-}
-
-func UnmarshalOutputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId) (result interface{}, err error) {
 	outputObjectMap, err := serializeOutput(outputMap, service, protocol)
 	if err != nil {
 		return result, err
@@ -49,12 +44,12 @@ func UnmarshalOutputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, 
 		}
 	}
 
-	matchingServiceCharacteristicId, conceptId, err := getMatchingOutputRootCharacteristic(conceptRepo, service.Outputs, outputCharacteristicId)
+	matchingServiceCharacteristicId, _, err := this.getMatchingOutputRootCharacteristic(service.Outputs, outputCharacteristicId)
 	if err != nil {
 		return result, err
 	}
 
-	serviceCharacteristic, err := conceptRepo.GetCharacteristic(matchingServiceCharacteristicId)
+	serviceCharacteristic, err := this.ConceptRepo.GetCharacteristic(matchingServiceCharacteristicId)
 	if err != nil {
 		return result, err
 	}
@@ -66,20 +61,20 @@ func UnmarshalOutputsWithRepo(conceptRepo ConceptRepo, protocol model.Protocol, 
 
 	normalized, err := normalize(serviceCharacteristicValue)
 
-	result, err = casting.Cast(normalized, conceptId, serviceCharacteristic.Id, outputCharacteristicId)
+	result, err = this.converter.Cast(normalized, serviceCharacteristic.Id, outputCharacteristicId)
 	return
 }
 
-func getMatchingOutputRootCharacteristic(repo ConceptRepo, contents []model.Content, matchingId CharacteristicId) (matchingServiceCharacteristicId CharacteristicId, conceptId string, err error) {
-	conceptId, err = repo.GetConceptOfCharacteristic(matchingId)
+func (this *Marshaller) getMatchingOutputRootCharacteristic(contents []model.Content, matchingId CharacteristicId) (matchingServiceCharacteristicId CharacteristicId, conceptId string, err error) {
+	conceptId, err = this.ConceptRepo.GetConceptOfCharacteristic(matchingId)
 	if err != nil {
 		return
 	}
 	for _, content := range contents {
 		variableCharacteristics := getVariableCharacteristics(content.ContentVariable)
-		rootCharacteristics := repo.GetRootCharacteristics(variableCharacteristics)
+		rootCharacteristics := this.ConceptRepo.GetRootCharacteristics(variableCharacteristics)
 		for _, candidate := range rootCharacteristics {
-			candidateConcept, err := repo.GetConceptOfCharacteristic(candidate)
+			candidateConcept, err := this.ConceptRepo.GetConceptOfCharacteristic(candidate)
 			if err != nil {
 				return matchingServiceCharacteristicId, conceptId, err
 			}
