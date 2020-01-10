@@ -17,15 +17,20 @@
 package tests
 
 import (
+	"context"
 	"errors"
-	"fmt"
+	"flag"
 	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller-service/lib/tests/mocks"
 	"os"
+	"sync"
 	"testing"
 )
 
-//example characteristics and concepts
+var integrationExisting = flag.Bool("integration-existing", false, "pass existing dependencies as parameters")
+var integrationDocker = flag.Bool("integration-docker", false, "create docker container for dependencies")
 
 var example = struct {
 	Brightness string
@@ -62,10 +67,42 @@ var color = struct {
 }
 
 func TestMain(m *testing.M) {
-	fmt.Println("setup")
+	os.Exit(testMain(m))
+}
+
+func testMain(m *testing.M) int {
+	flag.Parse()
+	cancelFinished := &sync.WaitGroup{}
+	defer func() {
+		cancelFinished.Wait()
+	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if *integrationDocker {
+		setupDocker(ctx, cancelFinished)
+	} else if *integrationExisting {
+		setupDependencies(ctx, cancelFinished)
+	} else {
+		setupMock(ctx, cancelFinished)
+	}
 	code := m.Run()
-	fmt.Println("teardown")
-	os.Exit(code)
+	return code
+}
+
+func setupMock(ctx context.Context, done *sync.WaitGroup) {
+	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{})
+	configurableService := configurables.New(mocks.ConceptRepo{})
+	TestMarshalInputs = marshaller.MarshalInputs
+	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
+	TestFindConfigurables = configurableService.Find
+}
+
+func setupDependencies(ctx context.Context, done *sync.WaitGroup) {
+
+}
+
+func setupDocker(ctx context.Context, done *sync.WaitGroup) {
+
 }
 
 var TestMarshalInputs = func(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId string, configurables ...configurables.Configurable) (result map[string]string, err error) {

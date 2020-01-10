@@ -44,8 +44,8 @@ func New(conf config.Config, ctx context.Context) (result *ConceptRepo, err erro
 		access:                             config.NewAccess(conf),
 		concepts:                           map[string]model.Concept{model.NullConcept.Id: model.NullConcept},
 		characteristics:                    map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic},
-		conceptByCharacteristic:            map[string]model.Concept{},
-		rootCharacteristicByCharacteristic: map[string]model.Characteristic{},
+		conceptByCharacteristic:            map[string]model.Concept{model.NullCharacteristic.Id: model.NullConcept},
+		rootCharacteristicByCharacteristic: map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic},
 	}
 	err = result.Load()
 	if err != nil {

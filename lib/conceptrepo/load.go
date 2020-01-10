@@ -56,8 +56,8 @@ func (this *ConceptRepo) Load() error {
 
 	this.concepts = map[string]model.Concept{model.NullConcept.Id: model.NullConcept}
 	this.characteristics = map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic}
-	this.conceptByCharacteristic = map[string]model.Concept{}
-	this.rootCharacteristicByCharacteristic = map[string]model.Characteristic{}
+	this.conceptByCharacteristic = map[string]model.Concept{model.NullCharacteristic.Id: model.NullConcept}
+	this.rootCharacteristicByCharacteristic = map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic}
 
 	for _, element := range temp {
 		this.register(element.Concept, element.Characteristics)
