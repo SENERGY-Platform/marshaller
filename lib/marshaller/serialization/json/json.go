@@ -18,8 +18,8 @@ package json
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization/base"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/base"
 )
 
 type Marshaller struct {

@@ -17,7 +17,7 @@
 package xml
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization/base"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/base"
 )
 
 type Marshaller struct {

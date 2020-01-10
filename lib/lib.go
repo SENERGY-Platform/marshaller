@@ -18,13 +18,13 @@ package lib
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/marshaller-service/lib/api"
-	"github.com/SENERGY-Platform/marshaller-service/lib/conceptrepo"
-	"github.com/SENERGY-Platform/marshaller-service/lib/config"
-	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller-service/lib/converter"
-	"github.com/SENERGY-Platform/marshaller-service/lib/devicerepository"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/converter"
+	"github.com/SENERGY-Platform/marshaller/lib/devicerepository"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 )
 
 func Start(ctx context.Context, config config.Config) (closed context.Context, err error) {

@@ -17,7 +17,7 @@
 package xml
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/clbanning/mxj"
 )
 

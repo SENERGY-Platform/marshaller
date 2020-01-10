@@ -17,8 +17,8 @@
 package tests
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"reflect"
 	"testing"
 )

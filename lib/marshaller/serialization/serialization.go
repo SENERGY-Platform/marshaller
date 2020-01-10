@@ -17,9 +17,9 @@
 package serialization
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization/base"
-	_ "github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization/json"
-	_ "github.com/SENERGY-Platform/marshaller-service/lib/marshaller/serialization/xml"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/base"
+	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/json"
+	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/xml"
 )
 
 func Get(key string) (marshaller base.Marshaller, ok bool) {

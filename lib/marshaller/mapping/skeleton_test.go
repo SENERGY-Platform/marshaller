@@ -18,7 +18,7 @@ package mapping
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"reflect"
 	"testing"
 )

@@ -16,7 +16,7 @@
 
 package marshaller
 
-import "github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+import "github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 
 type Converter interface {
 	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)

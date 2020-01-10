@@ -17,7 +17,7 @@
 package conceptrepo
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/url"
 	"strconv"
 )

@@ -17,7 +17,7 @@
 package configurables
 
 import (
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 type Configurable struct {

@@ -19,8 +19,8 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/SENERGY-Platform/marshaller-service/lib"
-	"github.com/SENERGY-Platform/marshaller-service/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"log"
 	"os"
 	"os/signal"

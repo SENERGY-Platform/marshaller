@@ -18,8 +18,8 @@ package configurables
 
 import (
 	"errors"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/mapping"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/mapping"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"strings"
 )
 

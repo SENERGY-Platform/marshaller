@@ -18,7 +18,7 @@ package mocks
 
 import (
 	converterService "github.com/SENERGY-Platform/converter/lib/converter"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 )
 
 type Converter struct{}

@@ -18,11 +18,11 @@ package api
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/marshaller-service/lib/api/util"
-	"github.com/SENERGY-Platform/marshaller-service/lib/config"
-	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/api/util"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	jwt_http_router "github.com/SmartEnergyPlatform/jwt-http-router"
 	"log"
 	"net/http"

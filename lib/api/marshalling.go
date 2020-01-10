@@ -19,9 +19,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/marshaller-service/lib/config"
-	"github.com/SENERGY-Platform/marshaller-service/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SmartEnergyPlatform/jwt-http-router"
 	"log"
 	"net/http"

@@ -19,8 +19,8 @@ package mocks
 import (
 	"encoding/json"
 	"github.com/SENERGY-Platform/converter/lib/converter/base"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 type ConceptRepo struct{}

@@ -18,8 +18,8 @@ package devicerepository
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller-service/lib/config"
-	"github.com/SENERGY-Platform/marshaller-service/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"log"
 	"net/url"
 	"runtime/debug"
