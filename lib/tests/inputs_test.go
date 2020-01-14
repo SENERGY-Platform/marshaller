@@ -149,9 +149,17 @@ func ExampleConfigurable1() {
 		fmt.Println(err, configurblesList)
 		return
 	}
-	configurblesList[0].Values[0].Value = 255
-	configurblesList[0].Values[1].Value = 255
-	configurblesList[0].Values[2].Value = 0
+	for index, value := range configurblesList[0].Values {
+		if value.Path == "r" {
+			configurblesList[0].Values[index].Value = 255
+		}
+		if value.Path == "g" {
+			configurblesList[0].Values[index].Value = 255
+		}
+		if value.Path == "b" {
+			configurblesList[0].Values[index].Value = 0
+		}
+	}
 
 	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, configurblesList...))
 	fmt.Println(TestMarshalInputs(protocol, service2, 37, temperature.Celcius, configurblesList...))

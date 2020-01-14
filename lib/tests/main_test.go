@@ -20,17 +20,22 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/converter"
+	"github.com/SENERGY-Platform/marshaller/lib/devicerepository"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
+	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
 )
 
-var integrationExisting = flag.Bool("integration-existing", false, "pass existing dependencies as parameters")
-var integrationDocker = flag.Bool("integration-docker", false, "create docker container for dependencies")
+var ServerUrl string
 
 var example = struct {
 	Brightness string
@@ -78,12 +83,10 @@ func testMain(m *testing.M) int {
 	}()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if *integrationDocker {
-		setupDocker(ctx, cancelFinished)
-	} else if *integrationExisting {
-		setupDependencies(ctx, cancelFinished)
-	} else {
+	if testing.Short() {
 		setupMock(ctx, cancelFinished)
+	} else {
+		setupExternal(ctx, cancelFinished)
 	}
 	code := m.Run()
 	return code
@@ -97,12 +100,72 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 	TestFindConfigurables = configurableService.Find
 }
 
-func setupDependencies(ctx context.Context, done *sync.WaitGroup) {
+func setupExternal(ctx context.Context, done *sync.WaitGroup) {
+	conf, err := config.Load("testdata/config.json")
+	if err != nil {
+		panic(err)
+	}
+	access := config.NewAccess(conf)
+	conceptRepo, err := conceptrepo.New(
+		ctx,
+		conf,
+		access,
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.NullConcept,
+			Characteristics: []model.Characteristic{
+				model.NullCharacteristic,
+			},
+		},
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.Concept{Id: example.Color, Name: "example", BaseCharacteristicId: example.Rgb},
+			Characteristics: []model.Characteristic{
+				{
+					Id:   example.Rgb,
+					Name: "rgb",
+					Type: model.Structure,
+					SubCharacteristics: []model.Characteristic{
+						{Id: example.Rgb + ".r", Name: "r", Type: model.Integer},
+						{Id: example.Rgb + ".g", Name: "g", Type: model.Integer},
+						{Id: example.Rgb + ".b", Name: "b", Type: model.Integer},
+					},
+				},
+				{
+					Id:   example.Hex,
+					Name: "hex",
+					Type: model.String,
+				},
+			},
+		},
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.Concept{Id: example.Brightness, Name: "example-bri"},
+			Characteristics: []model.Characteristic{
+				{
+					Id:   example.Lux,
+					Name: "lux",
+					Type: model.Integer,
+				},
+			},
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+	marshaller := marshaller.New(converter.New(conf, access), conceptRepo)
+	configurableService := configurables.New(conceptRepo)
+	devicerepo := devicerepository.New(conf)
 
-}
+	TestMarshalInputs = marshaller.MarshalInputs
+	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
+	TestFindConfigurables = configurableService.Find
 
-func setupDocker(ctx context.Context, done *sync.WaitGroup) {
-
+	done.Add(1)
+	server := httptest.NewServer(api.GetRouter(conf, marshaller, configurableService, devicerepo))
+	ServerUrl = server.URL
+	go func() {
+		<-ctx.Done()
+		server.Close()
+		done.Done()
+	}()
 }
 
 var TestMarshalInputs = func(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId string, configurables ...configurables.Configurable) (result map[string]string, err error) {

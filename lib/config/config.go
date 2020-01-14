@@ -28,17 +28,17 @@ import (
 )
 
 type Config struct {
-	ServerPort                  string  `json:"server_port"`
-	AuthExpirationTimeBuffer    float64 `json:"auth_expiration_time_buffer"`
-	AuthEndpoint                string  `json:"auth_endpoint"`
-	AuthClientId                string  `json:"auth_client_id"`
-	AuthClientSecret            string  `json:"auth_client_secret"`
-	PermissionsSearchUrl        string  `json:"permissions_search_url"`
-	SemanticRepositoryUrl       string  `json:"semantic_repository_url"`
-	DeviceRepositoryUrl         string  `json:"device_repository_url"`
-	ConceptRepoRefreshIntervall int64   `json:"concept_repo_refresh_intervall"`
-	LogLevel                    string  `json:"log_level"`
-	ConverterUrl                string  `json:"converter_url"`
+	ServerPort                 string  `json:"server_port"`
+	AuthExpirationTimeBuffer   float64 `json:"auth_expiration_time_buffer"`
+	AuthEndpoint               string  `json:"auth_endpoint"`
+	AuthClientId               string  `json:"auth_client_id"`
+	AuthClientSecret           string  `json:"auth_client_secret"`
+	PermissionsSearchUrl       string  `json:"permissions_search_url"`
+	SemanticRepositoryUrl      string  `json:"semantic_repository_url"`
+	DeviceRepositoryUrl        string  `json:"device_repository_url"`
+	ConceptRepoRefreshInterval int64   `json:"concept_repo_refresh_interval"`
+	LogLevel                   string  `json:"log_level"`
+	ConverterUrl               string  `json:"converter_url"`
 }
 
 //loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)

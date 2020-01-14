@@ -54,15 +54,22 @@ func (this *ConceptRepo) Load() error {
 	this.mux.Lock()
 	defer this.mux.Unlock()
 
-	this.concepts = map[string]model.Concept{model.NullConcept.Id: model.NullConcept}
-	this.characteristics = map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic}
-	this.conceptByCharacteristic = map[string]model.Concept{model.NullCharacteristic.Id: model.NullConcept}
-	this.rootCharacteristicByCharacteristic = map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic}
+	this.resetToDefault()
 
 	for _, element := range temp {
 		this.register(element.Concept, element.Characteristics)
 	}
 	return nil
+}
+
+func (this *ConceptRepo) resetToDefault() {
+	this.concepts = map[string]model.Concept{}
+	this.characteristics = map[string]model.Characteristic{}
+	this.conceptByCharacteristic = map[string]model.Concept{}
+	this.rootCharacteristicByCharacteristic = map[string]model.Characteristic{}
+	for _, defaultElement := range this.defaults {
+		this.register(defaultElement.Concept, defaultElement.Characteristics)
+	}
 }
 
 func (this *ConceptRepo) register(concept model.Concept, characteristics []model.Characteristic) {

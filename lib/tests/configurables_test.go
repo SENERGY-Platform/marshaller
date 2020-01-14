@@ -143,7 +143,7 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 		t.Fatal(configurablesList)
 	}
 
-	assert.ListContains(configurablesList, configurables.Configurable{
+	assert.ConfigurableListContains(configurablesList, configurables.Configurable{
 		CharacteristicId: color.Rgb,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
@@ -171,10 +171,30 @@ type Assertions struct {
 
 func (this Assertions) ListContains(list interface{}, element interface{}) {
 	this.Helper()
+	if !this.listContains(list, element) {
+		this.Fatal("missing element in list", list, element)
+	}
+}
+
+func (this Assertions) listContains(list interface{}, element interface{}) bool {
 	listValue := reflect.ValueOf(list)
 	for i := 0; i < listValue.Len(); i++ {
 		if reflect.DeepEqual(listValue.Index(i).Interface(), element) {
-			return
+			return true
+		}
+	}
+	return false
+}
+
+func (this Assertions) ConfigurableListContains(list []configurables.Configurable, element configurables.Configurable) {
+	this.Helper()
+	for _, listElement := range list {
+		if listElement.CharacteristicId == element.CharacteristicId && len(listElement.Values) == len(element.Values) {
+			for _, value := range element.Values {
+				if this.listContains(listElement.Values, value) {
+					return
+				}
+			}
 		}
 	}
 	this.Fatal("missing element in list", list, element)

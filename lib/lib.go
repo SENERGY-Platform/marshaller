@@ -25,20 +25,32 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
 	"github.com/SENERGY-Platform/marshaller/lib/devicerepository"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func Start(ctx context.Context, config config.Config) (closed context.Context, err error) {
+func Start(ctx context.Context, conf config.Config) (closed context.Context, err error) {
 	childCtx, cancel := context.WithCancel(ctx)
-	conceptRepo, err := conceptrepo.New(config, childCtx)
+	access := config.NewAccess(conf)
+	conceptRepo, err := conceptrepo.New(
+		childCtx,
+		conf,
+		access,
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.NullConcept,
+			Characteristics: []model.Characteristic{
+				model.NullCharacteristic,
+			},
+		},
+	)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-	marshaller := marshaller.New(converter.New(config), conceptRepo)
+	marshaller := marshaller.New(converter.New(conf, access), conceptRepo)
 	configurableService := configurables.New(conceptRepo)
-	devicerepo := devicerepository.New(config)
+	devicerepo := devicerepository.New(conf)
 
-	closed = api.Start(childCtx, config, marshaller, configurableService, devicerepo)
+	closed = api.Start(childCtx, conf, marshaller, configurableService, devicerepo)
 	go func() {
 		<-closed.Done()
 		cancel()

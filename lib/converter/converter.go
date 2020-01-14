@@ -17,43 +17,25 @@
 package converter
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"net/http"
 	"net/url"
-	"time"
 )
 
 type Converter struct {
 	config config.Config
+	access *config.Access
 }
 
-func New(config config.Config) *Converter {
-	return &Converter{config: config}
+func New(config config.Config, access *config.Access) *Converter {
+	return &Converter{config: config, access: access}
 }
 
 func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
-	body := new(bytes.Buffer)
-	err = json.NewEncoder(body).Encode(in)
+	token, err := this.access.Ensure()
 	if err != nil {
 		return out, err
 	}
-	req, err := http.NewRequest("POST", this.config.ConverterUrl+"/conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), body)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(&out)
+	err = token.PostJSON(this.config.ConverterUrl+"/conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), in, &out)
 	return out, err
 }

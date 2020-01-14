@@ -1,0 +1,13 @@
+{
+  "server_port":"8080",
+  "auth_expiration_time_buffer":2,
+  "auth_endpoint":"",
+  "auth_client_id":"",
+  "auth_client_secret":"",
+  "permissions_search_url":"",
+  "semantic_repository_url":"",
+  "device_repository_url":"",
+  "converter_url":"",
+  "concept_repo_refresh_interval":3600,
+  "log_level":"CALL"
+}

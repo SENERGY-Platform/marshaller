@@ -31,6 +31,7 @@ type ConceptRepo struct {
 	config config.Config
 	access *config.Access
 
+	defaults                           []ConceptRepoDefault
 	concepts                           map[string]model.Concept
 	characteristics                    map[string]model.Characteristic
 	conceptByCharacteristic            map[string]model.Concept
@@ -38,20 +39,26 @@ type ConceptRepo struct {
 	mux                                sync.Mutex
 }
 
-func New(conf config.Config, ctx context.Context) (result *ConceptRepo, err error) {
+type ConceptRepoDefault struct {
+	Concept         model.Concept
+	Characteristics []model.Characteristic
+}
+
+func New(ctx context.Context, conf config.Config, access *config.Access, defaults ...ConceptRepoDefault) (result *ConceptRepo, err error) {
 	result = &ConceptRepo{
 		config:                             conf,
-		access:                             config.NewAccess(conf),
-		concepts:                           map[string]model.Concept{model.NullConcept.Id: model.NullConcept},
-		characteristics:                    map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic},
-		conceptByCharacteristic:            map[string]model.Concept{model.NullCharacteristic.Id: model.NullConcept},
-		rootCharacteristicByCharacteristic: map[string]model.Characteristic{model.NullCharacteristic.Id: model.NullCharacteristic},
+		access:                             access,
+		defaults:                           defaults,
+		concepts:                           map[string]model.Concept{},
+		characteristics:                    map[string]model.Characteristic{},
+		conceptByCharacteristic:            map[string]model.Concept{},
+		rootCharacteristicByCharacteristic: map[string]model.Characteristic{},
 	}
 	err = result.Load()
 	if err != nil {
 		return result, err
 	}
-	ticker := time.NewTicker(time.Duration(conf.ConceptRepoRefreshIntervall) * time.Second)
+	ticker := time.NewTicker(time.Duration(conf.ConceptRepoRefreshInterval) * time.Second)
 	go func() {
 		defer ticker.Stop()
 		<-ctx.Done()

@@ -40,11 +40,7 @@ var endpoints = []func(router *jwt_http_router.Router, config config.Config, mar
 
 func Start(ctx context.Context, config config.Config, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (closed context.Context) {
 	log.Println("start api")
-	router := jwt_http_router.New(jwt_http_router.JwtConfig{ForceAuth: true, ForceUser: true})
-	for _, e := range endpoints {
-		log.Println("add endpoints: " + runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
-		e(router, config, marshaller, configurableService, deviceRepo)
-	}
+	router := GetRouter(config, marshaller, configurableService, deviceRepo)
 	log.Println("add logging and cors")
 	corsHandler := util.NewCors(router)
 	logger := util.NewLogger(corsHandler, config.LogLevel)
@@ -66,4 +62,13 @@ func Start(ctx context.Context, config config.Config, marshaller *marshaller.Mar
 		}
 	}()
 	return closed
+}
+
+func GetRouter(config config.Config, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (router *jwt_http_router.Router) {
+	router = jwt_http_router.New(jwt_http_router.JwtConfig{ForceAuth: true, ForceUser: true})
+	for _, e := range endpoints {
+		log.Println("add endpoints: " + runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
+		e(router, config, marshaller, configurableService, deviceRepo)
+	}
+	return
 }
