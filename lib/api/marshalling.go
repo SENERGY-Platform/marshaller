@@ -35,13 +35,14 @@ func Marshalling(router *jwt_http_router.Router, conf config.Config, marshaller 
 	resource := "/marshalling"
 
 	normalizeRequest := func(request *MarshallingRequest, jwt jwt_http_router.Jwt) error {
-		if request.Protocol != nil {
+		if request.Protocol == nil {
 			protocol, err := deviceRepo.GetProtocol(config.Impersonate((jwt.Impersonate)), request.Service.ProtocolId)
 			if err != nil {
 				return err
 			}
 			request.Protocol = &protocol
-		} else if request.Service.ProtocolId != request.Protocol.Id {
+		}
+		if request.Service.ProtocolId != request.Protocol.Id {
 			return errors.New("expect service to reference given protocol")
 		}
 		return nil

@@ -5,6 +5,8 @@ github.com/SENERGY-Platform/converter v0.0.0-20200110115447-5d9ce8988ea9 h1:1FFy
 github.com/SENERGY-Platform/converter v0.0.0-20200110115447-5d9ce8988ea9/go.mod h1:9g7L104dDpSMLj3pSP5cPB+9+5SYhphHfZbqeT1f18E=
 github.com/SENERGY-Platform/converter v0.0.0-20200110120349-089d052e647f h1:PbWv25sC5riRQnf6Nz9vYb6hhK4aXyUUcpz7RX7uEI4=
 github.com/SENERGY-Platform/converter v0.0.0-20200110120349-089d052e647f/go.mod h1:9g7L104dDpSMLj3pSP5cPB+9+5SYhphHfZbqeT1f18E=
+github.com/SENERGY-Platform/converter v0.0.0-20200114152115-63d2a698b3c4 h1:NjPjdgPMfl4vmF04CwHpASVu0uUlOjgUlP+WWcYm7vA=
+github.com/SENERGY-Platform/converter v0.0.0-20200114152115-63d2a698b3c4/go.mod h1:9g7L104dDpSMLj3pSP5cPB+9+5SYhphHfZbqeT1f18E=
 github.com/SENERGY-Platform/device-manager v0.0.0-20191216115423-e51ad8574d21/go.mod h1:1je7+vBG1cg5lCzWG8P4WZrFl5fRbI8ewOdQ41Rs5k4=
 github.com/SmartEnergyPlatform/jwt-http-router v0.0.0-20190318131115-1c2a98f99363/go.mod h1:64s8L4LwgDDohBNVwdE0tQGbfYldd+D0+4Jn6qfDlUg=
 github.com/SmartEnergyPlatform/jwt-http-router v0.0.0-20190722084820-0e1fe0dc7a07 h1:T/XHOUSJ12LPQpwCcIvs4R2KQ7M1y2p+MrokKIjuy2Q=

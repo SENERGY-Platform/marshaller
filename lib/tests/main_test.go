@@ -36,6 +36,7 @@ import (
 )
 
 var ServerUrl string
+var AccessToken config.Impersonate
 
 var example = struct {
 	Brightness string
@@ -93,11 +94,20 @@ func testMain(m *testing.M) int {
 }
 
 func setupMock(ctx context.Context, done *sync.WaitGroup) {
+	AccessToken = config.Impersonate("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
 	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{})
 	configurableService := configurables.New(mocks.ConceptRepo{})
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
+	done.Add(1)
+	server := httptest.NewServer(api.GetRouter(config.Config{}, marshaller, configurableService, mocks.DeviceRepo))
+	ServerUrl = server.URL
+	go func() {
+		<-ctx.Done()
+		server.Close()
+		done.Done()
+	}()
 }
 
 func setupExternal(ctx context.Context, done *sync.WaitGroup) {
@@ -106,6 +116,10 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 		panic(err)
 	}
 	access := config.NewAccess(conf)
+	AccessToken, err = access.Ensure()
+	if err != nil {
+		panic(err)
+	}
 	conceptRepo, err := conceptrepo.New(
 		ctx,
 		conf,
