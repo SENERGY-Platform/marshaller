@@ -31,7 +31,7 @@ func init() {
 }
 
 func Unmarshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
-	resource := "/unmarshalling"
+	resource := "/unmarshal"
 
 	normalizeRequest := func(request *UnmarshallingRequest) error {
 		if request.Protocol == nil {

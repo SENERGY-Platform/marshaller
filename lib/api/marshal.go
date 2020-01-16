@@ -31,7 +31,7 @@ func init() {
 }
 
 func Marshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
-	resource := "/marshalling"
+	resource := "/marshal"
 
 	normalizeRequest := func(request *MarshallingRequest) error {
 		if request.Protocol == nil {

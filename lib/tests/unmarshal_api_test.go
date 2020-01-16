@@ -33,7 +33,7 @@ func ExampleUnmarshal1() {
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
 	resp, err := post(
-		ServerUrl+"/unmarshalling/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId),
+		ServerUrl+"/unmarshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId),
 		"application/json",
 		strings.NewReader(
 			`{"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"}}`,
@@ -58,7 +58,7 @@ func ExampleUnmarshal2() {
 	}
 
 	resp, err := post(
-		ServerUrl+"/unmarshalling",
+		ServerUrl+"/unmarshal",
 		"application/json",
 		strings.NewReader(
 			`{
@@ -83,7 +83,7 @@ func ExampleUnmarshal2() {
 
 func ExampleUnmarshal3() {
 	resp, err := post(
-		ServerUrl+"/unmarshalling",
+		ServerUrl+"/unmarshal",
 		"application/json",
 		strings.NewReader(
 			`{
