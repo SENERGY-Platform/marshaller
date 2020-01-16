@@ -1,3 +1,4 @@
 .idea
-marshaller-service
+/marshaller-service
 /lib/tests/testdata/config.json
+/marshaller

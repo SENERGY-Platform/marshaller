@@ -19,10 +19,9 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SmartEnergyPlatform/jwt-http-router"
+	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 )
@@ -31,12 +30,12 @@ func init() {
 	endpoints = append(endpoints, Unmarshalling)
 }
 
-func Unmarshalling(router *jwt_http_router.Router, conf config.Config, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+func Unmarshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
 	resource := "/unmarshalling"
 
-	normalizeRequest := func(request *UnmarshallingRequest, jwt jwt_http_router.Jwt) error {
+	normalizeRequest := func(request *UnmarshallingRequest) error {
 		if request.Protocol == nil {
-			protocol, err := deviceRepo.GetProtocol(config.Impersonate((jwt.Impersonate)), request.Service.ProtocolId)
+			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
 				return err
 			}
@@ -52,7 +51,7 @@ func Unmarshalling(router *jwt_http_router.Router, conf config.Config, marshalle
 		return marshaller.UnmarshalOutputs(*request.Protocol, request.Service, request.Message, request.CharacteristicId)
 	}
 
-	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params jwt_http_router.Params, jwt jwt_http_router.Jwt) {
+	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		msg := UnmarshallingRequest{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
@@ -70,12 +69,12 @@ func Unmarshalling(router *jwt_http_router.Router, conf config.Config, marshalle
 			return
 		}
 		msg.CharacteristicId = characteristicId
-		msg.Service, err = deviceRepo.GetService(config.Impersonate(jwt.Impersonate), serviceId)
+		msg.Service, err = deviceRepo.GetService(serviceId)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = normalizeRequest(&msg, jwt)
+		err = normalizeRequest(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
@@ -92,14 +91,14 @@ func Unmarshalling(router *jwt_http_router.Router, conf config.Config, marshalle
 		}
 	})
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params jwt_http_router.Params, jwt jwt_http_router.Jwt) {
+	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		msg := UnmarshallingRequest{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err = normalizeRequest(&msg, jwt)
+		err = normalizeRequest(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return

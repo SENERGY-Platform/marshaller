@@ -32,7 +32,7 @@ func ExampleMarshal1() {
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
-	resp, err := AccessToken.Post(ServerUrl+"/marshalling/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), "application/json", strings.NewReader(`{"data": "#ff00ff"}`))
+	resp, err := post(ServerUrl+"/marshalling/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), "application/json", strings.NewReader(`{"data": "#ff00ff"}`))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -53,7 +53,7 @@ func ExampleMarshal2() {
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/marshalling/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId),
 		"application/json",
 		strings.NewReader(
@@ -88,7 +88,7 @@ func ExampleMarshal3() {
 		mocks.DeviceRepo.SetProtocolJson(protocolJson)
 	}
 
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/marshalling",
 		"application/json",
 		strings.NewReader(
@@ -121,7 +121,7 @@ func ExampleMarshal3() {
 }
 
 func ExampleMarshal4() {
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/marshalling",
 		"application/json",
 		strings.NewReader(

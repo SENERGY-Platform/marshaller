@@ -18,11 +18,10 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	jwt_http_router "github.com/SmartEnergyPlatform/jwt-http-router"
+	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"strings"
@@ -32,10 +31,10 @@ func init() {
 	endpoints = append(endpoints, Configurables)
 }
 
-func Configurables(router *jwt_http_router.Router, conf config.Config, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+func Configurables(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
 	resource := "/configurables"
 
-	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params jwt_http_router.Params, jwt jwt_http_router.Jwt) {
+	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		characteristicId := request.URL.Query().Get("characteristicId")
 		if characteristicId == "" {
 			http.Error(writer, "expect characteristicId as query-parameter", http.StatusBadRequest)
@@ -49,7 +48,7 @@ func Configurables(router *jwt_http_router.Router, conf config.Config, marshalle
 		serviceIds := strings.Split(serviceIdsStr, ",")
 		services := []model.Service{}
 		for _, id := range serviceIds {
-			service, err := deviceRepo.GetService(config.Impersonate(jwt.Impersonate), strings.TrimSpace(id))
+			service, err := deviceRepo.GetService(strings.TrimSpace(id))
 			if err != nil {
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
 				return
@@ -68,7 +67,7 @@ func Configurables(router *jwt_http_router.Router, conf config.Config, marshalle
 		}
 	})
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params jwt_http_router.Params, jwt jwt_http_router.Jwt) {
+	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		msg := FindConfigurablesRequest{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {

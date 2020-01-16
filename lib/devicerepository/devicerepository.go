@@ -29,35 +29,46 @@ type DeviceRepository struct {
 	cache         *Cache
 	repoUrl       string
 	permsearchUrl string
+	access        *config.Access
 }
 
-func New(config config.Config) *DeviceRepository {
-	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: NewCache(), permsearchUrl: config.PermissionsSearchUrl}
+func New(config config.Config, access *config.Access) *DeviceRepository {
+	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: NewCache(), permsearchUrl: config.PermissionsSearchUrl, access: access}
 }
 
-func (this *DeviceRepository) GetProtocol(token config.Impersonate, id string) (result model.Protocol, err error) {
+func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {
 	result, err = this.getProtocolFromCache(id)
 	if err != nil {
+		token, err := this.access.Ensure()
+		if err != nil {
+			return result, err
+		}
 		err = token.GetJSON(this.repoUrl+"/protocols/"+url.QueryEscape(id), &result)
 		if err == nil {
 			this.saveProtocolToCache(result)
 		}
+		return result, err
 	}
-	return
+	return result, err
 }
 
-func (this *DeviceRepository) GetService(token config.Impersonate, id string) (result model.Service, err error) {
+func (this *DeviceRepository) GetService(id string) (result model.Service, err error) {
 	result, err = this.getServiceFromCache(id)
 	if err != nil {
-		err = token.GetJSON(this.repoUrl+"/services/"+url.QueryEscape(id), &result)
+		token, err := this.access.Ensure()
+		if err != nil {
+			return result, err
+		}
+		err = token.GetJSON(this.repoUrl+"/services/"+url.PathEscape(id), &result)
 		if err != nil {
 			log.Println("ERROR:", err)
 			debug.PrintStack()
 			return result, err
 		}
 		this.saveServiceToCache(result)
+		return result, err
 	}
-	return
+	return result, err
 }
 
 func (this *DeviceRepository) getServiceFromCache(id string) (service model.Service, err error) {

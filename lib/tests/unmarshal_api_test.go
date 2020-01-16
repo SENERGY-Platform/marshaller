@@ -32,7 +32,7 @@ func ExampleUnmarshal1() {
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //Danfoss Radiator Thermostat getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/unmarshalling/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId),
 		"application/json",
 		strings.NewReader(
@@ -57,7 +57,7 @@ func ExampleUnmarshal2() {
 		mocks.DeviceRepo.SetProtocolJson(protocolJson)
 	}
 
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/unmarshalling",
 		"application/json",
 		strings.NewReader(
@@ -82,7 +82,7 @@ func ExampleUnmarshal2() {
 }
 
 func ExampleUnmarshal3() {
-	resp, err := AccessToken.Post(
+	resp, err := post(
 		ServerUrl+"/unmarshalling",
 		"application/json",
 		strings.NewReader(

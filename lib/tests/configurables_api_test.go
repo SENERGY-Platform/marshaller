@@ -33,7 +33,7 @@ func TestConfigurablesPostRequest(t *testing.T) {
 
 	result := []configurables.Configurable{}
 
-	err := AccessToken.PostJSON(ServerUrl+"/configurables", message, &result)
+	err := postJSON(ServerUrl+"/configurables", message, &result)
 	if err != nil {
 		t.Error(err)
 		return
@@ -70,7 +70,7 @@ func TestConfigurablesMockGetRequest(t *testing.T) {
 
 	result := []configurables.Configurable{}
 
-	err := AccessToken.GetJSON(ServerUrl+"/configurables?characteristicId="+url.QueryEscape(temperature.Celcius)+"&serviceIds="+url.QueryEscape(serviceExample1.Id)+","+url.QueryEscape(serviceExample2.Id), &result)
+	err := getJSON(ServerUrl+"/configurables?characteristicId="+url.QueryEscape(temperature.Celcius)+"&serviceIds="+url.QueryEscape(serviceExample1.Id)+","+url.QueryEscape(serviceExample2.Id), &result)
 	if err != nil {
 		t.Error(err)
 		return

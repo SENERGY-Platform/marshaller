@@ -19,7 +19,6 @@ package mocks
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
@@ -36,7 +35,7 @@ func (this *DeviceRepoStruct) Init() *DeviceRepoStruct {
 	return this
 }
 
-func (this *DeviceRepoStruct) GetService(token config.Impersonate, serviceId string) (model.Service, error) {
+func (this *DeviceRepoStruct) GetService(serviceId string) (model.Service, error) {
 	if service, ok := this.services[serviceId]; ok {
 		return service, nil
 	} else {
@@ -44,7 +43,7 @@ func (this *DeviceRepoStruct) GetService(token config.Impersonate, serviceId str
 	}
 }
 
-func (this *DeviceRepoStruct) GetProtocol(token config.Impersonate, id string) (model.Protocol, error) {
+func (this *DeviceRepoStruct) GetProtocol(id string) (model.Protocol, error) {
 	if protocol, ok := this.protocols[id]; ok {
 		return protocol, nil
 	} else {

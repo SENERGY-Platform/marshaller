@@ -17,7 +17,9 @@
 package tests
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"github.com/SENERGY-Platform/marshaller/lib/api"
@@ -29,14 +31,17 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
+	"io"
+	"log"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
+	"time"
 )
 
 var ServerUrl string
-var AccessToken config.Impersonate
 
 var example = struct {
 	Brightness string
@@ -94,14 +99,13 @@ func testMain(m *testing.M) int {
 }
 
 func setupMock(ctx context.Context, done *sync.WaitGroup) {
-	AccessToken = config.Impersonate("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
 	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{})
 	configurableService := configurables.New(mocks.ConceptRepo{})
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(config.Config{}, marshaller, configurableService, mocks.DeviceRepo))
+	server := httptest.NewServer(api.GetRouter(marshaller, configurableService, mocks.DeviceRepo))
 	ServerUrl = server.URL
 	go func() {
 		<-ctx.Done()
@@ -116,10 +120,6 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 		panic(err)
 	}
 	access := config.NewAccess(conf)
-	AccessToken, err = access.Ensure()
-	if err != nil {
-		panic(err)
-	}
 	conceptRepo, err := conceptrepo.New(
 		ctx,
 		conf,
@@ -166,14 +166,14 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 	}
 	marshaller := marshaller.New(converter.New(conf, access), conceptRepo)
 	configurableService := configurables.New(conceptRepo)
-	devicerepo := devicerepository.New(conf)
+	devicerepo := devicerepository.New(conf, access)
 
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
 
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(conf, marshaller, configurableService, devicerepo))
+	server := httptest.NewServer(api.GetRouter(marshaller, configurableService, devicerepo))
 	ServerUrl = server.URL
 	go func() {
 		<-ctx.Done()
@@ -192,4 +192,69 @@ var TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, 
 
 var TestFindConfigurables = func(notCharacteristicId string, services []model.Service) (result configurables.Configurables, err error) {
 	return nil, errors.New("todo")
+}
+
+func post(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", contentType)
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err = client.Do(req)
+	if err == nil && resp.StatusCode == 401 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		resp.Body.Close()
+		log.Println(buf.String())
+		err = errors.New("access denied")
+	}
+	return
+}
+
+func postJSON(url string, body interface{}, result interface{}) (err error) {
+	b := new(bytes.Buffer)
+	err = json.NewEncoder(b).Encode(body)
+	if err != nil {
+		return
+	}
+	resp, err := post(url, "application/json", b)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if result != nil {
+		err = json.NewDecoder(resp.Body).Decode(result)
+	}
+	return
+}
+
+func get(url string) (resp *http.Response, err error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err = client.Do(req)
+	if err == nil && resp.StatusCode == 401 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		log.Println(buf.String())
+		err = errors.New("access denied")
+	}
+	return
+}
+
+func getJSON(url string, result interface{}) (err error) {
+	resp, err := get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return json.NewDecoder(resp.Body).Decode(result)
 }
