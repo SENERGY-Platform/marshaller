@@ -19,6 +19,7 @@ package serialization
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/base"
 	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/json"
+	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/plaintext"
 	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/xml"
 )
 
