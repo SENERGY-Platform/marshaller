@@ -94,15 +94,16 @@ func createConfigurable(repo ConceptRepo, conceptId string) (result Configurable
 	}
 	return Configurable{
 		CharacteristicId: concept.BaseCharacteristicId,
-		Values:           createConfigurableValues(characteristic),
+		Values:           createConfigurableValues(characteristic, characteristic.Name),
 	}, nil
 }
 
-func createConfigurableValues(characteristic model.Characteristic, pathSegments ...string) (result []ConfigurableCharacteristicValue) {
+func createConfigurableValues(characteristic model.Characteristic, labelPrefix string, pathSegments ...string) (result []ConfigurableCharacteristicValue) {
 	switch characteristic.Type {
 	case model.Integer, model.Float:
 		return []ConfigurableCharacteristicValue{
 			{
+				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
 				Path:      strings.Join(pathSegments, "."),
 				Value:     0,
 				ValueType: characteristic.Type,
@@ -111,6 +112,7 @@ func createConfigurableValues(characteristic model.Characteristic, pathSegments 
 	case model.Boolean:
 		return []ConfigurableCharacteristicValue{
 			{
+				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
 				Path:      strings.Join(pathSegments, "."),
 				Value:     false,
 				ValueType: characteristic.Type,
@@ -119,6 +121,7 @@ func createConfigurableValues(characteristic model.Characteristic, pathSegments 
 	case model.String:
 		return []ConfigurableCharacteristicValue{
 			{
+				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
 				Path:      strings.Join(pathSegments, "."),
 				Value:     "",
 				ValueType: characteristic.Type,
@@ -130,12 +133,12 @@ func createConfigurableValues(characteristic model.Characteristic, pathSegments 
 			if sub.Name != mapping.VAR_LEN_PLACEHOLDER {
 				index = sub.Name
 			}
-			result = append(result, createConfigurableValues(sub, append(pathSegments, index)...)...)
+			result = append(result, createConfigurableValues(sub, labelPrefix, append(pathSegments, index)...)...)
 		}
 		return result
 	case model.Structure:
 		for _, sub := range characteristic.SubCharacteristics {
-			result = append(result, createConfigurableValues(sub, append(pathSegments, sub.Name)...)...)
+			result = append(result, createConfigurableValues(sub, labelPrefix, append(pathSegments, sub.Name)...)...)
 		}
 		return result
 	default:

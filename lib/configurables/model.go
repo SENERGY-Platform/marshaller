@@ -26,6 +26,7 @@ type Configurable struct {
 }
 
 type ConfigurableCharacteristicValue struct {
+	Label     string      `json:"label"`
 	Path      string      `json:"path"`
 	Value     interface{} `json:"value"`
 	ValueType model.Type  `json:"value_type"`

@@ -44,16 +44,19 @@ func TestConfigurablesPostRequest(t *testing.T) {
 		CharacteristicId: color.Rgb,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
+				Label:     "RGB r",
 				Path:      "r",
 				Value:     float64(0),
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB g",
 				Path:      "g",
 				Value:     float64(0),
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB b",
 				Path:      "b",
 				Value:     float64(0),
 				ValueType: model.Integer,
@@ -81,16 +84,19 @@ func TestConfigurablesMockGetRequest(t *testing.T) {
 		CharacteristicId: color.Rgb,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
+				Label:     "RGB r",
 				Path:      "r",
 				Value:     float64(0),
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB g",
 				Path:      "g",
 				Value:     float64(0),
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB b",
 				Path:      "b",
 				Value:     float64(0),
 				ValueType: model.Integer,

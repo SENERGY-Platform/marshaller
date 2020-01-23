@@ -17,11 +17,160 @@
 package tests
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"reflect"
 	"testing"
 )
+
+func ExampleFindConfigurablesShort() {
+	if !testing.Short() {
+		//skip
+		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"}]}]`)
+	} else {
+		exampleFindConfigurables()
+	}
+
+	//output:
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"}]}]
+}
+
+func ExampleFindConfigurablesLong() {
+	if testing.Short() {
+		//skip
+		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]`)
+	} else {
+		exampleFindConfigurables()
+	}
+
+	//output:
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]
+}
+
+func exampleFindConfigurables() {
+	service1 := model.Service{
+		Id:          "s1",
+		LocalId:     "s1l",
+		Name:        "s1n",
+		Description: "s1d",
+		ProtocolId:  "p1",
+		Inputs: []model.Content{
+			{
+				Id: "c1",
+				ContentVariable: model.ContentVariable{
+					Id:   "c1.1",
+					Name: "payload",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "c1.1.2",
+							Name:             "temperature",
+							Type:             model.Float,
+							CharacteristicId: temperature.Celcius,
+						},
+						{
+							Id:               "c1.1.1",
+							Name:             "color",
+							Type:             model.Structure,
+							CharacteristicId: color.Rgb,
+							SubContentVariables: []model.ContentVariable{
+								{
+									Id:   "c2.1.4",
+									Name: "foo",
+									Type: model.String,
+								},
+								{
+									Id:               "sr",
+									Name:             "red",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbR,
+								},
+								{
+									Id:               "sg",
+									Name:             "green",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbG,
+								},
+								{
+									Id:               "sb",
+									Name:             "blue",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbB,
+								},
+							},
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	service2 := model.Service{
+		Id:          "s2",
+		LocalId:     "s2l",
+		Name:        "s2n",
+		Description: "s2d",
+		ProtocolId:  "p1",
+		Inputs: []model.Content{
+			{
+				Id: "c2",
+				ContentVariable: model.ContentVariable{
+					Id:   "c2.1",
+					Name: "payload",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:   "c2.1.4",
+							Name: "foo",
+							Type: model.String,
+						},
+						{
+							Id:   "c2.1.3",
+							Name: "bar",
+							Type: model.String,
+						},
+						{
+							Id:               "c2.1.2",
+							Name:             "temperature",
+							Type:             model.Float,
+							CharacteristicId: temperature.Celcius,
+						},
+						{
+							Id:               "c2.1.1",
+							Name:             "color",
+							Type:             model.String,
+							CharacteristicId: color.Hex,
+						},
+						{
+							Id:               "c2.1.5",
+							Name:             "color_2",
+							Type:             model.String,
+							CharacteristicId: color.Hex,
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	configurablesList, err := TestFindConfigurables(temperature.Celcius, []model.Service{service1, service2})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	temp, _ := json.Marshal(configurablesList)
+	fmt.Println(string(temp))
+
+	//output:
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]
+
+}
 
 func TestFindIntersectingConfigurables1(t *testing.T) {
 	assert := Assertions{t}
@@ -147,16 +296,19 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 		CharacteristicId: color.Rgb,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
+				Label:     "RGB r",
 				Path:      "r",
 				Value:     0,
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB g",
 				Path:      "g",
 				Value:     0,
 				ValueType: model.Integer,
 			},
 			{
+				Label:     "RGB b",
 				Path:      "b",
 				Value:     0,
 				ValueType: model.Integer,
