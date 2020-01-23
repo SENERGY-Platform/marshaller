@@ -66,7 +66,7 @@ func New(ctx context.Context, conf config.Config, access *config.Access, default
 	go func() {
 		for range ticker.C {
 			err = result.Load()
-			log.Println("WARNING: unable to update concept repository")
+			log.Println("WARNING: unable to update concept repository", err.Error())
 		}
 	}()
 	return result, nil
