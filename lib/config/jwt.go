@@ -128,7 +128,7 @@ func (this *Access) Ensure() (token Impersonate, err error) {
 		return
 	}
 
-	if this.openid.RefreshToken != "" && this.openid.RefreshExpiresIn-this.config.AuthExpirationTimeBuffer < duration {
+	if this.openid.RefreshToken != "" && this.openid.RefreshExpiresIn-this.config.AuthExpirationTimeBuffer > duration {
 		log.Println("refresh token", this.openid.RefreshExpiresIn, duration)
 		err = refreshOpenidToken(this.openid, this.config)
 		if err != nil {
