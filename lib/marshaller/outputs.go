@@ -24,7 +24,7 @@ import (
 	"runtime/debug"
 )
 
-func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId) (result interface{}, err error) {
+func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId, hints ...string) (result interface{}, err error) {
 	if outputCharacteristicId == "" {
 		return nil, nil
 	}
@@ -54,7 +54,7 @@ func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.
 		return result, err
 	}
 
-	serviceCharacteristicValue, err := mapping.MapSensors(outputObjectMap, contentMap, serviceCharacteristic)
+	serviceCharacteristicValue, err := mapping.MapSensors(outputObjectMap, contentMap, serviceCharacteristic, hints)
 	if err != nil {
 		return result, err
 	}

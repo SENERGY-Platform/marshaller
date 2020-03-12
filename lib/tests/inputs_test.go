@@ -18,6 +18,7 @@ package tests
 
 import (
 	"fmt"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
@@ -167,6 +168,92 @@ func ExampleConfigurable1() {
 	//output:
 	//map[body:{"color":{"blue":0,"foo":"bar1","green":255,"red":255},"temperature":37}] <nil>
 	//map[body:{"bar":"foo2","color":"#ffff00","color_2":"#ffff00","foo":"bar2","temperature":37}] <nil>
+}
+
+func ExampleConfigurableUnused() {
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+
+	service1 := model.Service{
+		Id:          "s1",
+		LocalId:     "s1l",
+		Name:        "s1n",
+		Description: "s1d",
+		ProtocolId:  "p1",
+		Inputs: []model.Content{
+			{
+				Id: "c1",
+				ContentVariable: model.ContentVariable{
+					Id:   "c1.1",
+					Name: "payload",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "c1.1.2",
+							Name:             "temperature",
+							Type:             model.Float,
+							CharacteristicId: temperature.Celcius,
+						},
+						{
+							Id:               "c1.1.1",
+							Name:             "color",
+							Type:             model.Structure,
+							CharacteristicId: color.Rgb,
+							SubContentVariables: []model.ContentVariable{
+								{
+									Id:    "c2.1.4",
+									Name:  "foo",
+									Type:  model.String,
+									Value: "bar1",
+								},
+								{
+									Id:               "sr",
+									Name:             "red",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbR,
+								},
+								{
+									Id:               "sg",
+									Name:             "green",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbG,
+								},
+								{
+									Id:               "sb",
+									Name:             "blue",
+									Type:             model.Integer,
+									CharacteristicId: color.RgbB,
+								},
+							},
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, configurables.Configurable{
+		CharacteristicId: example.Lux,
+		Values: []configurables.ConfigurableCharacteristicValue{
+			{
+				Label: "nope",
+				Path:  "",
+				Value: 20,
+			},
+		},
+	}))
+
+	//output:
+	//map[body:{"color":{"blue":0,"foo":"bar1","green":0,"red":0},"temperature":37}] <nil>
 }
 
 func ExampleMarshalInput1() {

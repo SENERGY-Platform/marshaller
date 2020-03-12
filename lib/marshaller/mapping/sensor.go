@@ -23,7 +23,11 @@ import (
 	"strconv"
 )
 
-func MapSensors(in map[string]interface{}, contents map[string]model.ContentVariable, category model.Characteristic) (out interface{}, err error) {
+func MapSensors(in map[string]interface{}, contents map[string]model.ContentVariable, category model.Characteristic, hints []string) (out interface{}, err error) {
+	contents, err = applyHints(contents, hints)
+	if err != nil {
+		return out, err
+	}
 	temp, set, err := CharacteristicToSkeleton(category)
 	if err != nil {
 		return nil, err

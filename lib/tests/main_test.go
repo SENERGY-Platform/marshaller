@@ -186,7 +186,7 @@ var TestMarshalInputs = func(protocol model.Protocol, service model.Service, inp
 	return nil, errors.New("todo")
 }
 
-var TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId string) (result interface{}, err error) {
+var TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId string, hints ...string) (result interface{}, err error) {
 	return nil, errors.New("todo")
 }
 
