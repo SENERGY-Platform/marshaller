@@ -34,6 +34,7 @@ import (
 type DeviceRepository interface {
 	GetService(serviceId string) (model.Service, error)
 	GetProtocol(id string) (model.Protocol, error)
+	GetServiceWithErrCode(serviceId string) (model.Service, error, int)
 }
 
 var endpoints = []func(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository){}

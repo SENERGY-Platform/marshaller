@@ -18,11 +18,12 @@ package devicerepository
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	"log"
+	"net/http"
 	"net/url"
-	"runtime/debug"
+	"time"
 )
 
 type DeviceRepository struct {
@@ -53,22 +54,43 @@ func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err
 }
 
 func (this *DeviceRepository) GetService(id string) (result model.Service, err error) {
+	result, err, _ = this.GetServiceWithErrCode(id)
+	return
+}
+
+func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Service, err error, code int) {
 	result, err = this.getServiceFromCache(id)
 	if err != nil {
 		token, err := this.access.Ensure()
 		if err != nil {
-			return result, err
+			return result, err, http.StatusInternalServerError
 		}
-		err = token.GetJSON(this.repoUrl+"/services/"+url.PathEscape(id), &result)
+		req, err := http.NewRequest("GET", this.repoUrl+"/services/"+url.PathEscape(id), nil)
 		if err != nil {
-			log.Println("ERROR:", err)
-			debug.PrintStack()
-			return result, err
+			return result, err, http.StatusInternalServerError
+		}
+		req.Header.Set("Authorization", string(token))
+		client := &http.Client{
+			Timeout: 10 * time.Second,
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return result, err, http.StatusInternalServerError
+		}
+		if resp.StatusCode == http.StatusNotFound {
+			return result, errors.New("service not found"), resp.StatusCode
+		}
+		if resp.StatusCode >= 300 {
+			return result, errors.New("unexpected status code"), resp.StatusCode
+		}
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		if err != nil {
+			return result, err, http.StatusInternalServerError
 		}
 		this.saveServiceToCache(result)
-		return result, err
+		return result, nil, http.StatusOK
 	}
-	return result, err
+	return result, nil, http.StatusOK
 }
 
 func (this *DeviceRepository) getServiceFromCache(id string) (service model.Service, err error) {

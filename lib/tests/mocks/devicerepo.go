@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"net/http"
 )
 
 var DeviceRepo = (&DeviceRepoStruct{}).Init()
@@ -71,4 +72,14 @@ func (this *DeviceRepoStruct) SetProtocolJson(protocolStr string) *DeviceRepoStr
 	protocol := model.Protocol{}
 	json.Unmarshal([]byte(protocolStr), &protocol)
 	return this.SetProtocol(protocol)
+}
+
+func (this *DeviceRepoStruct) GetServiceWithErrCode(serviceId string) (result model.Service, err error, code int) {
+	result, err = this.GetService(serviceId)
+	if err != nil {
+		code = http.StatusInternalServerError
+	} else {
+		code = 200
+	}
+	return
 }

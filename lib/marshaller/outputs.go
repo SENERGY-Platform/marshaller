@@ -65,6 +65,8 @@ func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.
 	return
 }
 
+var ErrorNoMatchFound = errors.New("no match found")
+
 func (this *Marshaller) getMatchingOutputRootCharacteristic(contents []model.Content, matchingId CharacteristicId) (matchingServiceCharacteristicId CharacteristicId, conceptId string, err error) {
 	conceptId, err = this.ConceptRepo.GetConceptOfCharacteristic(matchingId)
 	if err != nil {
@@ -83,7 +85,7 @@ func (this *Marshaller) getMatchingOutputRootCharacteristic(contents []model.Con
 			}
 		}
 	}
-	return matchingServiceCharacteristicId, conceptId, errors.New("no match found")
+	return matchingServiceCharacteristicId, conceptId, ErrorNoMatchFound
 }
 
 func serializeOutput(output map[string]string, service model.Service, protocol model.Protocol) (result map[string]interface{}, err error) {
