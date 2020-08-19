@@ -16,20 +16,15 @@
 
 package configurables
 
-import (
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-)
-
 type Configurable struct {
 	CharacteristicId string                            `json:"characteristic_id"`
 	Values           []ConfigurableCharacteristicValue `json:"values"`
 }
 
 type ConfigurableCharacteristicValue struct {
-	Label     string      `json:"label"`
-	Path      string      `json:"path"`
-	Value     interface{} `json:"value"`
-	ValueType model.Type  `json:"value_type"`
+	Label string `json:"label"`
+	Path  string `json:"path"`
+	Value string `json:"value"`
 }
 
 type Configurables []Configurable

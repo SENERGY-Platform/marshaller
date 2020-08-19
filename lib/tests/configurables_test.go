@@ -28,25 +28,25 @@ import (
 func ExampleFindConfigurablesShort() {
 	if !testing.Short() {
 		//skip
-		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"}]}]`)
+		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB b","path":"b","value":"0"}]}]`)
 	} else {
 		exampleFindConfigurables()
 	}
 
 	//output:
-	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"}]}]
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB b","path":"b","value":"0"}]}]
 }
 
 func ExampleFindConfigurablesLong() {
 	if testing.Short() {
 		//skip
-		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]`)
+		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]`)
 	} else {
 		exampleFindConfigurables()
 	}
 
 	//output:
-	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB g","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"RGB r","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]
 }
 
 func exampleFindConfigurables() {
@@ -168,7 +168,7 @@ func exampleFindConfigurables() {
 	fmt.Println(string(temp))
 
 	//output:
-	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"","path":"b","value":0,"value_type":"https://schema.org/Integer"},{"label":"","path":"g","value":0,"value_type":"https://schema.org/Integer"},{"label":"","path":"r","value":0,"value_type":"https://schema.org/Integer"}]}]
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"","path":"b","value":0},{"label":"","path":"g","value":0},{"label":"","path":"r","value":0}]}]
 
 }
 
@@ -296,22 +296,19 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 		CharacteristicId: color.Rgb,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
-				Label:     "RGB r",
-				Path:      "r",
-				Value:     0,
-				ValueType: model.Integer,
+				Label: "RGB r",
+				Path:  "r",
+				Value: "0",
 			},
 			{
-				Label:     "RGB g",
-				Path:      "g",
-				Value:     0,
-				ValueType: model.Integer,
+				Label: "RGB g",
+				Path:  "g",
+				Value: "0",
 			},
 			{
-				Label:     "RGB b",
-				Path:      "b",
-				Value:     0,
-				ValueType: model.Integer,
+				Label: "RGB b",
+				Path:  "b",
+				Value: "0",
 			},
 		},
 	})

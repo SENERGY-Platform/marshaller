@@ -99,11 +99,11 @@ func assignConfigurableValues(setter map[string]*interface{}, characteristic mod
 	}
 }
 
-func assignConfigurableValue(setter map[string]*interface{}, characteristic model.Characteristic, path []string, value interface{}) {
+func assignConfigurableValue(setter map[string]*interface{}, characteristic model.Characteristic, path []string, value string) {
 	if len(path) == 0 || (len(path) == 1 && path[0] == "") {
 		set, ok := setter[characteristic.Id]
 		if ok {
-			*set = value
+			json.Unmarshal([]byte(value), set)
 		}
 	} else {
 		next, rest := path[0], path[1:]

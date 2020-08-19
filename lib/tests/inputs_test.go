@@ -152,13 +152,13 @@ func ExampleConfigurable1() {
 	}
 	for index, value := range configurblesList[0].Values {
 		if value.Path == "r" {
-			configurblesList[0].Values[index].Value = 255
+			configurblesList[0].Values[index].Value = "255"
 		}
 		if value.Path == "g" {
-			configurblesList[0].Values[index].Value = 255
+			configurblesList[0].Values[index].Value = "255"
 		}
 		if value.Path == "b" {
-			configurblesList[0].Values[index].Value = 0
+			configurblesList[0].Values[index].Value = "0"
 		}
 	}
 
@@ -247,7 +247,7 @@ func ExampleConfigurableUnused() {
 			{
 				Label: "nope",
 				Path:  "",
-				Value: 20,
+				Value: "20",
 			},
 		},
 	}))

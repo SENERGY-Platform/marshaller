@@ -103,28 +103,25 @@ func createConfigurableValues(characteristic model.Characteristic, labelPrefix s
 	case model.Integer, model.Float:
 		return []ConfigurableCharacteristicValue{
 			{
-				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
-				Path:      strings.Join(pathSegments, "."),
-				Value:     0,
-				ValueType: characteristic.Type,
+				Label: strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
+				Path:  strings.Join(pathSegments, "."),
+				Value: "0",
 			},
 		}
 	case model.Boolean:
 		return []ConfigurableCharacteristicValue{
 			{
-				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
-				Path:      strings.Join(pathSegments, "."),
-				Value:     false,
-				ValueType: characteristic.Type,
+				Label: strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
+				Path:  strings.Join(pathSegments, "."),
+				Value: "false",
 			},
 		}
 	case model.String:
 		return []ConfigurableCharacteristicValue{
 			{
-				Label:     strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
-				Path:      strings.Join(pathSegments, "."),
-				Value:     "",
-				ValueType: characteristic.Type,
+				Label: strings.Join(append([]string{labelPrefix}, pathSegments...), " "),
+				Path:  strings.Join(pathSegments, "."),
+				Value: "",
 			},
 		}
 	case model.List:

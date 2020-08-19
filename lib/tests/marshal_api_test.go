@@ -63,7 +63,7 @@ func ExampleMarshal2() {
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{
 							"path": "",
-							"value": 3,
+							"value": "3",
 							"value_type": "https://schema.org/Float"
 						}]
 					}]
@@ -100,7 +100,7 @@ func ExampleMarshal3() {
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{
 							"path": "",
-							"value": 3,
+							"value": "3",
 							"value_type": "https://schema.org/Float"
 						}]
 					}]
@@ -134,7 +134,7 @@ func ExampleMarshal4() {
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{
 							"path": "",
-							"value": 3,
+							"value": "3",
 							"value_type": "https://schema.org/Float"
 						}]
 					}]
