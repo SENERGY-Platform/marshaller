@@ -18,6 +18,7 @@ package conceptrepo
 
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"log"
 	"net/url"
 	"strconv"
 )
@@ -51,6 +52,12 @@ func (this *ConceptRepo) Load() error {
 		}
 		temp = append(temp, element)
 	}
+
+	functionInfos, err := this.loadFunctions()
+	if err != nil {
+		return err
+	}
+
 	this.mux.Lock()
 	defer this.mux.Unlock()
 
@@ -59,6 +66,11 @@ func (this *ConceptRepo) Load() error {
 	for _, element := range temp {
 		this.register(element.Concept, element.Characteristics)
 	}
+
+	for _, f := range functionInfos {
+		this.registerFunction(f)
+	}
+
 	return nil
 }
 
@@ -73,7 +85,9 @@ func (this *ConceptRepo) resetToDefault() {
 }
 
 func (this *ConceptRepo) register(concept model.Concept, characteristics []model.Characteristic) {
+	log.Println("load concept", concept.Name, concept.Id)
 	for _, characteristic := range characteristics {
+		log.Println("    load characteristic", characteristic.Name, characteristic.Id)
 		concept.CharacteristicIds = append(concept.CharacteristicIds, characteristic.Id)
 		this.characteristics[characteristic.Id] = characteristic
 		this.conceptByCharacteristic[characteristic.Id] = concept
@@ -109,6 +123,31 @@ func (this *ConceptRepo) loadConceptIds() (ids []string, err error) {
 		offset = offset + limit
 	}
 	return ids, err
+}
+
+type FunctionInfo struct {
+	Id        string `json:"id"`
+	ConceptId string `json:"concept_id"`
+}
+
+func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err error) {
+	token, err := this.access.Ensure()
+	if err != nil {
+		return functionInfos, err
+	}
+	limit := 100
+	offset := 0
+	temp := []FunctionInfo{}
+	for len(temp) == limit || offset == 0 {
+		temp = []FunctionInfo{}
+		err = token.GetJSON(this.config.PermissionsSearchUrl+"/jwt/list/functions/r/"+strconv.Itoa(limit)+"/"+strconv.Itoa(offset)+"/name/asc", &temp)
+		if err != nil {
+			return functionInfos, err
+		}
+		functionInfos = append(functionInfos, temp...)
+		offset = offset + limit
+	}
+	return functionInfos, err
 }
 
 func (this *ConceptRepo) loadConcept(id string) (result model.Concept, err error) {

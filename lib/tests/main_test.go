@@ -99,7 +99,7 @@ func testMain(m *testing.M) int {
 }
 
 func setupMock(ctx context.Context, done *sync.WaitGroup) {
-	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{})
+	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{}, mocks.DeviceRepo)
 	configurableService := configurables.New(mocks.ConceptRepo{})
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
@@ -119,7 +119,9 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 	if err != nil {
 		panic(err)
 	}
+	log.Println("init access connection")
 	access := config.NewAccess(conf)
+	log.Println("init conceptRepo")
 	conceptRepo, err := conceptrepo.New(
 		ctx,
 		conf,
@@ -164,9 +166,12 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 	if err != nil {
 		panic(err)
 	}
-	marshaller := marshaller.New(converter.New(conf, access), conceptRepo)
-	configurableService := configurables.New(conceptRepo)
+	log.Println("init device-repo connection")
 	devicerepo := devicerepository.New(conf, access)
+	log.Println("init marshaller")
+	marshaller := marshaller.New(converter.New(conf, access), conceptRepo, devicerepo)
+	log.Println("init configurableService")
+	configurableService := configurables.New(conceptRepo)
 
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs

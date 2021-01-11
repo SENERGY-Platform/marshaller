@@ -41,3 +41,11 @@ type FindConfigurablesRequest struct {
 	CharacteristicId string          `json:"characteristic_id"`
 	Services         []model.Service `json:"services"`
 }
+
+type PathOptionsQuery struct {
+	DeviceTypeIds          []string `json:"device_type_ids"`
+	FunctionId             string   `json:"function_id"`
+	AspectId               string   `json:"aspect_id"`
+	CharacteristicIdFilter []string `json:"characteristic_id_filter"`
+	WithoutEnvelope        bool     `json:"without_envelope"`
+}

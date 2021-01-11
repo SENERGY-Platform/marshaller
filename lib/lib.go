@@ -46,9 +46,10 @@ func Start(ctx context.Context, conf config.Config) (closed context.Context, err
 		cancel()
 		return nil, err
 	}
-	marshaller := marshaller.New(converter.New(conf, access), conceptRepo)
-	configurableService := configurables.New(conceptRepo)
+
 	devicerepo := devicerepository.New(conf, access)
+	marshaller := marshaller.New(converter.New(conf, access), conceptRepo, devicerepo)
+	configurableService := configurables.New(conceptRepo)
 
 	closed = api.Start(childCtx, conf, marshaller, configurableService, devicerepo)
 	go func() {

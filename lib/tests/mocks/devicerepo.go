@@ -26,13 +26,28 @@ import (
 var DeviceRepo = (&DeviceRepoStruct{}).Init()
 
 type DeviceRepoStruct struct {
-	services  map[string]model.Service
-	protocols map[string]model.Protocol
+	deviceTypes map[string]model.DeviceType
+	services    map[string]model.Service
+	protocols   map[string]model.Protocol
 }
 
 func (this *DeviceRepoStruct) Init() *DeviceRepoStruct {
 	this.services = map[string]model.Service{}
 	this.protocols = map[string]model.Protocol{}
+	this.deviceTypes = map[string]model.DeviceType{}
+	return this
+}
+
+func (this *DeviceRepoStruct) GetDeviceType(id string) (result model.DeviceType, err error, code int) {
+	if dt, ok := this.deviceTypes[id]; ok {
+		return dt, nil, 200
+	} else {
+		return dt, errors.New("not found"), 404
+	}
+}
+
+func (this *DeviceRepoStruct) SetDeviceType(dt model.DeviceType) *DeviceRepoStruct {
+	this.deviceTypes[dt.Id] = dt
 	return this
 }
 

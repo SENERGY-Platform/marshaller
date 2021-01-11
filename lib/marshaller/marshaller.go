@@ -16,7 +16,9 @@
 
 package marshaller
 
-import "github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+import (
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+)
 
 type Converter interface {
 	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
@@ -26,16 +28,23 @@ type ConceptRepo interface {
 	GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error)
 	GetCharacteristic(id CharacteristicId) (model.Characteristic, error)
 	GetRootCharacteristics(ids []CharacteristicId) (result []CharacteristicId)
+	GetCharacteristicsOfFunction(functionId string) (characteristicIds []string, err error)
+}
+
+type DeviceRepository interface {
+	GetDeviceType(id string) (result model.DeviceType, err error, code int)
 }
 
 type Marshaller struct {
 	converter   Converter
 	ConceptRepo ConceptRepo
+	devicerepo  DeviceRepository
 }
 
-func New(converter Converter, concepts ConceptRepo) *Marshaller {
+func New(converter Converter, concepts ConceptRepo, devicerepo DeviceRepository) *Marshaller {
 	return &Marshaller{
 		converter:   converter,
 		ConceptRepo: concepts,
+		devicerepo:  devicerepo,
 	}
 }

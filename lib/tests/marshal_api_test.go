@@ -154,6 +154,47 @@ func ExampleMarshal4() {
 
 }
 
+func ExampleMarshalWithUnusedConfigurable() {
+	resp, err := post(
+		ServerUrl+"/marshal",
+		"application/json",
+		strings.NewReader(
+			`{
+					"data": "#ff00ff",
+					"characteristic_id": "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8",
+					"service": `+philipsHueServiceStr+`,
+					"protocol": `+protocolJson+`,
+					"configurables": [{
+						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
+						"values": [{
+							"path": "",
+							"value": "3",
+							"value_type": "https://schema.org/Float"
+						}]
+					},{
+						"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
+						"values": [{
+							"path": "",
+							"value": "42",
+							"value_type": "https://schema.org/Float"
+						}]
+					}]
+				}`,
+		),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+	result, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(err, string(result))
+
+	//output:
+	//<nil> {"data":"{\"brightness\":100,\"duration\":3,\"hue\":300,\"saturation\":100}"}
+
+}
+
 const philipsHueServiceStr = `{
    "id":"urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70",
    "local_id":"setColor",

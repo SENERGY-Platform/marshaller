@@ -18,12 +18,31 @@ package mocks
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/SENERGY-Platform/converter/lib/converter/base"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
+var FunctionToCharacteristics = map[string][]string{}
+
+func SetCharacteristicsOfFunction(functionId string, characteristics []string) {
+	if FunctionToCharacteristics == nil {
+		FunctionToCharacteristics = map[string][]string{}
+	}
+	FunctionToCharacteristics[functionId] = characteristics
+}
+
 type ConceptRepo struct{}
+
+func (this ConceptRepo) GetCharacteristicsOfFunction(functionId string) (characteristicIds []string, err error) {
+	var ok bool
+	characteristicIds, ok = FunctionToCharacteristics[functionId]
+	if !ok {
+		err = errors.New("not found")
+	}
+	return
+}
 
 func (this ConceptRepo) GetConcept(id string) (result model.Concept, err error) {
 	temp, err := base.ConceptRepo.GetConcept(id)

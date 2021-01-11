@@ -36,7 +36,10 @@ type ConceptRepo struct {
 	characteristics                    map[string]model.Characteristic
 	conceptByCharacteristic            map[string]model.Concept
 	rootCharacteristicByCharacteristic map[string]model.Characteristic
-	mux                                sync.Mutex
+
+	characteristicsOfFunction map[string][]string
+
+	mux sync.Mutex
 }
 
 type ConceptRepoDefault struct {
@@ -53,6 +56,7 @@ func New(ctx context.Context, conf config.Config, access *config.Access, default
 		characteristics:                    map[string]model.Characteristic{},
 		conceptByCharacteristic:            map[string]model.Concept{},
 		rootCharacteristicByCharacteristic: map[string]model.Characteristic{},
+		characteristicsOfFunction:          map[string][]string{},
 	}
 	err = result.Load()
 	if err != nil {
@@ -72,6 +76,17 @@ func New(ctx context.Context, conf config.Config, access *config.Access, default
 		}
 	}()
 	return result, nil
+}
+
+func (this *ConceptRepo) GetCharacteristicsOfFunction(functionId string) (characteristicIds []string, err error) {
+	this.mux.Lock()
+	defer this.mux.Unlock()
+	var ok bool
+	characteristicIds, ok = this.characteristicsOfFunction[functionId]
+	if !ok {
+		err = errors.New("unknown function-id")
+	}
+	return
 }
 
 func (this *ConceptRepo) GetConcept(id string) (concept model.Concept, err error) {
@@ -128,4 +143,13 @@ func (this *ConceptRepo) GetRootCharacteristics(ids []string) (result []string) 
 		}
 	}
 	return
+}
+
+func (this *ConceptRepo) registerFunction(f FunctionInfo) {
+	concept, ok := this.concepts[f.ConceptId]
+	if !ok {
+		log.Println("WARNING: unable to register function with unknown concept", f)
+		return
+	}
+	this.characteristicsOfFunction[f.Id] = concept.CharacteristicIds
 }

@@ -17,12 +17,13 @@
 package devicerepository
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/coocood/freecache"
 	"log"
 )
 
-var L1Expiration = 60         // 60sec
+var CacheExpiration = 60      // 60sec
 var L1Size = 20 * 1024 * 1024 //20MB
 var Debug = false
 
@@ -41,18 +42,37 @@ func NewCache() *Cache {
 	return &Cache{l1: freecache.NewCache(L1Size)}
 }
 
-func (this *Cache) Get(key string) (item Item, err error) {
-	item.Value, err = this.l1.Get([]byte(key))
-	if err != nil && err != freecache.ErrNotFound {
-		log.Println("ERROR: in Cache::l1.Get()", err)
+func (this *Cache) get(key string) (value []byte, err error) {
+	value, err = this.l1.Get([]byte(key))
+	if err == freecache.ErrNotFound {
+		err = ErrNotFound
 	}
 	return
 }
 
-func (this *Cache) Set(key string, value []byte) {
-	err := this.l1.Set([]byte(key), value, L1Expiration)
+func (this *Cache) set(key string, value []byte) {
+	err := this.l1.Set([]byte(key), value, CacheExpiration)
 	if err != nil {
-		log.Println("ERROR: in Cache::l1.Set()", err)
+		log.Println("WARNING: err in LocalCache::l1.Set()", err)
 	}
 	return
+}
+func (this *Cache) Use(key string, getter func() (interface{}, error), result interface{}) (err error) {
+	value, err := this.get(key)
+	if err == nil {
+		err = json.Unmarshal(value, result)
+		return
+	} else if err != ErrNotFound {
+		log.Println("WARNING: err in LocalCache::l1.Get()", err)
+	}
+	temp, err := getter()
+	if err != nil {
+		return err
+	}
+	value, err = json.Marshal(temp)
+	if err != nil {
+		return err
+	}
+	this.set(key, value)
+	return json.Unmarshal(value, &result)
 }

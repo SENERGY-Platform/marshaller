@@ -38,19 +38,60 @@ func New(config config.Config, access *config.Access) *DeviceRepository {
 }
 
 func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {
-	result, err = this.getProtocolFromCache(id)
+	err = this.cache.Use("protocol."+id, func() (interface{}, error) {
+		return this.getProtocol(id)
+	}, &result)
+	return
+}
+
+func (this *DeviceRepository) getProtocol(id string) (result model.Protocol, err error) {
+	token, err := this.access.Ensure()
 	if err != nil {
-		token, err := this.access.Ensure()
-		if err != nil {
-			return result, err
-		}
-		err = token.GetJSON(this.repoUrl+"/protocols/"+url.QueryEscape(id), &result)
-		if err == nil {
-			this.saveProtocolToCache(result)
-		}
 		return result, err
 	}
-	return result, err
+	err = token.GetJSON(this.repoUrl+"/protocols/"+url.QueryEscape(id), &result)
+	return
+}
+
+func (this *DeviceRepository) GetDeviceType(id string) (result model.DeviceType, err error, code int) {
+	code = http.StatusOK
+	err = this.cache.Use("device-type."+id, func() (interface{}, error) {
+		var dt model.DeviceType
+		var terr error
+		dt, terr, code = this.getDeviceType(id)
+		return dt, terr
+	}, &result)
+	return
+}
+
+func (this *DeviceRepository) getDeviceType(id string) (result model.DeviceType, err error, code int) {
+	token, err := this.access.Ensure()
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	req, err := http.NewRequest("GET", this.repoUrl+"/device-types/"+url.PathEscape(id), nil)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	req.Header.Set("Authorization", string(token))
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		return result, errors.New("device-type not found"), resp.StatusCode
+	}
+	if resp.StatusCode >= 300 {
+		return result, errors.New("unexpected status code"), resp.StatusCode
+	}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	return
 }
 
 func (this *DeviceRepository) GetService(id string) (result model.Service, err error) {
@@ -59,64 +100,42 @@ func (this *DeviceRepository) GetService(id string) (result model.Service, err e
 }
 
 func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Service, err error, code int) {
-	result, err = this.getServiceFromCache(id)
-	if err != nil {
-		token, err := this.access.Ensure()
-		if err != nil {
-			return result, err, http.StatusInternalServerError
-		}
-		req, err := http.NewRequest("GET", this.repoUrl+"/services/"+url.PathEscape(id), nil)
-		if err != nil {
-			return result, err, http.StatusInternalServerError
-		}
-		req.Header.Set("Authorization", string(token))
-		client := &http.Client{
-			Timeout: 10 * time.Second,
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			return result, err, http.StatusInternalServerError
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return result, errors.New("service not found"), resp.StatusCode
-		}
-		if resp.StatusCode >= 300 {
-			return result, errors.New("unexpected status code"), resp.StatusCode
-		}
-		err = json.NewDecoder(resp.Body).Decode(&result)
-		if err != nil {
-			return result, err, http.StatusInternalServerError
-		}
-		this.saveServiceToCache(result)
-		return result, nil, http.StatusOK
-	}
-	return result, nil, http.StatusOK
-}
-
-func (this *DeviceRepository) getServiceFromCache(id string) (service model.Service, err error) {
-	item, err := this.cache.Get("service." + id)
-	if err != nil {
-		return service, err
-	}
-	err = json.Unmarshal(item.Value, &service)
+	code = http.StatusOK
+	err = this.cache.Use("service."+id, func() (interface{}, error) {
+		var service model.Service
+		var terr error
+		service, terr, code = this.getServiceWithErrCode(id)
+		return service, terr
+	}, &result)
 	return
 }
 
-func (this *DeviceRepository) saveServiceToCache(service model.Service) {
-	buffer, _ := json.Marshal(service)
-	this.cache.Set("service."+service.Id, buffer)
-}
-
-func (this *DeviceRepository) saveProtocolToCache(protocol model.Protocol) {
-	buffer, _ := json.Marshal(protocol)
-	this.cache.Set("protocol."+protocol.Id, buffer)
-}
-
-func (this *DeviceRepository) getProtocolFromCache(id string) (protocol model.Protocol, err error) {
-	item, err := this.cache.Get("protocol." + id)
+func (this *DeviceRepository) getServiceWithErrCode(id string) (result model.Service, err error, code int) {
+	token, err := this.access.Ensure()
 	if err != nil {
-		return protocol, err
+		return result, err, http.StatusInternalServerError
 	}
-	err = json.Unmarshal(item.Value, &protocol)
+	req, err := http.NewRequest("GET", this.repoUrl+"/services/"+url.PathEscape(id), nil)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	req.Header.Set("Authorization", string(token))
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		return result, errors.New("service not found"), resp.StatusCode
+	}
+	if resp.StatusCode >= 300 {
+		return result, errors.New("unexpected status code"), resp.StatusCode
+	}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
 	return
 }
