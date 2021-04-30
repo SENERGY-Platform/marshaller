@@ -85,8 +85,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"value.temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"value.temperature[0]"},
+					PathToCharacteristicId: map[string]string{"value.temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -100,8 +101,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"temperature[0]"},
+					PathToCharacteristicId: map[string]string{"temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -119,8 +121,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"value.temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"value.temperature[0]"},
+					PathToCharacteristicId: map[string]string{"value.temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -137,8 +140,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"temperature[0]"},
+					PathToCharacteristicId: map[string]string{"temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -153,8 +157,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"value.temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"value.temperature[0]"},
+					PathToCharacteristicId: map[string]string{"value.temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -168,8 +173,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsTemperatureCelsiusArray": {
 				{
-					ServiceId: "TestPathOptionsTemperatureCelsiusArray.celsius",
-					JsonPath:  []string{"temperature[0]"},
+					ServiceId:              "TestPathOptionsTemperatureCelsiusArray.celsius",
+					JsonPath:               []string{"temperature[0]"},
+					PathToCharacteristicId: map[string]string{"temperature[0]": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -264,8 +270,9 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {},
@@ -280,8 +287,9 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {},
@@ -300,14 +308,16 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-					JsonPath:  []string{"value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+					JsonPath:               []string{"value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -324,14 +334,16 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-					JsonPath:  []string{"temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+					JsonPath:               []string{"temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -346,14 +358,16 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-					JsonPath:  []string{"value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+					JsonPath:               []string{"value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -367,14 +381,16 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 			"TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k": {
 				{
-					ServiceId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-					JsonPath:  []string{"temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+					JsonPath:               []string{"temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -462,8 +478,9 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -477,8 +494,9 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -496,12 +514,14 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-					JsonPath:  []string{"value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+					JsonPath:               []string{"value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -518,12 +538,14 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-					JsonPath:  []string{"temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+					JsonPath:               []string{"temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -538,12 +560,14 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-					JsonPath:  []string{"value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+					JsonPath:               []string{"value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -557,12 +581,14 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 				{
-					ServiceId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-					JsonPath:  []string{"temperature.kelvin"},
+					ServiceId:              "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+					JsonPath:               []string{"temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -625,8 +651,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"value.temperature.celsius"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"value.temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -640,8 +667,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"temperature.celsius"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"temperature.celsius"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -659,8 +687,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"value.temperature.celsius", "value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"value.temperature.celsius", "value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -677,8 +706,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"temperature.celsius", "temperature.kelvin"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"temperature.celsius", "temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -693,8 +723,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"value.temperature.celsius", "value.temperature.kelvin"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"value.temperature.celsius", "value.temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"value.temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "value.temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -708,8 +739,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusAndKelvin": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-					JsonPath:  []string{"temperature.celsius", "temperature.kelvin"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+					JsonPath:               []string{"temperature.celsius", "temperature.kelvin"},
+					PathToCharacteristicId: map[string]string{"temperature.celsius": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "temperature.kelvin": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683"},
 				},
 			},
 		},
@@ -792,8 +824,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"value.temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "value.temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -807,8 +840,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"temperature.inside.value", "temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"temperature.inside.value", "temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -826,8 +860,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"value.temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "value.temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -844,8 +879,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"temperature.inside.value", "temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"temperature.inside.value", "temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -860,8 +896,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"value.temperature.inside.value", "value.temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"value.temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "value.temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -875,8 +912,9 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		map[string][]marshaller.PathOptionsResultElement{
 			"TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside": {
 				{
-					ServiceId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-					JsonPath:  []string{"temperature.inside.value", "temperature.outside.value"},
+					ServiceId:              "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+					JsonPath:               []string{"temperature.inside.value", "temperature.outside.value"},
+					PathToCharacteristicId: map[string]string{"temperature.inside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", "temperature.outside.value": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a"},
 				},
 			},
 		},
@@ -923,7 +961,6 @@ func testPathOptions(deviceTypes []string, functionId string, aspect string, cha
 			t.Error(err.Error())
 			return
 		}
-
 		if !reflect.DeepEqual(expectedResult, result) {
 			resultJson, _ := json.Marshal(result)
 			expectedJson, _ := json.Marshal(expectedResult)

@@ -19,12 +19,14 @@ package marshaller
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/http"
+	"sort"
 	"strings"
 )
 
 type PathOptionsResultElement struct {
-	ServiceId string   `json:"service_id"`
-	JsonPath  []string `json:"json_path"`
+	ServiceId              string            `json:"service_id"`
+	JsonPath               []string          `json:"json_path"`
+	PathToCharacteristicId map[string]string `json:"path_to_characteristic_id"`
 }
 
 func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string, aspectId string, characteristicIdFilter []string, withEnvelope bool) (result map[string][]PathOptionsResultElement, err error, code int) {
@@ -46,26 +48,34 @@ func (this *Marshaller) getPathOptionForDeviceType(deviceTypeId string, function
 	}
 	services := this.filterMatchingServices(dt.Services, functionId, aspectId)
 	for _, service := range services {
-		paths, err, code := this.getPathOptionsForService(service, functionId, characteristicIdFilter)
+		pathMapping, err, code := this.getPathOptionsForService(service, functionId, characteristicIdFilter)
 		if err != nil {
 			return result, err, code
 		}
 		if withEnvelope {
-			for i, e := range paths {
-				paths[i] = "value." + e
+			temp := map[string]string{}
+			for path, cid := range pathMapping {
+				temp["value."+path] = cid
 			}
+			pathMapping = temp
 		}
+		paths := []string{}
+		for path, _ := range pathMapping {
+			paths = append(paths, path)
+		}
+		sort.Strings(paths)
 		if len(paths) > 0 {
 			result = append(result, PathOptionsResultElement{
-				ServiceId: service.Id,
-				JsonPath:  paths,
+				ServiceId:              service.Id,
+				JsonPath:               paths,
+				PathToCharacteristicId: pathMapping,
 			})
 		}
 	}
 	return result, nil, http.StatusOK
 }
 
-func (this *Marshaller) getPathOptionsForService(service model.Service, functionId string, characteristicIdFilter []string) (paths []string, err error, code int) {
+func (this *Marshaller) getPathOptionsForService(service model.Service, functionId string, characteristicIdFilter []string) (paths map[string]string, err error, code int) {
 	characteristics, err := this.ConceptRepo.GetCharacteristicsOfFunction(functionId)
 	if err != nil {
 		return paths, err, http.StatusInternalServerError
@@ -81,26 +91,34 @@ func (this *Marshaller) getPathOptionsForService(service model.Service, function
 	return paths, nil, http.StatusOK
 }
 
-func (this *Marshaller) findPathsOfCharacteristicsInContents(contents []model.Content, characteristics map[string]bool) (result []string) {
+//result ist map of path to characteristic id
+func (this *Marshaller) findPathsOfCharacteristicsInContents(contents []model.Content, characteristics map[string]bool) (result map[string]string) {
+	result = map[string]string{}
 	for _, c := range contents {
-		result = append(result, this.findPathsInContentVariable([]string{}, c.ContentVariable, characteristics, "{{NAME}}")...)
+		for path, characteristicId := range this.findPathsInContentVariable([]string{}, c.ContentVariable, characteristics, "{{NAME}}") {
+			result[path] = characteristicId
+		}
 	}
 	return
 }
 
-func (this *Marshaller) findPathsInContentVariable(currentPath []string, variable model.ContentVariable, characteristics map[string]bool, pathSegmentPattern string) (result []string) {
+//result ist map of path to characteristic id
+func (this *Marshaller) findPathsInContentVariable(currentPath []string, variable model.ContentVariable, characteristics map[string]bool, pathSegmentPattern string) (result map[string]string) {
 	currentPath = append(currentPath, strings.ReplaceAll(pathSegmentPattern, "{{NAME}}", variable.Name))
 
 	if characteristics[variable.CharacteristicId] {
-		return []string{strings.Join(currentPath, "")}
+		return map[string]string{strings.Join(currentPath, ""): variable.CharacteristicId}
 	}
 
 	nextPattern := ".{{NAME}}"
 	if variable.Type == model.List {
 		nextPattern = "[{{NAME}}]"
 	}
+	result = map[string]string{}
 	for _, v := range variable.SubContentVariables {
-		result = append(result, this.findPathsInContentVariable(currentPath, v, characteristics, nextPattern)...)
+		for path, characteristicId := range this.findPathsInContentVariable(currentPath, v, characteristics, nextPattern) {
+			result[path] = characteristicId
+		}
 	}
 	return result
 }

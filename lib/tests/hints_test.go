@@ -108,10 +108,12 @@ func ExampleHints1() {
 	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.1", "foo", "bar"))
 	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.2"))
 	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.2", "foo", "bar"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "foo", "bar"))
 
 	//output:
 	//#ff0064 <nil>
 	//#ff0064 <nil>
+	//#00ff64 <nil>
 	//#00ff64 <nil>
 	//#00ff64 <nil>
 }
