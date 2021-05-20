@@ -1,6 +1,6 @@
 module github.com/SENERGY-Platform/marshaller
 
-go 1.13
+go 1.16
 
 require (
 	github.com/SENERGY-Platform/converter v0.0.0-20200114152115-63d2a698b3c4
