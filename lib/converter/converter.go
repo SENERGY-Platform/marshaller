@@ -32,6 +32,9 @@ func New(config config.Config, access *config.Access) *Converter {
 }
 
 func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
+	if from == to {
+		return in, nil
+	}
 	token, err := this.access.Ensure()
 	if err != nil {
 		return out, err
