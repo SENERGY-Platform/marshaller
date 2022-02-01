@@ -58,17 +58,22 @@ func (this Impersonate) PostJSON(url string, body interface{}, result interface{
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(body)
 	if err != nil {
-		return
+		return err
 	}
 	resp, err := this.Post(url, "application/json", b)
 	if err != nil {
+		return err
+	}
+	if resp.StatusCode >= 300 {
+		temp, _ := io.ReadAll(resp.Body)
+		err = errors.New(string(temp))
 		return err
 	}
 	defer resp.Body.Close()
 	if result != nil {
 		err = json.NewDecoder(resp.Body).Decode(result)
 	}
-	return
+	return err
 }
 
 func (this Impersonate) Get(url string) (resp *http.Response, err error) {
