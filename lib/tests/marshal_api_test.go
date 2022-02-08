@@ -25,6 +25,32 @@ import (
 	"testing"
 )
 
+func ExampleMarshalEmpty() {
+	resp, err := post(
+		ServerUrl+"/marshal",
+		"application/json",
+		strings.NewReader(
+			`{
+					"data": null,
+					"characteristic_id": "",
+					"service": `+offServiceStr+`,
+					"protocol": `+protocolJson+`
+				}`,
+		),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+	result, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(err, string(result))
+
+	//output:
+	//<nil> {"data":"{\"power\":false}"}
+
+}
+
 func ExampleMarshal1() {
 	if testing.Short() {
 		mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
@@ -194,6 +220,78 @@ func ExampleMarshalWithUnusedConfigurable() {
 	//<nil> {"data":"{\"brightness\":100,\"duration\":3,\"hue\":300,\"saturation\":100}"}
 
 }
+
+const offServiceStr = `{
+         "id":"urn:infai:ses:service:59dd05fc-cd67-4f66-98de-bbed8257a868",
+         "local_id":"setPower",
+         "name":"setPowerOffService",
+         "description":"",
+         "interaction":"request",
+         "aspect_ids":[
+            "urn:infai:ses:aspect:a7470d73-dde3-41fc-92bd-f16bb28f2da6"
+         ],
+         "protocol_id":"urn:infai:ses:protocol:f3a63aeb-187e-4dd9-9ef5-d97a6eb6292b",
+         "inputs":[
+            {
+               "id":"urn:infai:ses:content:9f6ac32e-5f26-423b-947a-8a769773239a",
+               "content_variable":{
+                  "id":"urn:infai:ses:content-variable:b3cd09ff-8d5b-4b35-abad-d998bd46a05f",
+                  "name":"struct",
+                  "type":"https://schema.org/StructuredValue",
+                  "sub_content_variables":[
+                     {
+                        "id":"urn:infai:ses:content-variable:71fbdd5d-294f-4161-bce5-0ad878d7d14f",
+                        "name":"power",
+                        "type":"https://schema.org/Boolean",
+                        "sub_content_variables":null,
+                        "characteristic_id":"urn:infai:ses:characteristic:7dc1bb7e-b256-408a-a6f9-044dc60fdcf5",
+                        "value": false,
+                        "serialization_options":null
+                     }
+                  ],
+                  "characteristic_id":"",
+                  "value":null,
+                  "serialization_options":null
+               },
+               "serialization":"json",
+               "protocol_segment_id":"urn:infai:ses:protocol-segment:0d211842-cef8-41ec-ab6b-9dbc31bc3a65"
+            }
+         ],
+         "outputs":[
+            {
+               "id":"urn:infai:ses:content:77e18f9c-27f7-4755-82b5-9baba3196666",
+               "content_variable":{
+                  "id":"urn:infai:ses:content-variable:cbab719c-5105-49f0-9419-e3733ffae1b9",
+                  "name":"struct",
+                  "type":"https://schema.org/StructuredValue",
+                  "sub_content_variables":[
+                     {
+                        "id":"urn:infai:ses:content-variable:82d51640-9907-4303-b97c-514e8de7c7ad",
+                        "name":"status",
+                        "type":"https://schema.org/Integer",
+                        "sub_content_variables":null,
+                        "characteristic_id":"urn:infai:ses:characteristic:c0353532-a8fb-4553-a00b-418cb8a80a65",
+                        "value":null,
+                        "serialization_options":null
+                     }
+                  ],
+                  "characteristic_id":"",
+                  "value":null,
+                  "serialization_options":null
+               },
+               "serialization":"json",
+               "protocol_segment_id":"urn:infai:ses:protocol-segment:0d211842-cef8-41ec-ab6b-9dbc31bc3a6"
+            }
+         ],
+         "function_ids":[
+            "urn:infai:ses:controlling-function:2f35150b-9df7-4cad-95bc-165fa00219fd"
+         ],
+         "attributes":[
+            
+         ],
+         "service_group_key":"",
+         "rdf_type":""
+      }`
 
 const philipsHueServiceStr = `{
    "id":"urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70",

@@ -165,7 +165,7 @@ func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristi
 
 	serviceVariableValue, err := mapping.MapActuator(normalized, serviceCharacteristic, serviceVariable, partial)
 	if err != nil {
-		log.Println("ERROR: unable to map actuator", serviceCharacteristic.Id, serviceCharacteristic.Value, "-->", serviceVariable.Id, serviceVariable.Name)
+		log.Println("ERROR: unable to map actuator", serviceCharacteristic.Id, serviceCharacteristic.Value, "-->", serviceVariable.Id, serviceVariable.Name, ":", err)
 		return result, err
 	}
 
