@@ -98,3 +98,15 @@ func (this *DeviceRepoStruct) GetServiceWithErrCode(serviceId string) (result mo
 	}
 	return
 }
+
+func (this *DeviceRepoStruct) GetAspectNode(id string) (result model.AspectNode, err error) {
+	return model.AspectNode{
+		Id:            id,
+		Name:          id,
+		RootId:        id,
+		ParentId:      "",
+		ChildIds:      []string{},
+		AncestorIds:   []string{},
+		DescendentIds: []string{},
+	}, nil
+}

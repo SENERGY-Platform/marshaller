@@ -46,7 +46,10 @@ func (this *Marshaller) getPathOptionForDeviceType(deviceTypeId string, function
 	if err != nil {
 		return nil, err, code
 	}
-	services := this.filterMatchingServices(dt.Services, functionId, aspectId)
+	services, err := this.filterMatchingServices(dt.Services, functionId, aspectId)
+	if err != nil {
+		return nil, err, http.StatusInternalServerError
+	}
 	for _, service := range services {
 		pathMapping, err, code := this.getPathOptionsForService(service, functionId, characteristicIdFilter)
 		if err != nil {
@@ -139,13 +142,46 @@ func intersection(alist []string, blist []string) (result []string) {
 	return
 }
 
-func (this *Marshaller) filterMatchingServices(services []model.Service, functionId string, aspectId string) (result []model.Service) {
+func (this *Marshaller) filterMatchingServices(services []model.Service, functionId string, aspectId string) (result []model.Service, err error) {
+	var aspectNode model.AspectNode
+	if aspectId != "" {
+		aspectNode, err = this.devicerepo.GetAspectNode(aspectId)
+		if err != nil {
+			return result, err
+		}
+	}
 	for _, service := range services {
-		if contains(service.FunctionIds, functionId) && contains(service.AspectIds, aspectId) {
+		if this.serviceMatches(service, functionId, aspectNode) {
 			result = append(result, service)
 		}
 	}
 	return
+}
+
+func (this *Marshaller) serviceMatches(service model.Service, functionId string, aspectNode model.AspectNode) (match bool) {
+	for _, content := range service.Inputs {
+		if contentVariableMatches(content.ContentVariable, functionId, aspectNode) {
+			return true
+		}
+	}
+	for _, content := range service.Outputs {
+		if contentVariableMatches(content.ContentVariable, functionId, aspectNode) {
+			return true
+		}
+	}
+	return false
+}
+
+func contentVariableMatches(variable model.ContentVariable, functionId string, aspectNode model.AspectNode) bool {
+	if variable.FunctionId == functionId && (variable.AspectId == aspectNode.Id || contains(aspectNode.DescendentIds, variable.AspectId)) {
+		return true
+	}
+	for _, sub := range variable.SubContentVariables {
+		if contentVariableMatches(sub, functionId, aspectNode) {
+			return true
+		}
+	}
+	return false
 }
 
 func contains(ids []string, id string) bool {

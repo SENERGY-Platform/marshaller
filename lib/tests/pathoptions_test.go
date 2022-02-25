@@ -42,11 +42,9 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 		Name: "TestPathOptionsTemperatureCelsiusArray",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsTemperatureCelsiusArray.celsius",
-				LocalId:     "TestPathOptionsTemperatureCelsiusArray.celsius",
-				Name:        "TestPathOptionsTemperatureCelsiusArray.celsius",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsTemperatureCelsiusArray.celsius",
+				LocalId: "TestPathOptionsTemperatureCelsiusArray.celsius",
+				Name:    "TestPathOptionsTemperatureCelsiusArray.celsius",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
@@ -57,6 +55,8 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 									Name:             "0",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name: "1",
@@ -194,11 +194,9 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		Name: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-				LocalId:     "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-				Name:        "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+				LocalId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
+				Name:    "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_c.celsius",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
@@ -209,6 +207,8 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 									Name:             "celsius",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name: "unit",
@@ -227,11 +227,9 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 		Name: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-				LocalId:     "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-				Name:        "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+				LocalId: "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
+				Name:    "TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin_k.kelvin",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
@@ -242,6 +240,8 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 									Name:             "kelvin",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name: "unit",
@@ -409,11 +409,9 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 		Name: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-				LocalId:     "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-				Name:        "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+				LocalId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
+				Name:    "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.celsius",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
@@ -424,6 +422,8 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 									Name:             "celsius",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name: "unit",
@@ -435,11 +435,9 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 				},
 			},
 			{
-				Id:          "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-				LocalId:     "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-				Name:        "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+				LocalId: "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
+				Name:    "TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin.kelvin",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
@@ -450,6 +448,8 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 									Name:             "kelvin",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name: "unit",
@@ -607,26 +607,29 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 		Name: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-				LocalId:     "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-				Name:        "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+				LocalId: "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
+				Name:    "TestPathOptionsOneServiceTemperatureCelsiusAndKelvin.1",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
 							Name: "temperature",
 							Type: model.Structure,
+							//modified from legacy test but multiple assignments of same aspect is not valid
 							SubContentVariables: []model.ContentVariable{
 								{
 									Name:             "celsius",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 								{
 									Name:             "kelvin",
 									Type:             model.Float,
 									CharacteristicId: "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
+									AspectId:         aspectId,
+									FunctionId:       functionId,
 								},
 							},
 						},
@@ -760,16 +763,15 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 		Name: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside",
 		Services: []model.Service{
 			{
-				Id:          "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-				LocalId:     "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-				Name:        "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
-				AspectIds:   []string{aspectId},
-				FunctionIds: []string{functionId},
+				Id:      "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+				LocalId: "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
+				Name:    "TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside.1",
 				Outputs: []model.Content{
 					{
 						ContentVariable: model.ContentVariable{
 							Name: "temperature",
 							Type: model.Structure,
+							//modified from legacy test but multiple assignments of same aspect is not valid
 							SubContentVariables: []model.ContentVariable{
 								{
 									Name: "inside",
@@ -779,6 +781,8 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 											Name:             "value",
 											Type:             model.Float,
 											CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+											AspectId:         aspectId,
+											FunctionId:       functionId,
 										},
 										{
 											Name: "unit",
@@ -794,6 +798,8 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 											Name:             "value",
 											Type:             model.Float,
 											CharacteristicId: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+											AspectId:         aspectId,
+											FunctionId:       functionId,
 										},
 										{
 											Name: "unit",

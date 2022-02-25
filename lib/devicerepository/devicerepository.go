@@ -17,12 +17,14 @@
 package devicerepository
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/http"
 	"net/url"
+	"runtime/debug"
 	"time"
 )
 
@@ -137,5 +139,36 @@ func (this *DeviceRepository) getServiceWithErrCode(id string) (result model.Ser
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
+	return
+}
+
+func (this *DeviceRepository) GetAspectNode(id string) (result model.AspectNode, err error) {
+	err = this.cache.Use("aspect-nodes."+id, func() (interface{}, error) {
+		token, err := this.access.Ensure()
+		if err != nil {
+			return result, err
+		}
+		req, err := http.NewRequest("GET", this.repoUrl+"/aspect-nodes/"+url.PathEscape(id), nil)
+		if err != nil {
+			debug.PrintStack()
+			return nil, err
+		}
+		req.Header.Set("Authorization", string(token))
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			debug.PrintStack()
+			return nil, err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode >= 300 {
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(resp.Body)
+			debug.PrintStack()
+			return nil, errors.New(buf.String())
+		}
+		var aspect model.AspectNode
+		err = json.NewDecoder(resp.Body).Decode(&aspect)
+		return aspect, err
+	}, &result)
 	return
 }

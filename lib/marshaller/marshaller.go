@@ -33,6 +33,7 @@ type ConceptRepo interface {
 
 type DeviceRepository interface {
 	GetDeviceType(id string) (result model.DeviceType, err error, code int)
+	GetAspectNode(id string) (result model.AspectNode, err error)
 }
 
 type Marshaller struct {
