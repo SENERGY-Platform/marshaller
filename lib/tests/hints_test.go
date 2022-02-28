@@ -104,11 +104,11 @@ func ExampleHints1() {
 	}
 	output := map[string]string{"body": "{\"color1\":{\"blue\":100,\"green\":0,\"red\":255}, \"color2\":{\"blue\":100,\"green\":255,\"red\":0}}"}
 	outputCharacteristic := example.Hex
-	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.1"))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.1", "foo", "bar"))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.2"))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "c1.1.2", "foo", "bar"))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, "foo", "bar"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil, "c1.1.1"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil, "c1.1.1", "foo", "bar"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil, "c1.1.2"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil, "c1.1.2", "foo", "bar"))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil, "foo", "bar"))
 
 	//output:
 	//#ff0064 <nil>

@@ -187,11 +187,11 @@ func setupExternal(ctx context.Context, done *sync.WaitGroup) {
 	}()
 }
 
-var TestMarshalInputs = func(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId string, configurables ...configurables.Configurable) (result map[string]string, err error) {
+var TestMarshalInputs = func(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId string, pathAllowList []string, configurables ...configurables.Configurable) (result map[string]string, err error) {
 	return nil, errors.New("todo")
 }
 
-var TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId string, hints ...string) (result interface{}, err error) {
+var TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId string, pathAllowList []string, hints ...string) (result interface{}, err error) {
 	return nil, errors.New("todo")
 }
 

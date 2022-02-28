@@ -48,7 +48,7 @@ func Marshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, c
 	}
 
 	marshal := func(request MarshallingRequest) (map[string]string, error) {
-		return marshaller.MarshalInputs(*request.Protocol, request.Service, request.Data, request.CharacteristicId, request.Configurables...)
+		return marshaller.MarshalInputs(*request.Protocol, request.Service, request.Data, request.CharacteristicId, request.PathAllowList, request.Configurables...)
 	}
 
 	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {

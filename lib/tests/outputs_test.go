@@ -79,7 +79,7 @@ func ExampleUnmarshalOutput1() {
 	}
 	output := map[string]string{"body": "{\"color\":{\"blue\":100,\"green\":0,\"red\":255}}"}
 	outputCharacteristic := example.Hex
-	result, err := TestUnmarshalOutputs(protocol, service, output, outputCharacteristic)
+	result, err := TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -118,7 +118,7 @@ func ExampleUnmarshalOutput2() {
 	}
 	output := map[string]string{"body": "\"#ff0064\""}
 	outputCharacteristic := example.Rgb
-	result, err := TestUnmarshalOutputs(protocol, service, output, outputCharacteristic)
+	result, err := TestUnmarshalOutputs(protocol, service, output, outputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -191,8 +191,8 @@ func ExampleUnmarshalOutputMulti() {
 			},
 		},
 	}
-	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "{\"bri\":100,\"color\":{\"blue\":100,\"green\":0,\"red\":255}}"}, example.Hex))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "{\"bri\":25,\"color\":{\"blue\":255,\"green\":255,\"red\":255}}"}, example.Lux))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "{\"bri\":100,\"color\":{\"blue\":100,\"green\":0,\"red\":255}}"}, example.Hex, nil))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "{\"bri\":25,\"color\":{\"blue\":255,\"green\":255,\"red\":255}}"}, example.Lux, nil))
 
 	//output:
 	//#ff0064 <nil>
@@ -265,8 +265,8 @@ func ExampleMarshalOutputMultiXml() {
 			},
 		},
 	}
-	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "<payload><bri>100</bri><color blue=\"100\" green=\"0\" red=\"255\"/></payload>"}, example.Hex))
-	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "<payload><bri>25</bri><color blue=\"255\" green=\"255\" red=\"255\"></color></payload>"}, example.Lux))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "<payload><bri>100</bri><color blue=\"100\" green=\"0\" red=\"255\"/></payload>"}, example.Hex, nil))
+	fmt.Println(TestUnmarshalOutputs(protocol, service, map[string]string{"body": "<payload><bri>25</bri><color blue=\"255\" green=\"255\" red=\"255\"></color></payload>"}, example.Lux, nil))
 
 	//output:
 	//#ff0064 <nil>

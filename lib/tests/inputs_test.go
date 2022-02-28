@@ -162,8 +162,8 @@ func ExampleConfigurable1() {
 		}
 	}
 
-	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, configurblesList...))
-	fmt.Println(TestMarshalInputs(protocol, service2, 37, temperature.Celcius, configurblesList...))
+	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, nil, configurblesList...))
+	fmt.Println(TestMarshalInputs(protocol, service2, 37, temperature.Celcius, nil, configurblesList...))
 
 	//output:
 	//map[body:{"color":{"blue":0,"foo":"bar1","green":255,"red":255},"temperature":37}] <nil>
@@ -241,7 +241,7 @@ func ExampleConfigurableUnused() {
 		},
 	}
 
-	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, configurables.Configurable{
+	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, nil, configurables.Configurable{
 		CharacteristicId: example.Lux,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{
@@ -314,7 +314,7 @@ func ExampleMarshalInput1() {
 	}
 	input := "#ff0064"
 	inputCharacteristic := example.Hex
-	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic)
+	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -406,7 +406,7 @@ func ExampleMarshalMultiInput1() {
 	}
 	input := "#ff0064"
 	inputCharacteristic := example.Hex
-	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic)
+	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -478,7 +478,7 @@ func ExampleMarshalMultiInput2() {
 	}
 	input := "#ff0064"
 	inputCharacteristic := example.Hex
-	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic)
+	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -528,7 +528,7 @@ func ExampleMarshalInput2() {
 		"b": float64(100),
 	}
 	inputCharacteristic := example.Rgb
-	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic)
+	result, err := TestMarshalInputs(protocol, service, input, inputCharacteristic, nil)
 	fmt.Println(result, err)
 
 	//output:
@@ -601,8 +601,8 @@ func ExampleMarshalInputMulti() {
 			},
 		},
 	}
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex))
-	fmt.Println(TestMarshalInputs(protocol, service, float64(25), example.Lux))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, float64(25), example.Lux, nil))
 
 	//output:
 	//map[body:{"bri":100,"color":{"blue":100,"green":0,"red":255}}] <nil>
@@ -675,8 +675,8 @@ func ExampleMarshalInputMultiXml() {
 			},
 		},
 	}
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex))
-	fmt.Println(TestMarshalInputs(protocol, service, float64(25), example.Lux))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, float64(25), example.Lux, nil))
 
 	//output:
 	//map[body:<payload><bri>100</bri><color blue="100" green="0" red="255"/></payload>] <nil>
@@ -749,14 +749,14 @@ func ExampleMarshalInputNull() {
 			},
 		},
 	}
-	fmt.Println(TestMarshalInputs(protocol, service, nil, ""))
-	fmt.Println(TestMarshalInputs(protocol, service, nil, model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, "something", ""))
-	fmt.Println(TestMarshalInputs(protocol, service, "something", model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, ""))
-	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", ""))
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", model.NullCharacteristic.Id))
+	fmt.Println(TestMarshalInputs(protocol, service, nil, "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, nil, model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "something", "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "something", model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", model.NullCharacteristic.Id, nil))
 
 	//output:
 	//map[body:<payload><bri>100</bri><color blue="100" green="0" red="255"/></payload>] <nil>
@@ -786,17 +786,17 @@ func ExampleMarshalEmptyService() {
 		Description: "s1d",
 		ProtocolId:  "p1",
 	}
-	fmt.Println(TestMarshalInputs(protocol, service, nil, ""))
-	fmt.Println(TestMarshalInputs(protocol, service, nil, model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, "something", ""))
-	fmt.Println(TestMarshalInputs(protocol, service, "something", model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, ""))
-	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, model.NullCharacteristic.Id))
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", ""))
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", model.NullCharacteristic.Id))
+	fmt.Println(TestMarshalInputs(protocol, service, nil, "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, nil, model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "something", "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "something", model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, map[string]string{"foo": "bar"}, model.NullCharacteristic.Id, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", "", nil))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", model.NullCharacteristic.Id, nil))
 
-	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex))
-	fmt.Println(TestMarshalInputs(protocol, service, map[string]interface{}{"r": float64(255), "g": float64(0), "b": float64(100)}, example.Rgb))
+	fmt.Println(TestMarshalInputs(protocol, service, "#ff0064", example.Hex, nil))
+	fmt.Println(TestMarshalInputs(protocol, service, map[string]interface{}{"r": float64(255), "g": float64(0), "b": float64(100)}, example.Rgb, nil))
 
 	//output:
 	//map[] <nil>

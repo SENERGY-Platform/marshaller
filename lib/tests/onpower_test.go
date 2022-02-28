@@ -51,7 +51,7 @@ func ExampleOnPower() {
 			},
 		},
 	}
-	result, err := TestMarshalInputs(protocol, service, nil, "")
+	result, err := TestMarshalInputs(protocol, service, nil, "", nil)
 	fmt.Println(result, err)
 
 	//output:

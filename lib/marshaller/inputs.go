@@ -32,9 +32,11 @@ import (
 type CharacteristicId = string
 type ConceptId = string
 
-func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, configurables ...configurables.Configurable) (result map[string]string, err error) {
+func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, pathAllowList []string, configurables ...configurables.Configurable) (result map[string]string, err error) {
 	result = map[string]string{}
-	for _, content := range service.Inputs {
+	inputs := RemoveVoidVariables(service.Inputs)
+	inputs = UsePathAllowList(inputs, pathAllowList)
+	for _, content := range inputs {
 		partial := mapping.NewPartial()
 		var resultPart = ""
 		for _, configurable := range configurables {

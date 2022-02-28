@@ -24,7 +24,7 @@ import (
 	"runtime/debug"
 )
 
-func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId, hints ...string) (result interface{}, err error) {
+func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId, pathAllowList []string, hints ...string) (result interface{}, err error) {
 	if outputCharacteristicId == "" {
 		return nil, nil
 	}
@@ -36,7 +36,9 @@ func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.
 		return result, err
 	}
 	contentMap := map[string]model.ContentVariable{}
-	for _, content := range service.Outputs {
+	outputs := RemoveVoidVariables(service.Outputs)
+	outputs = UsePathAllowList(outputs, pathAllowList)
+	for _, content := range outputs {
 		for _, segment := range protocol.ProtocolSegments {
 			if segment.Id == content.ProtocolSegmentId {
 				contentMap[segment.Name] = content.ContentVariable

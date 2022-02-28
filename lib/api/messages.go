@@ -27,6 +27,13 @@ type MarshallingRequest struct {
 	CharacteristicId string                       `json:"characteristic_id,omitempty"` //semi-optional, may be determined by request path
 	Configurables    []configurables.Configurable `json:"configurables,omitempty"`     //optional, may be empty
 	Data             interface{}                  `json:"data"`
+
+	/*
+		optional
+		if len > 0: apply data only on given ContentVariable paths
+		useful if 2 variables have the same characteristic assigned but are used with different functions or aspects
+	*/
+	PathAllowList []string `json:"path_allow_list,omitempty"`
 }
 
 type UnmarshallingRequest struct {
@@ -35,6 +42,13 @@ type UnmarshallingRequest struct {
 	CharacteristicId     string            `json:"characteristic_id,omitempty"` //semi-optional, may be determined by request path
 	Message              map[string]string `json:"message"`
 	ContentVariableHints []string          `json:"content_variable_hints"` //optional
+
+	/*
+		optional
+		if len > 0: apply data only on given ContentVariable paths
+		useful if 2 variables have the same characteristic assigned but are used with different functions or aspects
+	*/
+	PathAllowList []string `json:"path_allow_list,omitempty"`
 }
 
 type FindConfigurablesRequest struct {

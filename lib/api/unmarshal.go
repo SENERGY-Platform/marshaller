@@ -48,7 +48,7 @@ func Unmarshalling(router *httprouter.Router, marshaller *marshaller.Marshaller,
 	}
 
 	unmarshal := func(request UnmarshallingRequest) (interface{}, error) {
-		return marshaller.UnmarshalOutputs(*request.Protocol, request.Service, request.Message, request.CharacteristicId, request.ContentVariableHints...)
+		return marshaller.UnmarshalOutputs(*request.Protocol, request.Service, request.Message, request.CharacteristicId, request.PathAllowList, request.ContentVariableHints...)
 	}
 
 	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
