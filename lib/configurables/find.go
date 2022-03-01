@@ -24,7 +24,7 @@ import (
 )
 
 type ConceptRepo interface {
-	GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error)
+	GetConceptsOfCharacteristic(characteristicId string) (conceptId []string, err error)
 	GetCharacteristic(id string) (model.Characteristic, error)
 	GetConcept(id string) (concept model.Concept, err error)
 }
@@ -42,7 +42,7 @@ func (this *ConfigurableService) Find(notCharacteristicId string, services []mod
 }
 
 func FindIntersectingConfigurables(repo ConceptRepo, notCharacteristicId string, services []model.Service) (result Configurables, err error) {
-	notConcept, err := repo.GetConceptOfCharacteristic(notCharacteristicId)
+	notConcepts, err := repo.GetConceptsOfCharacteristic(notCharacteristicId)
 	if err != nil {
 		return nil, err
 	}
@@ -53,19 +53,21 @@ func FindIntersectingConfigurables(repo ConceptRepo, notCharacteristicId string,
 			characteristics = append(characteristics, characteristicsInContentVariable(content.ContentVariable)...)
 		}
 		for _, characteristic := range characteristics {
-			concept, err := repo.GetConceptOfCharacteristic(characteristic)
+			concepts, err := repo.GetConceptsOfCharacteristic(characteristic)
 			if err != nil {
 				return nil, err
 			}
-			if _, ok := invertedIndex[concept]; !ok {
-				invertedIndex[concept] = map[string]bool{}
+			for _, concept := range concepts {
+				if _, ok := invertedIndex[concept]; !ok {
+					invertedIndex[concept] = map[string]bool{}
+				}
+				invertedIndex[concept][service.Id] = true
 			}
-			invertedIndex[concept][service.Id] = true
 		}
 	}
 	serviceCount := len(services)
 	for conceptId, servicesUsingConcept := range invertedIndex {
-		if conceptId != notConcept && len(servicesUsingConcept) == serviceCount {
+		if !contains(notConcepts, conceptId) && len(servicesUsingConcept) == serviceCount {
 			configurable, err := createConfigurable(repo, conceptId)
 			if err != nil {
 				return nil, err
@@ -74,6 +76,15 @@ func FindIntersectingConfigurables(repo ConceptRepo, notCharacteristicId string,
 		}
 	}
 	return result, nil
+}
+
+func contains(ids []string, id string) bool {
+	for _, element := range ids {
+		if element == id {
+			return true
+		}
+	}
+	return false
 }
 
 func createConfigurable(repo ConceptRepo, conceptId string) (result Configurable, err error) {

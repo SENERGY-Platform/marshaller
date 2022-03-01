@@ -24,5 +24,9 @@ import (
 type Converter struct{}
 
 func (this Converter) Cast(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
-	return converterService.Cast(in, from, to)
+	converter, err := converterService.New()
+	if err != nil {
+		return nil, err
+	}
+	return converter.Cast(in, from, to)
 }

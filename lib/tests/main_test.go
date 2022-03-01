@@ -23,11 +23,7 @@ import (
 	"errors"
 	"flag"
 	"github.com/SENERGY-Platform/marshaller/lib/api"
-	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/devicerepository"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
@@ -89,96 +85,23 @@ func testMain(m *testing.M) int {
 	}()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if testing.Short() {
-		setupMock(ctx, cancelFinished)
-	} else {
-		setupExternal(ctx, cancelFinished)
-	}
+	setupMock(ctx, cancelFinished)
 	code := m.Run()
 	return code
 }
 
 func setupMock(ctx context.Context, done *sync.WaitGroup) {
-	marshaller := marshaller.New(mocks.Converter{}, mocks.ConceptRepo{}, mocks.DeviceRepo)
-	configurableService := configurables.New(mocks.ConceptRepo{})
+	conceptRepo, err := mocks.NewMockConceptRepo(ctx)
+	if err != nil {
+		panic(err)
+	}
+	marshaller := marshaller.New(mocks.Converter{}, conceptRepo, mocks.DeviceRepo)
+	configurableService := configurables.New(conceptRepo)
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
 	done.Add(1)
 	server := httptest.NewServer(api.GetRouter(marshaller, configurableService, mocks.DeviceRepo))
-	ServerUrl = server.URL
-	go func() {
-		<-ctx.Done()
-		server.Close()
-		done.Done()
-	}()
-}
-
-func setupExternal(ctx context.Context, done *sync.WaitGroup) {
-	conf, err := config.Load("testdata/config.json")
-	if err != nil {
-		panic(err)
-	}
-	log.Println("init access connection")
-	access := config.NewAccess(conf)
-	log.Println("init conceptRepo")
-	conceptRepo, err := conceptrepo.New(
-		ctx,
-		conf,
-		access,
-		conceptrepo.ConceptRepoDefault{
-			Concept: model.NullConcept,
-			Characteristics: []model.Characteristic{
-				model.NullCharacteristic,
-			},
-		},
-		conceptrepo.ConceptRepoDefault{
-			Concept: model.Concept{Id: example.Color, Name: "example", BaseCharacteristicId: example.Rgb},
-			Characteristics: []model.Characteristic{
-				{
-					Id:   example.Rgb,
-					Name: "rgb",
-					Type: model.Structure,
-					SubCharacteristics: []model.Characteristic{
-						{Id: example.Rgb + ".r", Name: "r", Type: model.Integer},
-						{Id: example.Rgb + ".g", Name: "g", Type: model.Integer},
-						{Id: example.Rgb + ".b", Name: "b", Type: model.Integer},
-					},
-				},
-				{
-					Id:   example.Hex,
-					Name: "hex",
-					Type: model.String,
-				},
-			},
-		},
-		conceptrepo.ConceptRepoDefault{
-			Concept: model.Concept{Id: example.Brightness, Name: "example-bri"},
-			Characteristics: []model.Characteristic{
-				{
-					Id:   example.Lux,
-					Name: "lux",
-					Type: model.Integer,
-				},
-			},
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("init device-repo connection")
-	devicerepo := devicerepository.New(conf, access)
-	log.Println("init marshaller")
-	marshaller := marshaller.New(converter.New(conf, access), conceptRepo, devicerepo)
-	log.Println("init configurableService")
-	configurableService := configurables.New(conceptRepo)
-
-	TestMarshalInputs = marshaller.MarshalInputs
-	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
-	TestFindConfigurables = configurableService.Find
-
-	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(marshaller, configurableService, devicerepo))
 	ServerUrl = server.URL
 	go func() {
 		<-ctx.Done()

@@ -25,7 +25,7 @@ type Converter interface {
 }
 
 type ConceptRepo interface {
-	GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error)
+	GetConceptsOfCharacteristic(characteristicId string) (conceptIds []string, err error)
 	GetCharacteristic(id CharacteristicId) (model.Characteristic, error)
 	GetRootCharacteristics(ids []CharacteristicId) (result []CharacteristicId)
 	GetCharacteristicsOfFunction(functionId string) (characteristicIds []string, err error)

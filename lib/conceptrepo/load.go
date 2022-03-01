@@ -77,7 +77,7 @@ func (this *ConceptRepo) Load() error {
 func (this *ConceptRepo) resetToDefault() {
 	this.concepts = map[string]model.Concept{}
 	this.characteristics = map[string]model.Characteristic{}
-	this.conceptByCharacteristic = map[string]model.Concept{}
+	this.conceptByCharacteristic = map[string][]model.Concept{}
 	this.rootCharacteristicByCharacteristic = map[string]model.Characteristic{}
 	for _, defaultElement := range this.defaults {
 		this.register(defaultElement.Concept, defaultElement.Characteristics)
@@ -90,7 +90,7 @@ func (this *ConceptRepo) register(concept model.Concept, characteristics []model
 		log.Println("    load characteristic", characteristic.Name, characteristic.Id)
 		concept.CharacteristicIds = append(concept.CharacteristicIds, characteristic.Id)
 		this.characteristics[characteristic.Id] = characteristic
-		this.conceptByCharacteristic[characteristic.Id] = concept
+		this.conceptByCharacteristic[characteristic.Id] = append(this.conceptByCharacteristic[characteristic.Id], concept)
 		this.rootCharacteristicByCharacteristic[characteristic.Id] = characteristic
 		for _, descendent := range getCharacteristicDescendents(characteristic) {
 			this.rootCharacteristicByCharacteristic[descendent.Id] = characteristic
@@ -113,7 +113,8 @@ func (this *ConceptRepo) loadConceptIds() (ids []string, err error) {
 	temp := []IdWrapper{}
 	for len(temp) == limit || offset == 0 {
 		temp = []IdWrapper{}
-		err = token.GetJSON(this.config.PermissionsSearchUrl+"/jwt/list/concepts/r/"+strconv.Itoa(limit)+"/"+strconv.Itoa(offset)+"/name/asc", &temp)
+		endpoint := this.config.PermissionsSearchUrl + "/v3/resources/concepts?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
+		err = token.GetJSON(endpoint, &temp)
 		if err != nil {
 			return ids, err
 		}
@@ -140,7 +141,8 @@ func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err erro
 	temp := []FunctionInfo{}
 	for len(temp) == limit || offset == 0 {
 		temp = []FunctionInfo{}
-		err = token.GetJSON(this.config.PermissionsSearchUrl+"/jwt/list/functions/r/"+strconv.Itoa(limit)+"/"+strconv.Itoa(offset)+"/name/asc", &temp)
+		endpoint := this.config.PermissionsSearchUrl + "/v3/resources/functions?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
+		err = token.GetJSON(endpoint, &temp)
 		if err != nil {
 			return functionInfos, err
 		}
@@ -155,7 +157,7 @@ func (this *ConceptRepo) loadConcept(id string) (result model.Concept, err error
 	if err != nil {
 		return result, err
 	}
-	err = token.GetJSON(this.config.SemanticRepositoryUrl+"/concepts/"+url.PathEscape(id), &result)
+	err = token.GetJSON(this.config.DeviceRepositoryUrl+"/concepts/"+url.PathEscape(id), &result)
 	return
 }
 
@@ -164,6 +166,6 @@ func (this *ConceptRepo) loadCharacteristic(id string) (result model.Characteris
 	if err != nil {
 		return result, err
 	}
-	err = token.GetJSON(this.config.SemanticRepositoryUrl+"/characteristics/"+url.PathEscape(id), &result)
+	err = token.GetJSON(this.config.DeviceRepositoryUrl+"/characteristics/"+url.PathEscape(id), &result)
 	return
 }

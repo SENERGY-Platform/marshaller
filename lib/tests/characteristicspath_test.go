@@ -21,13 +21,10 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 	"io/ioutil"
 	"net/url"
-	"testing"
 )
 
 func ExampleCharacteristicsPathSame() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
-	}
+	mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //danfos getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a" //temperature celcius
 
@@ -46,9 +43,7 @@ func ExampleCharacteristicsPathSame() {
 }
 
 func ExampleCharacteristicsPathMatching() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
-	}
+	mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //danfos getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
@@ -67,9 +62,7 @@ func ExampleCharacteristicsPathMatching() {
 }
 
 func ExampleCharacteristicsPathNotMatching() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
-	}
+	mocks.DeviceRepo.SetServiceJson(danfossTemperatureService)
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //danfos getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:5caa707d-dc08-4f3b-bd9f-f08935c8dd3c" //percentage
 

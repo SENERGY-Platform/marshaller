@@ -63,9 +63,6 @@ func TestConfigurablesPostRequest(t *testing.T) {
 }
 
 func TestConfigurablesMockGetRequest(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mocks (use '-short' test argument)")
-	}
 	mocks.DeviceRepo.Init().SetService(serviceExample1).SetService(serviceExample2)
 
 	result := []configurables.Configurable{}

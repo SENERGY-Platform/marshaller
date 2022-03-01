@@ -75,7 +75,7 @@ func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, 
 		return result, err
 	}
 	if !reflect.DeepEqual(inputCharacteristic, model.NullCharacteristic) {
-		_, variableCharacteristicIds, err := this.getMatchingVariableRootCharacteristic(variable, inputCharacteristicId)
+		variableCharacteristicIds, err := this.getMatchingVariableRootCharacteristic(variable, inputCharacteristicId)
 		if err != nil {
 			return result, err
 		}
@@ -117,8 +117,8 @@ func assignConfigurableValue(setter map[string]*interface{}, characteristic mode
 	}
 }
 
-func (this *Marshaller) getMatchingVariableRootCharacteristic(variable model.ContentVariable, matchingId CharacteristicId) (conceptId string, matchingVariableRootCharacteristic []CharacteristicId, err error) {
-	conceptId, err = this.ConceptRepo.GetConceptOfCharacteristic(matchingId)
+func (this *Marshaller) getMatchingVariableRootCharacteristic(variable model.ContentVariable, matchingId CharacteristicId) (matchingVariableRootCharacteristic []CharacteristicId, err error) {
+	conceptIds, err := this.ConceptRepo.GetConceptsOfCharacteristic(matchingId)
 	if err != nil {
 		return
 	}
@@ -126,21 +126,24 @@ func (this *Marshaller) getMatchingVariableRootCharacteristic(variable model.Con
 	rootCharacteristics := this.ConceptRepo.GetRootCharacteristics(variableCharacteristics)
 	resultSet := map[string]bool{}
 	for _, candidate := range rootCharacteristics {
-		conceptA, err := this.ConceptRepo.GetConceptOfCharacteristic(candidate)
+		conceptsA, err := this.ConceptRepo.GetConceptsOfCharacteristic(candidate)
 		if err != nil {
-			return conceptId, matchingVariableRootCharacteristic, err
+			return matchingVariableRootCharacteristic, err
 		}
-		if conceptA == conceptId {
-			resultSet[candidate] = true
+		for _, a := range conceptsA {
+			if contains(conceptIds, a) {
+				resultSet[candidate] = true
+				break
+			}
 		}
 	}
 	for characteristic, _ := range resultSet {
 		matchingVariableRootCharacteristic = append(matchingVariableRootCharacteristic, characteristic)
 	}
 	if len(matchingVariableRootCharacteristic) == 0 {
-		return conceptId, matchingVariableRootCharacteristic, errors.New("no match found between " + matchingId + " and characteristics of " + variable.Id + " (" + strings.Join(variableCharacteristics, ",") + ") => (" + strings.Join(rootCharacteristics, ",") + ")")
+		return matchingVariableRootCharacteristic, errors.New("no match found between " + matchingId + " and characteristics of " + variable.Id + " (" + strings.Join(variableCharacteristics, ",") + ") => (" + strings.Join(rootCharacteristics, ",") + ")")
 	}
-	return conceptId, matchingVariableRootCharacteristic, nil
+	return matchingVariableRootCharacteristic, nil
 }
 
 func getVariableCharacteristics(variable model.ContentVariable) (result []CharacteristicId) {

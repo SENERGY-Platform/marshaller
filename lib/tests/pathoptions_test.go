@@ -31,10 +31,6 @@ import (
 )
 
 func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mock")
-	}
-
 	aspectId := "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
 	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
 	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
@@ -68,12 +64,6 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 				},
 			},
 		},
-	})
-
-	//temperature
-	mocks.SetCharacteristicsOfFunction(functionId, []string{
-		"urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683", //kelvin
-		"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", //celsius
 	})
 
 	t.Run("filtered to celsius with envelope", testPathOptions(
@@ -183,10 +173,6 @@ func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
 }
 
 func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mock")
-	}
-
 	aspectId := "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
 	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
 	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
@@ -253,12 +239,6 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 				},
 			},
 		},
-	})
-
-	//temperature
-	mocks.SetCharacteristicsOfFunction(functionId, []string{
-		"urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683", //kelvin
-		"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", //celsius
 	})
 
 	t.Run("filtered to celsius with envelope", testPathOptions(
@@ -398,10 +378,6 @@ func TestPathOptionsMultipleDeviceTypesTemperatureCelsiusAndKelvin(t *testing.T)
 }
 
 func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mock")
-	}
-
 	aspectId := "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
 	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
 	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
@@ -461,12 +437,6 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 				},
 			},
 		},
-	})
-
-	//temperature
-	mocks.SetCharacteristicsOfFunction(functionId, []string{
-		"urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683", //kelvin
-		"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", //celsius
 	})
 
 	t.Run("filtered to celsius with envelope", testPathOptions(
@@ -596,10 +566,6 @@ func TestPathOptionsMultipleServicesTemperatureCelsiusAndKelvin(t *testing.T) {
 }
 
 func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mock")
-	}
-
 	aspectId := "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
 	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
 	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
@@ -637,12 +603,6 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 				},
 			},
 		},
-	})
-
-	//temperature
-	mocks.SetCharacteristicsOfFunction(functionId, []string{
-		"urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683", //kelvin
-		"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", //celsius
 	})
 
 	t.Run("filtered to celsius with envelope", testPathOptions(
@@ -752,10 +712,6 @@ func TestPathOptionsOneServiceTemperatureCelsiusAndKelvin(t *testing.T) {
 }
 
 func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
-	if !testing.Short() {
-		t.Skip("only with mock")
-	}
-
 	aspectId := "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
 	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
 	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
@@ -813,12 +769,6 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 				},
 			},
 		},
-	})
-
-	//temperature
-	mocks.SetCharacteristicsOfFunction(functionId, []string{
-		"urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683", //kelvin
-		"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a", //celsius
 	})
 
 	t.Run("filtered to celsius with envelope", testPathOptions(

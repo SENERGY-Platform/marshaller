@@ -34,7 +34,6 @@ type Config struct {
 	AuthClientId               string  `json:"auth_client_id"`
 	AuthClientSecret           string  `json:"auth_client_secret"`
 	PermissionsSearchUrl       string  `json:"permissions_search_url"`
-	SemanticRepositoryUrl      string  `json:"semantic_repository_url"`
 	DeviceRepositoryUrl        string  `json:"device_repository_url"`
 	ConceptRepoRefreshInterval int64   `json:"concept_repo_refresh_interval"`
 	LogLevel                   string  `json:"log_level"`

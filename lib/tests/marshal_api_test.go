@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 	"net/url"
 	"strings"
-	"testing"
 )
 
 func ExampleMarshalEmpty() {
@@ -52,9 +51,7 @@ func ExampleMarshalEmpty() {
 }
 
 func ExampleMarshal1() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
-	}
+	mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
@@ -73,9 +70,7 @@ func ExampleMarshal1() {
 }
 
 func ExampleMarshal2() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
-	}
+	mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
@@ -110,9 +105,7 @@ func ExampleMarshal2() {
 }
 
 func ExampleMarshal3() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetProtocolJson(protocolJson)
-	}
+	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
 	resp, err := post(
 		ServerUrl+"/marshal",

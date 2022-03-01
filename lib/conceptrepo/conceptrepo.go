@@ -29,12 +29,12 @@ import (
 
 type ConceptRepo struct {
 	config config.Config
-	access *config.Access
+	access Access
 
 	defaults                           []ConceptRepoDefault
 	concepts                           map[string]model.Concept
 	characteristics                    map[string]model.Characteristic
-	conceptByCharacteristic            map[string]model.Concept
+	conceptByCharacteristic            map[string][]model.Concept
 	rootCharacteristicByCharacteristic map[string]model.Characteristic
 
 	characteristicsOfFunction map[string][]string
@@ -47,14 +47,18 @@ type ConceptRepoDefault struct {
 	Characteristics []model.Characteristic
 }
 
-func New(ctx context.Context, conf config.Config, access *config.Access, defaults ...ConceptRepoDefault) (result *ConceptRepo, err error) {
+type Access interface {
+	Ensure() (config.Impersonate, error)
+}
+
+func New(ctx context.Context, conf config.Config, access Access, defaults ...ConceptRepoDefault) (result *ConceptRepo, err error) {
 	result = &ConceptRepo{
 		config:                             conf,
 		access:                             access,
 		defaults:                           defaults,
 		concepts:                           map[string]model.Concept{},
 		characteristics:                    map[string]model.Characteristic{},
-		conceptByCharacteristic:            map[string]model.Concept{},
+		conceptByCharacteristic:            map[string][]model.Concept{},
 		rootCharacteristicByCharacteristic: map[string]model.Characteristic{},
 		characteristicsOfFunction:          map[string][]string{},
 	}
@@ -108,15 +112,18 @@ func getCharacteristicDescendents(characteristic model.Characteristic) (result [
 	return result
 }
 
-func (this *ConceptRepo) GetConceptOfCharacteristic(characteristicId string) (conceptId string, err error) {
+func (this *ConceptRepo) GetConceptsOfCharacteristic(characteristicId string) (conceptIds []string, err error) {
 	this.mux.Lock()
 	defer this.mux.Unlock()
-	concept, ok := this.conceptByCharacteristic[this.rootCharacteristicByCharacteristic[characteristicId].Id]
+	concepts, ok := this.conceptByCharacteristic[this.rootCharacteristicByCharacteristic[characteristicId].Id]
 	if !ok {
 		debug.PrintStack()
-		return conceptId, errors.New("no concept found for characteristic id " + characteristicId)
+		return conceptIds, errors.New("no concept found for characteristic id " + characteristicId)
 	}
-	return concept.Id, nil
+	for _, concept := range concepts {
+		conceptIds = append(conceptIds, concept.Id)
+	}
+	return conceptIds, nil
 }
 
 func (this *ConceptRepo) GetCharacteristic(id string) (characteristic model.Characteristic, err error) {

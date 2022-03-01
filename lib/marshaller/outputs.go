@@ -70,7 +70,7 @@ func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.
 var ErrorNoMatchFound = errors.New("no match found")
 
 func (this *Marshaller) getMatchingOutputRootCharacteristic(contents []model.Content, matchingId CharacteristicId) (matchingServiceCharacteristicId CharacteristicId, conceptId string, err error) {
-	conceptId, err = this.ConceptRepo.GetConceptOfCharacteristic(matchingId)
+	conceptIds, err := this.ConceptRepo.GetConceptsOfCharacteristic(matchingId)
 	if err != nil {
 		return
 	}
@@ -78,12 +78,14 @@ func (this *Marshaller) getMatchingOutputRootCharacteristic(contents []model.Con
 		variableCharacteristics := getVariableCharacteristics(content.ContentVariable)
 		rootCharacteristics := this.ConceptRepo.GetRootCharacteristics(variableCharacteristics)
 		for _, candidate := range rootCharacteristics {
-			candidateConcept, err := this.ConceptRepo.GetConceptOfCharacteristic(candidate)
+			candidateConcepts, err := this.ConceptRepo.GetConceptsOfCharacteristic(candidate)
 			if err != nil {
 				return matchingServiceCharacteristicId, conceptId, err
 			}
-			if candidateConcept == conceptId {
-				return candidate, conceptId, err
+			for _, candidateConcept := range candidateConcepts {
+				if contains(conceptIds, candidateConcept) {
+					return candidate, conceptId, err
+				}
 			}
 		}
 	}

@@ -23,13 +23,10 @@ import (
 	"log"
 	"net/url"
 	"strings"
-	"testing"
 )
 
 func ExampleUnmarshal1() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetServiceJson(danfossTemperatureService).SetProtocolJson(protocolJson)
-	}
+	mocks.DeviceRepo.SetServiceJson(danfossTemperatureService).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //Danfoss Radiator Thermostat getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
@@ -54,9 +51,7 @@ func ExampleUnmarshal1() {
 }
 
 func ExampleUnmarshal2() {
-	if testing.Short() {
-		mocks.DeviceRepo.SetProtocolJson(protocolJson)
-	}
+	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
 	resp, err := post(
 		ServerUrl+"/unmarshal",
