@@ -19,6 +19,7 @@ package mocks
 import (
 	"context"
 	"encoding/json"
+	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
 	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -45,7 +46,7 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 	if err != nil {
 		return nil, err
 	}
-	characteristics, err := testdata.GetCharacteristics()
+	characteristicsList, err := testdata.GetCharacteristics()
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 		}
 
 		if strings.Contains(request.URL.String(), "/characteristics/") {
-			for _, element := range characteristics {
+			for _, element := range characteristicsList {
 				if element.Id == id {
 					json.NewEncoder(writer).Encode(element)
 					return
@@ -138,31 +139,33 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 		ConceptRepoRefreshInterval: 42000,
 		LogLevel:                   "DEBUG",
 	}
-	return conceptrepo.New(ctx, config, MockAccess{}, conceptrepo.ConceptRepoDefault{
-		Concept: model.NullConcept,
-		Characteristics: []model.Characteristic{
-			model.NullCharacteristic,
+	return conceptrepo.New(ctx, config, MockAccess{},
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.NullConcept,
+			Characteristics: []model.Characteristic{
+				model.NullCharacteristic,
+			},
 		},
-	}, conceptrepo.ConceptRepoDefault{
-		Concept: model.Concept{Id: exampleColor, Name: "example", BaseCharacteristicId: exampleRgb},
-		Characteristics: []model.Characteristic{
-			{
-				Id:   exampleRgb,
-				Name: "rgb",
-				Type: model.Structure,
-				SubCharacteristics: []model.Characteristic{
-					{Id: exampleRgb + ".r", Name: "r", Type: model.Integer},
-					{Id: exampleRgb + ".g", Name: "g", Type: model.Integer},
-					{Id: exampleRgb + ".b", Name: "b", Type: model.Integer},
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.Concept{Id: exampleColor, Name: "example", BaseCharacteristicId: exampleRgb},
+			Characteristics: []model.Characteristic{
+				{
+					Id:   exampleRgb,
+					Name: "rgb",
+					Type: model.Structure,
+					SubCharacteristics: []model.Characteristic{
+						{Id: exampleRgb + ".r", Name: "r", Type: model.Integer},
+						{Id: exampleRgb + ".g", Name: "g", Type: model.Integer},
+						{Id: exampleRgb + ".b", Name: "b", Type: model.Integer},
+					},
+				},
+				{
+					Id:   exampleHex,
+					Name: "hex",
+					Type: model.String,
 				},
 			},
-			{
-				Id:   exampleHex,
-				Name: "hex",
-				Type: model.String,
-			},
 		},
-	},
 		conceptrepo.ConceptRepoDefault{
 			Concept: model.Concept{Id: exampleBrightness, Name: "example-bri"},
 			Characteristics: []model.Characteristic{
@@ -172,7 +175,39 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 					Type: model.Integer,
 				},
 			},
-		})
+		},
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.Concept{Id: "side-celsius", Name: "side-celsius"},
+			Characteristics: []model.Characteristic{
+				{
+					Id:   characteristics.Celcius,
+					Name: "celsius",
+					Type: model.Integer,
+				},
+				{
+					Id:   "side-celsius-foo",
+					Name: "side-celsius-foo",
+					Type: model.Integer,
+				},
+			},
+		},
+
+		conceptrepo.ConceptRepoDefault{
+			Concept: model.Concept{Id: "side-kelvin", Name: "side-kelvin"},
+			Characteristics: []model.Characteristic{
+				{
+					Id:   characteristics.Kelvin,
+					Name: "kelvin",
+					Type: model.Integer,
+				},
+				{
+					Id:   "side-kelvin-foo",
+					Name: "side-kelvin-foo",
+					Type: model.Integer,
+				},
+			},
+		},
+	)
 }
 
 type MockAccess struct{}
