@@ -62,6 +62,9 @@ func UnmarshallingV2(router *httprouter.Router, marshaller *marshaller.Marshalle
 			if len(paths) > 0 {
 				log.Println("WARNING: only first path found by FunctionId and AspectNode is used for Unmarshal")
 			}
+			if len(paths) == 0 {
+				return errors.New("no output path found for criteria")
+			}
 			request.Path = paths[0]
 		}
 		return nil

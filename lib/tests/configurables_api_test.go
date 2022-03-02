@@ -27,7 +27,7 @@ import (
 
 func TestConfigurablesPostRequest(t *testing.T) {
 	message := api.FindConfigurablesRequest{
-		CharacteristicId: temperature.Celcius,
+		CharacteristicId: temperature.Celsius,
 		Services:         []model.Service{serviceExample1, serviceExample2},
 	}
 
@@ -67,7 +67,7 @@ func TestConfigurablesMockGetRequest(t *testing.T) {
 
 	result := []configurables.Configurable{}
 
-	err := getJSON(ServerUrl+"/configurables?characteristicId="+url.QueryEscape(temperature.Celcius)+"&serviceIds="+url.QueryEscape(serviceExample1.Id)+","+url.QueryEscape(serviceExample2.Id), &result)
+	err := getJSON(ServerUrl+"/configurables?characteristicId="+url.QueryEscape(temperature.Celsius)+"&serviceIds="+url.QueryEscape(serviceExample1.Id)+","+url.QueryEscape(serviceExample2.Id), &result)
 	if err != nil {
 		t.Error(err)
 		return
@@ -114,7 +114,7 @@ var serviceExample1 = model.Service{
 						Id:               "c1.1.2",
 						Name:             "temperature",
 						Type:             model.Float,
-						CharacteristicId: temperature.Celcius,
+						CharacteristicId: temperature.Celsius,
 					},
 					{
 						Id:               "c1.1.1",
@@ -183,7 +183,7 @@ var serviceExample2 = model.Service{
 						Id:               "c2.1.2",
 						Name:             "temperature",
 						Type:             model.Float,
-						CharacteristicId: temperature.Celcius,
+						CharacteristicId: temperature.Celsius,
 					},
 					{
 						Id:               "c2.1.1",

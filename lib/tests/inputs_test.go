@@ -51,7 +51,7 @@ func ExampleConfigurable1() {
 							Id:               "c1.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c1.1.1",
@@ -123,7 +123,7 @@ func ExampleConfigurable1() {
 							Id:               "c2.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c2.1.1",
@@ -145,7 +145,7 @@ func ExampleConfigurable1() {
 		},
 	}
 
-	configurblesList, err := TestFindConfigurables(temperature.Celcius, []model.Service{service1, service2})
+	configurblesList, err := TestFindConfigurables(temperature.Celsius, []model.Service{service1, service2})
 	if err != nil {
 		fmt.Println(err, configurblesList)
 		return
@@ -162,8 +162,8 @@ func ExampleConfigurable1() {
 		}
 	}
 
-	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, nil, configurblesList...))
-	fmt.Println(TestMarshalInputs(protocol, service2, 37, temperature.Celcius, nil, configurblesList...))
+	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celsius, nil, configurblesList...))
+	fmt.Println(TestMarshalInputs(protocol, service2, 37, temperature.Celsius, nil, configurblesList...))
 
 	//output:
 	//map[body:{"color":{"blue":0,"foo":"bar1","green":255,"red":255},"temperature":37}] <nil>
@@ -199,7 +199,7 @@ func ExampleConfigurableUnused() {
 							Id:               "c1.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c1.1.1",
@@ -241,7 +241,7 @@ func ExampleConfigurableUnused() {
 		},
 	}
 
-	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celcius, nil, configurables.Configurable{
+	fmt.Println(TestMarshalInputs(protocol, service1, 37, temperature.Celsius, nil, configurables.Configurable{
 		CharacteristicId: example.Lux,
 		Values: []configurables.ConfigurableCharacteristicValue{
 			{

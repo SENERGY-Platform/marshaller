@@ -1,3 +1,26 @@
 [
-
+    {
+        "id":               "inside_air",
+        "root_id":          "air",
+        "parent_id":        "air",
+        "child_ids":        [],
+        "ancestor_ids":     ["air"],
+        "descendent_ids":   []
+    },
+    {
+        "id":               "outside_air",
+        "root_id":          "air",
+        "parent_id":        "air",
+        "child_ids":        [],
+        "ancestor_ids":     ["air"],
+        "descendent_ids":   []
+    },
+    {
+        "id":               "air",
+        "root_id":          "air",
+        "parent_id":        "",
+        "child_ids":        ["inside_air","outside_air"],
+        "ancestor_ids":     [],
+        "descendent_ids":   ["inside_air","outside_air"]
+    }
 ]

@@ -34,7 +34,7 @@ func ExampleFindConfigurablesShort() {
 	}
 
 	//output:
-	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]
+	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB r","path":"r","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB b","path":"b","value":"0"}]}]
 }
 
 func ExampleFindConfigurablesLong() {
@@ -68,7 +68,7 @@ func exampleFindConfigurables() {
 							Id:               "c1.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c1.1.1",
@@ -137,7 +137,7 @@ func exampleFindConfigurables() {
 							Id:               "c2.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c2.1.1",
@@ -159,7 +159,7 @@ func exampleFindConfigurables() {
 		},
 	}
 
-	configurablesList, err := TestFindConfigurables(temperature.Celcius, []model.Service{service1, service2})
+	configurablesList, err := TestFindConfigurables(temperature.Celsius, []model.Service{service1, service2})
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -192,7 +192,7 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 							Id:               "c1.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c1.1.1",
@@ -261,7 +261,7 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 							Id:               "c2.1.2",
 							Name:             "temperature",
 							Type:             model.Float,
-							CharacteristicId: temperature.Celcius,
+							CharacteristicId: temperature.Celsius,
 						},
 						{
 							Id:               "c2.1.1",
@@ -283,7 +283,7 @@ func TestFindIntersectingConfigurables1(t *testing.T) {
 		},
 	}
 
-	configurablesList, err := TestFindConfigurables(temperature.Celcius, []model.Service{service1, service2})
+	configurablesList, err := TestFindConfigurables(temperature.Celsius, []model.Service{service1, service2})
 	if err != nil {
 		t.Fatal(err)
 	}

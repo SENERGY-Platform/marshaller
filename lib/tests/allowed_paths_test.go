@@ -51,7 +51,7 @@ func TestMarshallingWithAllowedPaths(t *testing.T) {
 							Id:               "inside",
 							Name:             "inside",
 							Type:             model.Float,
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
 							AspectId:         "inside_air",
 							Value:            12.0,
@@ -60,7 +60,7 @@ func TestMarshallingWithAllowedPaths(t *testing.T) {
 							Id:               "outside",
 							Name:             "outside",
 							Type:             model.Float,
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
 							AspectId:         "outside_air",
 							Value:            13.0,
@@ -78,11 +78,11 @@ func TestMarshallingWithAllowedPaths(t *testing.T) {
 	t.Run("k outside", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{"temperature.outside"}, map[string]string{"body": `{"inside":12,"outside":27}`}))
 	t.Run("k inside and outside", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{"temperature.inside", "temperature.outside"}, map[string]string{"body": `{"inside":27,"outside":27}`}))
 
-	t.Run("c nil", testMarshalInputs(protocol, service, 300, characteristics.Celcius, nil, map[string]string{"body": `{"inside":300,"outside":300}`}))
-	t.Run("c []", testMarshalInputs(protocol, service, 300, characteristics.Celcius, []string{}, map[string]string{"body": `{"inside":300,"outside":300}`}))
-	t.Run("c inside", testMarshalInputs(protocol, service, 300, characteristics.Celcius, []string{"temperature.inside"}, map[string]string{"body": `{"inside":300,"outside":13}`}))
-	t.Run("c outside", testMarshalInputs(protocol, service, 300, characteristics.Celcius, []string{"temperature.outside"}, map[string]string{"body": `{"inside":12,"outside":300}`}))
-	t.Run("c inside and outside", testMarshalInputs(protocol, service, 300, characteristics.Celcius, []string{"temperature.inside", "temperature.outside"}, map[string]string{"body": `{"inside":300,"outside":300}`}))
+	t.Run("c nil", testMarshalInputs(protocol, service, 300, characteristics.Celsius, nil, map[string]string{"body": `{"inside":300,"outside":300}`}))
+	t.Run("c []", testMarshalInputs(protocol, service, 300, characteristics.Celsius, []string{}, map[string]string{"body": `{"inside":300,"outside":300}`}))
+	t.Run("c inside", testMarshalInputs(protocol, service, 300, characteristics.Celsius, []string{"temperature.inside"}, map[string]string{"body": `{"inside":300,"outside":13}`}))
+	t.Run("c outside", testMarshalInputs(protocol, service, 300, characteristics.Celsius, []string{"temperature.outside"}, map[string]string{"body": `{"inside":12,"outside":300}`}))
+	t.Run("c inside and outside", testMarshalInputs(protocol, service, 300, characteristics.Celsius, []string{"temperature.inside", "temperature.outside"}, map[string]string{"body": `{"inside":300,"outside":300}`}))
 
 }
 
@@ -160,7 +160,7 @@ func TestUnmarshallingWithAllowedPaths(t *testing.T) {
 							Id:               "inside",
 							Name:             "inside",
 							Type:             model.Float,
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
 							AspectId:         "inside_air",
 						},
@@ -168,7 +168,7 @@ func TestUnmarshallingWithAllowedPaths(t *testing.T) {
 							Id:               "outside",
 							Name:             "outside",
 							Type:             model.Float,
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
 							AspectId:         "outside_air",
 						},
@@ -187,11 +187,11 @@ func TestUnmarshallingWithAllowedPaths(t *testing.T) {
 	t.Run("k outside", testUnmarshalOutputs(protocol, service, output, characteristics.Kelvin, []string{"temperature.outside"}, 773.15))
 	t.Run("k inside and outside", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Kelvin, []string{"temperature.inside", "temperature.outside"}, []interface{}{673.15, 773.15}))
 
-	t.Run("c nil", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celcius, nil, []interface{}{400.0, 500.0}))
-	t.Run("c []", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celcius, []string{}, []interface{}{400.0, 500.0}))
-	t.Run("c inside", testUnmarshalOutputs(protocol, service, output, characteristics.Celcius, []string{"temperature.inside"}, 400.0))
-	t.Run("c outside", testUnmarshalOutputs(protocol, service, output, characteristics.Celcius, []string{"temperature.outside"}, 500.0))
-	t.Run("c inside and outside", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celcius, []string{"temperature.inside", "temperature.outside"}, []interface{}{400.0, 500.0}))
+	t.Run("c nil", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celsius, nil, []interface{}{400.0, 500.0}))
+	t.Run("c []", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celsius, []string{}, []interface{}{400.0, 500.0}))
+	t.Run("c inside", testUnmarshalOutputs(protocol, service, output, characteristics.Celsius, []string{"temperature.inside"}, 400.0))
+	t.Run("c outside", testUnmarshalOutputs(protocol, service, output, characteristics.Celsius, []string{"temperature.outside"}, 500.0))
+	t.Run("c inside and outside", testUnmarshalOutputsOneOf(protocol, service, output, characteristics.Celsius, []string{"temperature.inside", "temperature.outside"}, []interface{}{400.0, 500.0}))
 
 }
 

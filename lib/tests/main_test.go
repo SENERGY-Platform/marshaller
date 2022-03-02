@@ -56,9 +56,9 @@ var example = struct {
 }
 
 var temperature = struct {
-	Celcius string
+	Celsius string
 }{
-	Celcius: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+	Celsius: "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
 }
 
 var color = struct {

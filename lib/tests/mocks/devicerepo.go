@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/tests/testdata"
 	"net/http"
 )
 
@@ -29,12 +30,23 @@ type DeviceRepoStruct struct {
 	deviceTypes map[string]model.DeviceType
 	services    map[string]model.Service
 	protocols   map[string]model.Protocol
+	aspectnodes map[string]model.AspectNode
 }
 
 func (this *DeviceRepoStruct) Init() *DeviceRepoStruct {
 	this.services = map[string]model.Service{}
 	this.protocols = map[string]model.Protocol{}
 	this.deviceTypes = map[string]model.DeviceType{}
+	this.aspectnodes = map[string]model.AspectNode{}
+
+	aspects, err := testdata.GetAspectNodes()
+	if err != nil {
+		panic(err)
+	}
+	for _, aspect := range aspects {
+		this.aspectnodes[aspect.Id] = aspect
+	}
+
 	return this
 }
 
@@ -100,6 +112,9 @@ func (this *DeviceRepoStruct) GetServiceWithErrCode(serviceId string) (result mo
 }
 
 func (this *DeviceRepoStruct) GetAspectNode(id string) (result model.AspectNode, err error) {
+	if aspect, ok := this.aspectnodes[id]; ok {
+		return aspect, nil
+	}
 	return model.AspectNode{
 		Id:            id,
 		Name:          id,

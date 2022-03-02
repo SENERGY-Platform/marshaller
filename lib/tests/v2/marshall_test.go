@@ -63,7 +63,7 @@ func TestMarshalling(t *testing.T) {
 							Id:               "inside",
 							Name:             "inside",
 							Type:             model.Integer, //results like 26,85 will be rounded to 27
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
 							AspectId:         "inside_air",
 							Value:            12,
@@ -72,7 +72,7 @@ func TestMarshalling(t *testing.T) {
 							Id:               "outside",
 							Name:             "outside",
 							Type:             model.Integer, //results like 26,85 will be rounded to 27
-							CharacteristicId: characteristics.Celcius,
+							CharacteristicId: characteristics.Celsius,
 							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
 							AspectId:         "outside_air",
 							Value:            13,

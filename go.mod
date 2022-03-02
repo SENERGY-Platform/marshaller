@@ -3,7 +3,7 @@ module github.com/SENERGY-Platform/marshaller
 go 1.17
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.0-20220301060621-ba1f5eb7de41
+	github.com/SENERGY-Platform/converter v0.0.0-20220302112210-0325026a0e9f
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/clbanning/mxj v1.8.4
 	github.com/coocood/freecache v1.1.0

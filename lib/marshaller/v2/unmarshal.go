@@ -117,7 +117,7 @@ func serializeOutput(output map[string]string, service model.Service, protocol m
 					if err != nil {
 						return result, err
 					}
-					result[segment.Name] = value
+					result[content.ContentVariable.Name] = value
 				}
 			}
 		}
