@@ -21,6 +21,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
 	"log"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -87,6 +88,14 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 		if err != nil {
 			return variable, err
 		}
+		if variable.Type == model.Integer {
+			switch v := variable.Value.(type) {
+			case float64:
+				variable.Value = int64(math.Round(v))
+			case float32:
+				variable.Value = int64(math.Round(float64(v)))
+			}
+		}
 	} else {
 		variable.Value = value
 	}
@@ -96,7 +105,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []model.Content) (result map[string]string, err error) {
 	result = map[string]string{}
 	for _, input := range inputs {
-		obj, _, err := contentVariableToObject(input.ContentVariable)
+		_, obj, err := contentVariableToObject(input.ContentVariable)
 		if err != nil {
 			return result, err
 		}
