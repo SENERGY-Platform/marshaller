@@ -21,6 +21,7 @@ import (
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ func init() {
 	endpoints = append(endpoints, Unmarshalling)
 }
 
-func Unmarshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+func Unmarshalling(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
 	resource := "/unmarshal"
 
 	normalizeRequest := func(request *UnmarshallingRequest) error {

@@ -28,6 +28,9 @@ import (
 
 func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
 	for _, value := range data {
+		if len(value.Paths) == 0 && value.FunctionId != "" {
+			value.Paths = this.GetInputPaths(service, value.FunctionId, nil)
+		}
 		service.Inputs, err = this.setContentVariableValues(service.Inputs, value.Paths, value.CharacteristicId, value.Value)
 		if err != nil {
 			return result, err
@@ -163,6 +166,6 @@ func contentVariableToObject(variable model.ContentVariable) (name string, obj i
 		}
 		return name, temp, nil
 	default:
-		return name, obj, errors.New("unknown variable type:" + variable.Type)
+		return name, obj, errors.New("unknown variable type:" + string(variable.Type))
 	}
 }

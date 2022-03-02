@@ -51,6 +51,11 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 		return nil, err
 	}
 
+	aspectNodeList, err := testdata.GetAspectNodes()
+	if err != nil {
+		return nil, err
+	}
+
 	searchMockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		//endpoint := this.config.PermissionsSearchUrl + "/v3/resources/concepts?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
 		//endpoint := this.config.PermissionsSearchUrl + "/v3/resources/functions?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
@@ -123,6 +128,16 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 				}
 			}
 		}
+
+		if strings.Contains(request.URL.String(), "/aspect-nodes/") {
+			for _, element := range aspectNodeList {
+				if element.Id == id {
+					json.NewEncoder(writer).Encode(element)
+					return
+				}
+			}
+		}
+
 		log.Println("TEST_ERROR: no match found", request.URL.Path, request.URL.String())
 		http.Error(writer, request.URL.Path, http.StatusNotFound)
 	}))

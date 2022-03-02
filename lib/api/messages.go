@@ -38,7 +38,7 @@ type MarshallingRequest struct {
 
 type MarshallingV2Request struct {
 	Service  model.Service                    `json:"service"`  //semi-optional, may be determined by request path
-	Protocol model.Protocol                   `json:"protocol"` //semi-optional, may be determined by request path
+	Protocol model.Protocol                   `json:"protocol"` //semi-optional, may be determined by service
 	Data     []model.MarshallingV2RequestData `json:"data"`
 }
 

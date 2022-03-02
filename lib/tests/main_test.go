@@ -23,9 +23,11 @@ import (
 	"errors"
 	"flag"
 	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 	"io"
 	"log"
@@ -96,12 +98,13 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 		panic(err)
 	}
 	marshaller := marshaller.New(mocks.Converter{}, conceptRepo, mocks.DeviceRepo)
+	marshallerv2 := v2.New(config.Config{}, mocks.Converter{})
 	configurableService := configurables.New(conceptRepo)
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(marshaller, configurableService, mocks.DeviceRepo))
+	server := httptest.NewServer(api.GetRouter(marshaller, marshallerv2, configurableService, mocks.DeviceRepo))
 	ServerUrl = server.URL
 	go func() {
 		<-ctx.Done()

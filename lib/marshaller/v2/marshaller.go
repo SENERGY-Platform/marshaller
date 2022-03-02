@@ -22,6 +22,13 @@ import (
 	"strings"
 )
 
+func New(config config.Config, converter Converter) *Marshaller {
+	return &Marshaller{
+		config:    config,
+		converter: converter,
+	}
+}
+
 type Marshaller struct {
 	config    config.Config
 	converter Converter

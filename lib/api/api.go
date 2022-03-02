@@ -23,6 +23,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -35,13 +36,14 @@ type DeviceRepository interface {
 	GetService(serviceId string) (model.Service, error)
 	GetProtocol(id string) (model.Protocol, error)
 	GetServiceWithErrCode(serviceId string) (model.Service, error, int)
+	GetAspectNode(id string) (model.AspectNode, error)
 }
 
-var endpoints = []func(router *httprouter.Router, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository){}
+var endpoints = []func(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository){}
 
-func Start(ctx context.Context, config config.Config, marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (closed context.Context) {
+func Start(ctx context.Context, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (closed context.Context) {
 	log.Println("start api")
-	router := GetRouter(marshaller, configurableService, deviceRepo)
+	router := GetRouter(marshaller, marshallerV2, configurableService, deviceRepo)
 	log.Println("add logging and cors")
 	corsHandler := util.NewCors(router)
 	logger := util.NewLogger(corsHandler, config.LogLevel)
@@ -65,11 +67,11 @@ func Start(ctx context.Context, config config.Config, marshaller *marshaller.Mar
 	return closed
 }
 
-func GetRouter(marshaller *marshaller.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (router *httprouter.Router) {
+func GetRouter(marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) (router *httprouter.Router) {
 	router = httprouter.New()
 	for _, e := range endpoints {
 		log.Println("add endpoints: " + runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
-		e(router, marshaller, configurableService, deviceRepo)
+		e(router, marshaller, marshallerV2, configurableService, deviceRepo)
 	}
 	return
 }

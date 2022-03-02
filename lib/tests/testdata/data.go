@@ -31,6 +31,9 @@ var ConceptsJson []byte
 //go:embed characteristics.json
 var CharacteristicsJson []byte
 
+//go:embed aspectnodes.json
+var AspectNodesJson []byte
+
 func GetFunctions() (result []model.Function, err error) {
 	err = json.Unmarshal(FunctionsJson, &result)
 	return
@@ -43,5 +46,10 @@ func GetConcepts() (result []model.Concept, err error) {
 
 func GetCharacteristics() (result []model.Characteristic, err error) {
 	err = json.Unmarshal(CharacteristicsJson, &result)
+	return
+}
+
+func GetAspectNodes() (result []model.AspectNode, err error) {
+	err = json.Unmarshal(AspectNodesJson, &result)
 	return
 }

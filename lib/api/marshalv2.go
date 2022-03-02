@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,45 +18,63 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
-	"strings"
 )
 
 func init() {
-	endpoints = append(endpoints, Configurables)
+	endpoints = append(endpoints, MarshallingV2)
 }
 
-func Configurables(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
-	resource := "/configurables"
+func MarshallingV2(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+	resource := "/v2/marshal"
 
-	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		characteristicId := request.URL.Query().Get("characteristicId")
-		if characteristicId == "" {
-			http.Error(writer, "expect characteristicId as query-parameter", http.StatusBadRequest)
-			return
-		}
-		serviceIdsStr := request.URL.Query().Get("serviceIds")
-		if serviceIdsStr == "" {
-			http.Error(writer, "expect serviceIds as query-parameter", http.StatusBadRequest)
-			return
-		}
-		serviceIds := strings.Split(serviceIdsStr, ",")
-		services := []model.Service{}
-		for _, id := range serviceIds {
-			service, err := deviceRepo.GetService(strings.TrimSpace(id))
+	normalizeRequest := func(request *MarshallingV2Request) error {
+		if request.Protocol.Id == "" {
+			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
-				http.Error(writer, err.Error(), http.StatusInternalServerError)
-				return
+				return err
 			}
-			services = append(services, service)
+			request.Protocol = protocol
 		}
-		result, err := configurableService.Find(characteristicId, services)
+		if request.Service.ProtocolId != request.Protocol.Id {
+			return errors.New("expect service to reference given protocol")
+		}
+		return nil
+	}
+
+	marshal := func(request MarshallingV2Request) (map[string]string, error) {
+		return marshallerV2.Marshal(request.Protocol, request.Service, request.Data)
+	}
+
+	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		msg := MarshallingV2Request{}
+		serviceId := params.ByName("serviceId")
+		if serviceId == "" {
+			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
+			return
+		}
+		err := json.NewDecoder(request.Body).Decode(&msg)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+			return
+		}
+		msg.Service, err = deviceRepo.GetService(serviceId)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = normalizeRequest(&msg)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+			return
+		}
+		result, err := marshal(msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
@@ -69,17 +87,18 @@ func Configurables(router *httprouter.Router, marshaller *marshaller.Marshaller,
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := FindConfigurablesRequest{}
+		msg := MarshallingV2Request{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if msg.CharacteristicId == "" {
-			http.Error(writer, "expect characteristic_id as field in body", http.StatusBadRequest)
+		err = normalizeRequest(&msg)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		result, err := configurableService.Find(msg.CharacteristicId, msg.Services)
+		result, err := marshal(msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
