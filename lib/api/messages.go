@@ -36,6 +36,12 @@ type MarshallingRequest struct {
 	PathAllowList []string `json:"path_allow_list,omitempty"`
 }
 
+type MarshallingV2Request struct {
+	Service  model.Service                    `json:"service"`  //semi-optional, may be determined by request path
+	Protocol model.Protocol                   `json:"protocol"` //semi-optional, may be determined by request path
+	Data     []model.MarshallingV2RequestData `json:"data"`
+}
+
 type UnmarshallingRequest struct {
 	Service              model.Service     `json:"service,omitempty"`           //semi-optional, may be determined by request path
 	Protocol             *model.Protocol   `json:"protocol,omitempty"`          //semi-optional, may be determined by service
@@ -49,6 +55,18 @@ type UnmarshallingRequest struct {
 		useful if 2 variables have the same characteristic assigned but are used with different functions or aspects
 	*/
 	PathAllowList []string `json:"path_allow_list,omitempty"`
+}
+
+type UnmarshallingV2Request struct {
+	Service          model.Service     `json:"service"`           //semi-optional, may be determined by request path
+	Protocol         model.Protocol    `json:"protocol"`          //semi-optional, may be determined by service
+	CharacteristicId string            `json:"characteristic_id"` //semi-optional, may be determined by request path
+	Message          map[string]string `json:"message"`
+
+	Path         string           `json:"path"`           //semi-optional, may be determent by FunctionId and AspectNode
+	FunctionId   string           `json:"function_id"`    //semi-optional, to determine Path if not set
+	AspectNode   model.AspectNode `json:"aspect_node"`    //semi-optional, to determine Path if not set, may itself be determent by AspectNodeId
+	AspectNodeId string           `json:"aspect_node_id"` //semi-optional, to determine AspectNode if not set
 }
 
 type FindConfigurablesRequest struct {

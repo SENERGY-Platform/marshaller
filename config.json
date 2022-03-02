@@ -8,5 +8,6 @@
   "device_repository_url":"",
   "converter_url":"",
   "concept_repo_refresh_interval":3600,
-  "log_level":"CALL"
+  "log_level":"CALL",
+  "return_unknown_path_as_null": false
 }

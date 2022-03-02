@@ -38,6 +38,7 @@ type Config struct {
 	ConceptRepoRefreshInterval int64   `json:"concept_repo_refresh_interval"`
 	LogLevel                   string  `json:"log_level"`
 	ConverterUrl               string  `json:"converter_url"`
+	ReturnUnknownPathAsNull    bool    `json:"return_unknown_path_as_null"`
 }
 
 //loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
