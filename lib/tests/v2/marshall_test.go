@@ -98,6 +98,19 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":27,"outside":13}`}))
 
+	t.Run("inside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+		Service:  service,
+		Protocol: protocol,
+		Data: []model.MarshallingV2RequestData{
+			{
+				Value:            300,
+				CharacteristicId: characteristics.Kelvin,
+				Paths:            []string{"temperature.inside"},
+				FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
+			},
+		},
+	}, map[string]string{"body": `{"inside":27,"outside":13}`}))
+
 	t.Run("outside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
@@ -107,6 +120,19 @@ func TestMarshalling(t *testing.T) {
 				CharacteristicId: characteristics.Kelvin,
 				Paths:            []string{"temperature.outside"},
 				FunctionId:       "",
+			},
+		},
+	}, map[string]string{"body": `{"inside":12,"outside":27}`}))
+
+	t.Run("outside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+		Service:  service,
+		Protocol: protocol,
+		Data: []model.MarshallingV2RequestData{
+			{
+				Value:            300,
+				CharacteristicId: characteristics.Kelvin,
+				Paths:            []string{"temperature.outside"},
+				FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setTemperature",
 			},
 		},
 	}, map[string]string{"body": `{"inside":12,"outside":27}`}))
