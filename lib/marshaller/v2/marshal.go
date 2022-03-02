@@ -105,28 +105,30 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []model.Content) (result map[string]string, err error) {
 	result = map[string]string{}
 	for _, input := range inputs {
-		_, obj, err := contentVariableToObject(input.ContentVariable)
-		if err != nil {
-			return result, err
-		}
-		s, ok := serialization.Get(input.Serialization)
-		if !ok {
-			return result, errors.New("unknown serialization " + input.Serialization)
-		}
-		segmentName := ""
-		for _, segment := range protocol.ProtocolSegments {
-			if segment.Id == input.ProtocolSegmentId {
-				segmentName = segment.Name
-				break
-			}
-		}
-		if segmentName != "" {
-			result[segmentName], err = s.Marshal(obj, input.ContentVariable)
+		if !input.ContentVariable.IsVoid {
+			_, obj, err := contentVariableToObject(input.ContentVariable)
 			if err != nil {
 				return result, err
 			}
-		} else {
-			log.Println("WARNING: protocol-segment not found " + input.ProtocolSegmentId)
+			s, ok := serialization.Get(input.Serialization)
+			if !ok {
+				return result, errors.New("unknown serialization " + input.Serialization)
+			}
+			segmentName := ""
+			for _, segment := range protocol.ProtocolSegments {
+				if segment.Id == input.ProtocolSegmentId {
+					segmentName = segment.Name
+					break
+				}
+			}
+			if segmentName != "" {
+				result[segmentName], err = s.Marshal(obj, input.ContentVariable)
+				if err != nil {
+					return result, err
+				}
+			} else {
+				log.Println("WARNING: protocol-segment not found " + input.ProtocolSegmentId)
+			}
 		}
 	}
 	return result, nil
@@ -146,32 +148,36 @@ func contentVariableToObject(variable model.ContentVariable) (name string, obj i
 	case model.Structure:
 		temp := map[string]interface{}{}
 		for _, sub := range variable.SubContentVariables {
-			subName, subObj, err := contentVariableToObject(sub)
-			if err != nil {
-				return name, obj, err
+			if !sub.IsVoid {
+				subName, subObj, err := contentVariableToObject(sub)
+				if err != nil {
+					return name, obj, err
+				}
+				temp[subName] = subObj
 			}
-			temp[subName] = subObj
 		}
 		return name, temp, nil
 	case model.List:
 		temp := make([]interface{}, len(variable.SubContentVariables))
 		for _, sub := range variable.SubContentVariables {
-			subName, subObj, err := contentVariableToObject(sub)
-			if err != nil {
-				return name, obj, err
-			}
-			if subName == "*" {
-				if len(temp) != 1 {
-					return name, obj, errors.New("expect * only on list with one element")
+			if !sub.IsVoid {
+				subName, subObj, err := contentVariableToObject(sub)
+				if err != nil {
+					return name, obj, err
 				}
-				temp[0] = subObj
-				return name, temp, nil
+				if subName == "*" {
+					if len(temp) != 1 {
+						return name, obj, errors.New("expect * only on list with one element")
+					}
+					temp[0] = subObj
+					return name, temp, nil
+				}
+				index, err := strconv.Atoi(subName)
+				if err != nil {
+					return name, obj, errors.New("unable to marshal list with index " + subName + " in " + variable.Name + " " + variable.Id + ": " + err.Error())
+				}
+				temp[index] = subObj
 			}
-			index, err := strconv.Atoi(subName)
-			if err != nil {
-				return name, obj, errors.New("unable to marshal list with index " + subName + " in " + variable.Name + " " + variable.Id + ": " + err.Error())
-			}
-			temp[index] = subObj
 		}
 		return name, temp, nil
 	default:
