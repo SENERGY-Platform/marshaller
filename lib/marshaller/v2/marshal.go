@@ -17,12 +17,14 @@
 package v2
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
 	"log"
 	"math"
 	"reflect"
+	"runtime/debug"
 	"strconv"
 	"strings"
 )
@@ -83,7 +85,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 		return variable, errors.New("wtf")
 	}
 
-	if variable.CharacteristicId != characteristic {
+	if characteristic != "" && variable.CharacteristicId != characteristic {
 		variable.Value, err = this.converter.Cast(value, characteristic, variable.CharacteristicId)
 		if err != nil {
 			return variable, err
@@ -99,7 +101,82 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	} else {
 		variable.Value = value
 	}
+
+	//handle complex variables/data-structures like rgb
+	if variable.CharacteristicId != "" && (variable.Type == model.Structure || variable.Type == model.List) {
+		characteristicToVariablePath := getCharacteristicToPath(variable, []string{})
+		targetCharacteristic, err := this.characteristics.GetCharacteristic(variable.CharacteristicId)
+		if err != nil {
+			return variable, err
+		}
+		normalizedValue, err := normalize(variable.Value)
+		if err != nil {
+			return variable, err
+		}
+		characteristicPathToValue := this.getPathToValueMapFromObj([]string{targetCharacteristic.Name}, normalizedValue)
+		variablePathToCharacteristicsValue := getVariablePathToCharacteristicsValue(targetCharacteristic, []string{}, characteristicToVariablePath, characteristicPathToValue)
+		for subPath, subValue := range variablePathToCharacteristicsValue {
+			subPathParts := strings.Split(subPath, ".")
+			if !reflect.DeepEqual(currentPath, subPathParts) {
+				variable, err = this.setContentVariableValue(variable, []string{}, subPathParts, "", subValue)
+				if err != nil {
+					return variable, err
+				}
+			}
+		}
+		variable.Value = nil
+	}
+
 	return variable, nil
+}
+
+func normalize(value interface{}) (result interface{}, err error) {
+	temp, err := json.Marshal(value)
+	if err != nil {
+		debug.PrintStack()
+		return result, err
+	}
+	err = json.Unmarshal(temp, &result)
+	if err != nil {
+		debug.PrintStack()
+		return result, err
+	}
+	return
+}
+
+func getVariablePathToCharacteristicsValue(characteristic model.Characteristic, currentPath []string, characteristicToVariablePath map[string]string, characteristicPathToValue map[string]interface{}) (result map[string]interface{}) {
+	result = map[string]interface{}{}
+	currentPath = append(currentPath, characteristic.Name)
+	if path, ok := characteristicToVariablePath[characteristic.Id]; ok {
+		if value, ok := characteristicPathToValue[strings.Join(currentPath, ".")]; ok {
+			result[path] = value
+		}
+	}
+	for _, sub := range characteristic.SubCharacteristics {
+		for subPath, subValue := range getVariablePathToCharacteristicsValue(sub, currentPath, characteristicToVariablePath, characteristicPathToValue) {
+			result[subPath] = subValue
+		}
+	}
+	return result
+}
+
+type subCharacteristicPathInVariable struct {
+	pathParts                []string
+	variableCharacteristicId string
+}
+
+func getCharacteristicToPath(variable model.ContentVariable, currentPath []string) (result map[string]string) {
+	result = map[string]string{}
+	currentPath = append(currentPath, variable.Name)
+	if variable.CharacteristicId != "" {
+		result[variable.CharacteristicId] = strings.Join(currentPath, ".")
+	}
+	for _, sub := range variable.SubContentVariables {
+		for characteristic, path := range getCharacteristicToPath(sub, currentPath) {
+			result[characteristic] = path
+		}
+	}
+	return result
 }
 
 func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []model.Content) (result map[string]string, err error) {

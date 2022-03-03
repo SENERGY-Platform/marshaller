@@ -22,16 +22,22 @@ import (
 	"strings"
 )
 
-func New(config config.Config, converter Converter) *Marshaller {
+func New(config config.Config, converter Converter, characteristics CharacteristicsRepo) *Marshaller {
 	return &Marshaller{
-		config:    config,
-		converter: converter,
+		config:          config,
+		converter:       converter,
+		characteristics: characteristics,
 	}
 }
 
 type Marshaller struct {
-	config    config.Config
-	converter Converter
+	config          config.Config
+	converter       Converter
+	characteristics CharacteristicsRepo
+}
+
+type CharacteristicsRepo interface {
+	GetCharacteristic(id string) (characteristic model.Characteristic, err error)
 }
 
 type CharacteristicId = string

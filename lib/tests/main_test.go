@@ -98,7 +98,7 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 		panic(err)
 	}
 	marshaller := marshaller.New(mocks.Converter{}, conceptRepo, mocks.DeviceRepo)
-	marshallerv2 := v2.New(config.Config{}, mocks.Converter{})
+	marshallerv2 := v2.New(config.Config{}, mocks.Converter{}, conceptRepo)
 	configurableService := configurables.New(conceptRepo)
 	TestMarshalInputs = marshaller.MarshalInputs
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
