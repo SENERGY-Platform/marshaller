@@ -160,11 +160,6 @@ func getVariablePathToCharacteristicsValue(characteristic model.Characteristic, 
 	return result
 }
 
-type subCharacteristicPathInVariable struct {
-	pathParts                []string
-	variableCharacteristicId string
-}
-
 func getCharacteristicToPath(variable model.ContentVariable, currentPath []string) (result map[string]string) {
 	result = map[string]string{}
 	currentPath = append(currentPath, variable.Name)
@@ -214,6 +209,8 @@ func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []mode
 func contentVariableToObject(variable model.ContentVariable) (name string, obj interface{}, err error) {
 	name = variable.Name
 	switch variable.Type {
+	case "":
+		return name, variable.Value, nil
 	case model.String:
 		return name, variable.Value, nil
 	case model.Boolean:

@@ -184,11 +184,19 @@ func TestRgbUnmarshal(t *testing.T) {
 
 	output := map[string]string{"body": `{"rgb":{"blau":100,"grün":0,"rot":255}}`}
 
-	t.Run("inside path", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+	t.Run("unmarshal rgb to hex", testUnmarshal(apiurl, api.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Hex,
 		Message:          output,
 		Path:             "color.rgb",
 	}, "#ff0064"))
+
+	t.Run("unmarshal rgb to rgb", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Rgb,
+		Message:          output,
+		Path:             "color.rgb",
+	}, map[string]interface{}{"r": 255.0, "g": 0.0, "b": 100.0}))
 }

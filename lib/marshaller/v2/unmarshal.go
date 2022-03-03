@@ -50,6 +50,12 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 	if !ok {
 		return result, errors.New("path not found in service")
 	}
+
+	value, err = this.variableStructureToCharacteristicsStructure(pathToCharacteristic, path, value)
+	if err != nil {
+		return result, err
+	}
+
 	if variableCharacteristic == characteristicId {
 		return value, nil
 	} else {
@@ -123,4 +129,97 @@ func serializeOutput(output map[string]string, service model.Service, protocol m
 		}
 	}
 	return
+}
+
+func (this *Marshaller) variableStructureToCharacteristicsStructure(variablePathToCharacteristic map[string]string, variablePath string, value interface{}) (result interface{}, err error) {
+	value, err = normalize(value)
+	if err != nil {
+		return result, err
+	}
+	switch value.(type) {
+	case map[string]interface{}:
+	case []interface{}:
+	default:
+		return value, nil
+	}
+
+	shortVariablePathToCharacteristic := map[string]string{}
+	for subVariablePath, variableCharacteristic := range variablePathToCharacteristic {
+		if subVariablePath != variablePath {
+			shortVariablePath := strings.Replace(subVariablePath, variablePath+".", "", 1)
+			shortVariablePathToCharacteristic[shortVariablePath] = variableCharacteristic
+		}
+	}
+
+	characteristicId := variablePathToCharacteristic[variablePath]
+	characteristic, err := this.characteristics.GetCharacteristic(characteristicId)
+	if err != nil {
+		return result, err
+	}
+
+	characteristicToVariablePath := map[string]string{}
+	for path, variableCharacteristic := range shortVariablePathToCharacteristic {
+		characteristicToVariablePath[variableCharacteristic] = path
+	}
+
+	variablePathToValue := this.getPathToValueMapFromObj([]string{}, value)
+
+	characteristicIdToValue := map[string]interface{}{}
+	for subVariablePath, variableValue := range variablePathToValue {
+		subCharacteristicId, ok := shortVariablePathToCharacteristic[subVariablePath]
+		if ok && subCharacteristicId != characteristicId {
+			characteristicIdToValue[subCharacteristicId] = variableValue
+		}
+	}
+
+	characteristicsIdToPath := getCharacteristicIdToPath(characteristic, []string{})
+
+	characteristicsPathToValue := map[string]interface{}{}
+	for subCharacteristicId, subValue := range characteristicIdToValue {
+		characteristicsPathToValue[characteristicsIdToPath[subCharacteristicId]] = subValue
+	}
+
+	pseudoVariable := characteristicToPseudoVariable(characteristic)
+	for characteristicsPath, subValue := range characteristicsPathToValue {
+		pseudoVariable, err = this.setContentVariableValue(pseudoVariable, []string{}, strings.Split(characteristicsPath, "."), "", subValue)
+		if err != nil {
+			return result, err
+		}
+	}
+
+	_, result, err = contentVariableToObject(pseudoVariable)
+	if err != nil {
+		return result, err
+	}
+	return result, err
+}
+
+func characteristicToPseudoVariable(characteristic model.Characteristic) model.ContentVariable {
+	subVariables := []model.ContentVariable{}
+	for _, sub := range characteristic.SubCharacteristics {
+		subVariables = append(subVariables, characteristicToPseudoVariable(sub))
+	}
+	variableType := characteristic.Type
+	if variableType == "" && len(subVariables) > 0 {
+		variableType = model.Structure
+	}
+	return model.ContentVariable{
+		Name:                characteristic.Name,
+		Type:                variableType,
+		SubContentVariables: subVariables,
+	}
+}
+
+func getCharacteristicIdToPath(characteristic model.Characteristic, currentPath []string) (result map[string]string) {
+	result = map[string]string{}
+	currentPath = append(currentPath, characteristic.Name)
+	if characteristic.Id != "" {
+		result[characteristic.Id] = strings.Join(currentPath, ".")
+	}
+	for _, sub := range characteristic.SubCharacteristics {
+		for characteristicId, path := range getCharacteristicIdToPath(sub, currentPath) {
+			result[characteristicId] = path
+		}
+	}
+	return result
 }
