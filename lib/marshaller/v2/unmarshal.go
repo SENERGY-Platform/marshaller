@@ -25,7 +25,11 @@ import (
 	"strings"
 )
 
+var PathNotFoundInMessage = errors.New("path not found in message")
+
 func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service, characteristicId string, path string, msg map[string]string) (result interface{}, err error) {
+	path = substitudeVariableLenPlaceholderInPath(path)
+
 	outputObjectMap, err := serializeOutput(msg, service, protocol)
 	if err != nil {
 		return result, err
@@ -36,8 +40,10 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 		if this.config.ReturnUnknownPathAsNull {
 			return nil, nil
 		}
-		return result, errors.New("path not found in message")
+		return result, PathNotFoundInMessage
 	}
+
+	service.Outputs, err = substituteVariableLenListsInOutputs(service.Outputs, pathToValue)
 
 	//no conversion wanted
 	if characteristicId == "" {
@@ -61,6 +67,20 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 	} else {
 		return this.converter.Cast(value, variableCharacteristic, characteristicId)
 	}
+}
+
+func substitudeVariableLenPlaceholderInPath(path string) string {
+	if path == "*" {
+		path = "0"
+	}
+	path = strings.ReplaceAll(path, ".*.", ".0.")
+	if strings.HasPrefix(path, "*.") {
+		path = "0." + strings.TrimPrefix(path, "*.")
+	}
+	if strings.HasSuffix(path, ".*") {
+		path = strings.TrimSuffix(path, ".*") + ".0"
+	}
+	return path
 }
 
 func (this Marshaller) getPathToValueMapFromObj(startPath []string, value interface{}) (result map[string]interface{}) {
@@ -145,7 +165,7 @@ func (this *Marshaller) variableStructureToCharacteristicsStructure(variablePath
 
 	shortVariablePathToCharacteristic := map[string]string{}
 	for subVariablePath, variableCharacteristic := range variablePathToCharacteristic {
-		if subVariablePath != variablePath {
+		if subVariablePath != variablePath && strings.HasPrefix(subVariablePath, variablePath+".") {
 			shortVariablePath := strings.Replace(subVariablePath, variablePath+".", "", 1)
 			shortVariablePathToCharacteristic[shortVariablePath] = variableCharacteristic
 		}
@@ -222,4 +242,43 @@ func getCharacteristicIdToPath(characteristic model.Characteristic, currentPath 
 		}
 	}
 	return result
+}
+
+func substituteVariableLenListsInOutputs(outputs []model.Content, value map[string]interface{}) (result []model.Content, err error) {
+	result = []model.Content{}
+	for _, c := range outputs {
+		c.ContentVariable, err = substituteVariableLenListsInVariable(c.ContentVariable, []string{}, value)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, c)
+	}
+	return result, nil
+}
+
+func substituteVariableLenListsInVariable(variable model.ContentVariable, currentPath []string, pathToValue map[string]interface{}) (model.ContentVariable, error) {
+	currentPath = append(currentPath, variable.Name)
+	if variable.Type == model.List && len(variable.SubContentVariables) > 0 && variable.SubContentVariables[0].Name == "*" {
+		currentPathStr := strings.Join(currentPath, ".")
+		currentValue := pathToValue[currentPathStr]
+		list, ok := currentValue.([]interface{})
+		if ok {
+			max := len(list)
+			for i := 0; i < max; i++ {
+				clonedChild := variable.SubContentVariables[0]
+				clonedChild.Name = strconv.Itoa(i)
+				variable.SubContentVariables = append(variable.SubContentVariables, clonedChild)
+			}
+		}
+	}
+	temp := []model.ContentVariable{}
+	for _, sub := range variable.SubContentVariables {
+		newSub, err := substituteVariableLenListsInVariable(sub, currentPath, pathToValue)
+		if err != nil {
+			return variable, err
+		}
+		temp = append(temp, newSub)
+	}
+	variable.SubContentVariables = temp
+	return variable, nil
 }
