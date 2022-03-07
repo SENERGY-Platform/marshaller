@@ -32,7 +32,7 @@ import (
 func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
 	for _, value := range data {
 		if len(value.Paths) == 0 && value.FunctionId != "" {
-			value.Paths = this.GetInputPaths(service, value.FunctionId, nil)
+			value.Paths = this.GetInputPaths(service, value.FunctionId, value.AspectNode)
 		}
 		service.Inputs, err = this.setContentVariableValues(service.Inputs, value.Paths, value.CharacteristicId, value.Value)
 		if err != nil {

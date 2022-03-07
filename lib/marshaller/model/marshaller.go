@@ -19,6 +19,7 @@ package model
 type MarshallingV2RequestData struct {
 	Value            interface{} `json:"value"`
 	CharacteristicId string      `json:"characteristic_id"`
-	Paths            []string    `json:"paths"`       //semi-optional, may be determent by FunctionId
-	FunctionId       string      `json:"function_id"` //semi-optional, to determine Paths if they are not set
+	Paths            []string    `json:"paths"`                 //semi-optional, may be determent by FunctionId
+	FunctionId       string      `json:"function_id"`           //semi-optional, to determine Paths if they are not set
+	AspectNode       *AspectNode `json:"aspect_node,omitempty"` //optional, to determine Paths if they are not set, may be empty if only FunctionId should be searched
 }
