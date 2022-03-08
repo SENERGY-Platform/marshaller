@@ -59,7 +59,7 @@ func UnmarshallingV2(router *httprouter.Router, marshaller *marshaller.Marshalle
 				aspect = &request.AspectNode
 			}
 			paths := marshallerV2.GetOutputPaths(request.Service, request.FunctionId, aspect)
-			if len(paths) > 0 {
+			if len(paths) > 1 {
 				log.Println("WARNING: only first path found by FunctionId and AspectNode is used for Unmarshal")
 			}
 			if len(paths) == 0 {
