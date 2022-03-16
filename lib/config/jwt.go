@@ -102,10 +102,18 @@ func (this Impersonate) GetJSON(url string, result interface{}) (err error) {
 		return err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
+		temp, _ := io.ReadAll(resp.Body)
+		err = errors.New(string(temp))
+		log.Println("ERROR:", resp.StatusCode, err)
+		debug.PrintStack()
+		return err
+	}
 	err = json.NewDecoder(resp.Body).Decode(result)
 	if err != nil {
-		log.Println("ERROR:", err)
+		log.Println("ERROR:", url, resp.StatusCode, err)
 		debug.PrintStack()
+		return err
 	}
 	return err
 }
