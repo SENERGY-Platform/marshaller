@@ -23,6 +23,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"net/url"
@@ -101,7 +102,12 @@ func (this Impersonate) GetJSON(url string, result interface{}) (err error) {
 		return err
 	}
 	defer resp.Body.Close()
-	return json.NewDecoder(resp.Body).Decode(result)
+	err = json.NewDecoder(resp.Body).Decode(result)
+	if err != nil {
+		log.Println("ERROR:", err)
+		debug.PrintStack()
+	}
+	return err
 }
 
 type OpenidToken struct {

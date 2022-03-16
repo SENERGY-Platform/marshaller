@@ -132,6 +132,7 @@ type FunctionInfo struct {
 }
 
 func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err error) {
+	log.Println("load functions")
 	token, err := this.access.Ensure()
 	if err != nil {
 		return functionInfos, err
