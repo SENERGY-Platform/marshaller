@@ -105,7 +105,7 @@ func (this Impersonate) GetJSON(url string, result interface{}) (err error) {
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		temp, _ := io.ReadAll(resp.Body)
 		err = errors.New(string(temp))
-		log.Println("ERROR:", resp.StatusCode, err)
+		log.Println("ERROR:", url, resp.StatusCode, err)
 		debug.PrintStack()
 		return err
 	}
