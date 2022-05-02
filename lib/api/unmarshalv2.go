@@ -19,6 +19,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -33,10 +34,14 @@ func init() {
 	endpoints = append(endpoints, UnmarshallingV2)
 }
 
-func UnmarshallingV2(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
 	resource := "/v2/unmarshal"
 
 	normalizeRequest := func(request *UnmarshallingV2Request) error {
+		if config.Debug {
+			temp, _ := json.Marshal(request)
+			log.Println("DEBUG: UnmarshallingV2Request:", string(temp))
+		}
 		if request.Protocol.Id == "" {
 			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
@@ -68,7 +73,9 @@ func UnmarshallingV2(router *httprouter.Router, marshaller *marshaller.Marshalle
 					debug.PrintStack()
 					return err
 				}
-				//log.Println("WARNING: only first path found by FunctionId and AspectNode is used for Unmarshal")
+				if config.Debug {
+					log.Println("WARNING: only one path found by FunctionId and AspectNode is used for Unmarshal")
+				}
 			}
 			if len(paths) == 0 {
 				return errors.New("no output path found for criteria")

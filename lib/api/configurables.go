@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -32,7 +33,7 @@ func init() {
 	endpoints = append(endpoints, Configurables)
 }
 
-func Configurables(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
+func Configurables(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository) {
 	resource := "/configurables"
 
 	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {

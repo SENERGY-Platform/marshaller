@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
@@ -31,7 +32,7 @@ func init() {
 	endpoints = append(endpoints, PathOptions)
 }
 
-func PathOptions(router *httprouter.Router, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, service *configurables.ConfigurableService, repo DeviceRepository) {
+func PathOptions(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, service *configurables.ConfigurableService, repo DeviceRepository) {
 
 	router.GET("/path-options", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		deviceTypeIdsStr := request.URL.Query().Get("device-type-ids")
