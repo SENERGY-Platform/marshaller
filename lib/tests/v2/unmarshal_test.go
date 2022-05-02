@@ -29,6 +29,174 @@ import (
 	"testing"
 )
 
+func TestUnmarshalPrioritySort(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		Id:          "sid",
+		LocalId:     "slid",
+		Name:        "sname",
+		Interaction: model.EVENT_AND_REQUEST,
+		ProtocolId:  "p1",
+		Outputs: []model.Content{
+			{
+				Id: "content",
+				ContentVariable: model.ContentVariable{
+					Id:   "temperature",
+					Name: "temperature",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "today",
+							Name:             "today",
+							Type:             model.Float,
+							CharacteristicId: characteristics.Celsius,
+							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+							AspectId:         "today",
+						},
+						{
+							Id:               "consumption",
+							Name:             "consumption",
+							Type:             model.Float,
+							CharacteristicId: characteristics.Celsius,
+							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+							AspectId:         "consumption",
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	output := map[string]string{"body": `{"today":400,"consumption":500}`}
+
+	t.Run("electricity", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "electricity",
+	}, 500.0))
+
+	t.Run("consumption", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "consumption",
+	}, 500.0))
+
+	t.Run("today", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "today",
+	}, 400.0))
+}
+
+func TestUnmarshalPrioritySort2(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		Id:          "sid",
+		LocalId:     "slid",
+		Name:        "sname",
+		Interaction: model.EVENT_AND_REQUEST,
+		ProtocolId:  "p1",
+		Outputs: []model.Content{
+			{
+				Id: "content",
+				ContentVariable: model.ContentVariable{
+					Id:   "temperature",
+					Name: "temperature",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "today",
+							Name:             "today",
+							Type:             model.Float,
+							CharacteristicId: characteristics.Celsius,
+							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+							AspectId:         "today",
+						},
+						{
+							Id:               "electricity",
+							Name:             "electricity",
+							Type:             model.Float,
+							CharacteristicId: characteristics.Celsius,
+							FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+							AspectId:         "electricity",
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	output := map[string]string{"body": `{"today":400,"electricity":500}`}
+
+	t.Run("electricity", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "electricity",
+	}, 500.0))
+
+	t.Run("consumption", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "consumption",
+	}, 400.0))
+
+	t.Run("today", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Celsius,
+		Message:          output,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "today",
+	}, 400.0))
+}
+
 func TestUnmarshalling(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()

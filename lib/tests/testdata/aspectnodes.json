@@ -22,5 +22,29 @@
         "child_ids":        ["inside_air","outside_air"],
         "ancestor_ids":     [],
         "descendent_ids":   ["inside_air","outside_air"]
+    },
+    {
+        "id":               "today",
+        "root_id":          "electricity",
+        "parent_id":        "consumption",
+        "child_ids":        [],
+        "ancestor_ids":     ["electricity", "consumption"],
+        "descendent_ids":   []
+    },
+    {
+        "id":               "consumption",
+        "root_id":          "electricity",
+        "parent_id":        "electricity",
+        "child_ids":        ["today"],
+        "ancestor_ids":     ["electricity"],
+        "descendent_ids":   ["today"]
+    },
+    {
+        "id":               "electricity",
+        "root_id":          "electricity",
+        "parent_id":        "",
+        "child_ids":        ["consumption"],
+        "ancestor_ids":     [],
+        "descendent_ids":   ["consumption", "today"]
     }
 ]
