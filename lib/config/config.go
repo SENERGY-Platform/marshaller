@@ -39,6 +39,7 @@ type Config struct {
 	LogLevel                   string  `json:"log_level"`
 	ConverterUrl               string  `json:"converter_url"`
 	ReturnUnknownPathAsNull    bool    `json:"return_unknown_path_as_null"`
+	Debug                      bool    `json:"debug"`
 }
 
 //loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)

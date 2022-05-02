@@ -17,17 +17,19 @@
 package v2
 
 import (
+	"encoding/json"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"log"
 	"math"
 	"reflect"
 	"sort"
 	"strings"
 )
 
-type pathAspectInfo struct {
-	path     string
-	aspect   string
-	distance int
+type PathAspectInfo struct {
+	Path     string
+	Aspect   string
+	Distance int
 }
 
 type DeviceRepository interface {
@@ -42,21 +44,25 @@ func (this *Marshaller) SortPathsByAspectDistance(repo DeviceRepository, service
 	if err != nil {
 		return result, err
 	}
-	infoList := []pathAspectInfo{}
+	infoList := []PathAspectInfo{}
 	for _, path := range paths {
 		info := this.getOutputPathAspectInfo(service, path)
 		var ok bool
-		info.distance, ok = distances[info.aspect]
+		info.Distance, ok = distances[info.Aspect]
 		if !ok {
-			info.distance = math.MaxInt
+			info.Distance = math.MaxInt
 		}
 		infoList = append(infoList, info)
 	}
 	sort.Slice(infoList, func(i, j int) bool {
-		return infoList[i].distance < infoList[j].distance
+		return infoList[i].Distance < infoList[j].Distance
 	})
 	for _, info := range infoList {
-		result = append(result, info.path)
+		result = append(result, info.Path)
+	}
+	if this.config.Debug {
+		temp, _ := json.Marshal(infoList)
+		log.Println("DEBUG: path aspect distance info", aspect.Id, aspect.Name, string(temp))
 	}
 	return result, nil
 }
@@ -86,9 +92,9 @@ func getAspectDistances(repo DeviceRepository, aspect model.AspectNode) (result 
 	return result, nil
 }
 
-func (this *Marshaller) getOutputPathAspectInfo(service model.Service, path string) (result pathAspectInfo) {
-	result.path = path
-	result.aspect = this.getPathAspect(service.Outputs, strings.Split(path, "."))
+func (this *Marshaller) getOutputPathAspectInfo(service model.Service, path string) (result PathAspectInfo) {
+	result.Path = path
+	result.Aspect = this.getPathAspect(service.Outputs, strings.Split(path, "."))
 	return result
 }
 
