@@ -19,6 +19,7 @@ package v2
 import (
 	"encoding/json"
 	"errors"
+	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
 	"log"
@@ -86,7 +87,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	}
 
 	if characteristic != "" && variable.CharacteristicId != characteristic {
-		castExtensions := []model.ConverterExtensions{}
+		castExtensions := []convertermodel.ConverterExtension{}
 		if variable.FunctionId != "" {
 			conceptId := this.characteristics.GetConceptIdOfFunction(variable.FunctionId)
 			if conceptId != "" {

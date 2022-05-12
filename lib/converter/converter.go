@@ -17,9 +17,9 @@
 package converter
 
 import (
+	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/url"
 )
 
@@ -44,7 +44,7 @@ func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to
 	return out, err
 }
 
-func (this *Converter) CastWithExtension(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId, extensions []model.ConverterExtensions) (out interface{}, err error) {
+func (this *Converter) CastWithExtension(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId, extensions []convertermodel.ConverterExtension) (out interface{}, err error) {
 	if from == to {
 		return in, nil
 	}

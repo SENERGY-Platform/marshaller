@@ -17,6 +17,7 @@
 package v2
 
 import (
+	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"strings"
@@ -46,7 +47,7 @@ type CharacteristicId = string
 
 type Converter interface {
 	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
-	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []model.ConverterExtensions) (out interface{}, err error)
+	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []convertermodel.ConverterExtension) (out interface{}, err error)
 }
 
 func (this *Marshaller) GetInputPaths(service model.Service, functionId string, aspectNode *model.AspectNode) (result []string) {

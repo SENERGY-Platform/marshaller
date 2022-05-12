@@ -16,6 +16,8 @@
 
 package model
 
+import convertermodel "github.com/SENERGY-Platform/converter/lib/model"
+
 type DeviceClass struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`
@@ -47,12 +49,12 @@ type AspectNode struct {
 }
 
 type Concept struct {
-	Id                   string                `json:"id"`
-	Name                 string                `json:"name"`
-	CharacteristicIds    []string              `json:"characteristic_ids"`
-	BaseCharacteristicId string                `json:"base_characteristic_id"`
-	RdfType              string                `json:"rdf_type"`
-	ConverterExtensions  []ConverterExtensions `json:"converter_extensions"`
+	Id                   string                              `json:"id"`
+	Name                 string                              `json:"name"`
+	CharacteristicIds    []string                            `json:"characteristic_ids"`
+	BaseCharacteristicId string                              `json:"base_characteristic_id"`
+	RdfType              string                              `json:"rdf_type"`
+	ConverterExtensions  []convertermodel.ConverterExtension `json:"converter_extensions"`
 }
 
 type Characteristic struct {
@@ -64,12 +66,4 @@ type Characteristic struct {
 	Value              interface{}      `json:"value,omitempty"`
 	SubCharacteristics []Characteristic `json:"sub_characteristics"`
 	RdfType            string           `json:"rdf_type"`
-}
-
-type ConverterExtensions struct {
-	From            string `json:"from"`
-	To              string `json:"to"`
-	Distance        int64  `json:"distance"`
-	F               string `json:"f"`
-	PlaceholderName string `json:"placeholder_name"`
 }
