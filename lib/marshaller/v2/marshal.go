@@ -86,7 +86,22 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	}
 
 	if characteristic != "" && variable.CharacteristicId != characteristic {
-		variable.Value, err = this.converter.Cast(value, characteristic, variable.CharacteristicId)
+		castExtensions := []model.ConverterExtensions{}
+		if variable.FunctionId != "" {
+			conceptId := this.characteristics.GetConceptIdOfFunction(variable.FunctionId)
+			if conceptId != "" {
+				concept, err := this.characteristics.GetConcept(conceptId)
+				if err != nil {
+					return variable, err
+				}
+				castExtensions = concept.ConverterExtensions
+			}
+		}
+		if len(castExtensions) == 0 {
+			variable.Value, err = this.converter.Cast(value, characteristic, variable.CharacteristicId)
+		} else {
+			variable.Value, err = this.converter.CastWithExtension(value, characteristic, variable.CharacteristicId, castExtensions)
+		}
 		if err != nil {
 			return variable, err
 		}

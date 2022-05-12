@@ -3,7 +3,7 @@ module github.com/SENERGY-Platform/marshaller
 go 1.18
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.0-20220506072101-e31e4cedd586
+	github.com/SENERGY-Platform/converter v0.0.0-20220512105400-d22e8a0222db
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/clbanning/mxj v1.8.4
 	github.com/coocood/freecache v1.1.0
@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/RyanCarrier/dijkstra v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
 	gopkg.in/go-playground/colors.v1 v1.2.0 // indirect

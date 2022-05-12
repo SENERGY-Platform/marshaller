@@ -38,12 +38,15 @@ type Marshaller struct {
 
 type CharacteristicsRepo interface {
 	GetCharacteristic(id string) (characteristic model.Characteristic, err error)
+	GetConcept(id string) (concept model.Concept, err error)
+	GetConceptIdOfFunction(id string) string
 }
 
 type CharacteristicId = string
 
 type Converter interface {
 	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
+	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []model.ConverterExtensions) (out interface{}, err error)
 }
 
 func (this *Marshaller) GetInputPaths(service model.Service, functionId string, aspectNode *model.AspectNode) (result []string) {

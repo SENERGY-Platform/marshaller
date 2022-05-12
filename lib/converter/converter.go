@@ -19,6 +19,7 @@ package converter
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/url"
 )
 
@@ -40,5 +41,20 @@ func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to
 		return out, err
 	}
 	err = token.PostJSON(this.config.ConverterUrl+"/conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), in, &out)
+	return out, err
+}
+
+func (this *Converter) CastWithExtension(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId, extensions []model.ConverterExtensions) (out interface{}, err error) {
+	if from == to {
+		return in, nil
+	}
+	token, err := this.access.Ensure()
+	if err != nil {
+		return out, err
+	}
+	err = token.PostJSON(this.config.ConverterUrl+"/extended-conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), map[string]interface{}{
+		"input":      in,
+		"extensions": extensions,
+	}, &out)
 	return out, err
 }
