@@ -54,7 +54,7 @@ type Concept struct {
 	CharacteristicIds    []string                            `json:"characteristic_ids"`
 	BaseCharacteristicId string                              `json:"base_characteristic_id"`
 	RdfType              string                              `json:"rdf_type"`
-	ConverterExtensions  []convertermodel.ConverterExtension `json:"converter_extensions"`
+	Conversions          []convertermodel.ConverterExtension `json:"conversions"`
 }
 
 type Characteristic struct {

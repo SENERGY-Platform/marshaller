@@ -95,7 +95,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 				if err != nil {
 					return variable, err
 				}
-				castExtensions = concept.ConverterExtensions
+				castExtensions = concept.Conversions
 			}
 		}
 		if len(castExtensions) == 0 {
