@@ -18,6 +18,7 @@ package v2
 
 import (
 	"errors"
+	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
 	"runtime/debug"
@@ -51,7 +52,8 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 	}
 
 	//convert service/variable characteristic to wanted characteristic
-	pathToCharacteristic := this.getPathToCharacteristicFromContents(service.Outputs)
+	pathToCharacteristic := getPathToCharacteristicFromContents(service.Outputs)
+	pathToFunction := getPathToFunctionFromContents(service.Outputs)
 	variableCharacteristic, ok := pathToCharacteristic[path]
 	if !ok {
 		return result, errors.New("path not found in service")
@@ -65,7 +67,23 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 	if variableCharacteristic == characteristicId {
 		return value, nil
 	} else {
-		return this.converter.Cast(value, variableCharacteristic, characteristicId)
+		castExtensions := []convertermodel.ConverterExtension{}
+		functionId := pathToFunction[path]
+		if functionId != "" {
+			conceptId := this.characteristics.GetConceptIdOfFunction(functionId)
+			if conceptId != "" {
+				concept, err := this.characteristics.GetConcept(conceptId)
+				if err != nil {
+					return nil, err
+				}
+				castExtensions = concept.Conversions
+			}
+		}
+		if len(castExtensions) == 0 {
+			return this.converter.Cast(value, variableCharacteristic, characteristicId)
+		} else {
+			return this.converter.CastWithExtension(value, variableCharacteristic, characteristicId, castExtensions)
+		}
 	}
 }
 
@@ -104,23 +122,45 @@ func (this Marshaller) getPathToValueMapFromObj(startPath []string, value interf
 	return result
 }
 
-func (this *Marshaller) getPathToCharacteristicFromContents(content []model.Content) (result map[string]string) {
+func getPathToFunctionFromContents(content []model.Content) (result map[string]string) {
 	result = map[string]string{}
 	for _, c := range content {
-		for key, value := range this.getPathToCharacteristicFromVariable([]string{}, c.ContentVariable) {
+		temp := walkPathToMap(
+			[]string{},
+			c.ContentVariable, func(v model.ContentVariable) string { return v.Name },
+			func(v model.ContentVariable) string { return v.FunctionId },
+			func(v model.ContentVariable) []model.ContentVariable { return v.SubContentVariables },
+		)
+		for key, value := range temp {
 			result[key] = value
 		}
 	}
 	return result
 }
 
-func (this *Marshaller) getPathToCharacteristicFromVariable(startPath []string, variable model.ContentVariable) (result map[string]string) {
-	startPath = append(startPath, variable.Name)
-	result = map[string]string{
-		strings.Join(startPath, "."): variable.CharacteristicId,
+func getPathToCharacteristicFromContents(content []model.Content) (result map[string]string) {
+	result = map[string]string{}
+	for _, c := range content {
+		temp := walkPathToMap(
+			[]string{},
+			c.ContentVariable, func(v model.ContentVariable) string { return v.Name },
+			func(v model.ContentVariable) string { return v.CharacteristicId },
+			func(v model.ContentVariable) []model.ContentVariable { return v.SubContentVariables },
+		)
+		for key, value := range temp {
+			result[key] = value
+		}
 	}
-	for _, sub := range variable.SubContentVariables {
-		for subPath, subValue := range this.getPathToCharacteristicFromVariable(startPath, sub) {
+	return result
+}
+
+func walkPathToMap[Element any, PathElement func(Element) string, Field func(Element) FieldType, FieldType any, Sub func(Element) []Element](startPath []string, element Element, pathElement PathElement, field Field, sub Sub) (result map[string]FieldType) {
+	startPath = append(startPath, pathElement(element))
+	result = map[string]FieldType{
+		strings.Join(startPath, "."): field(element),
+	}
+	for _, subElement := range sub(element) {
+		for subPath, subValue := range walkPathToMap(startPath, subElement, pathElement, field, sub) {
 			result[subPath] = subValue
 		}
 	}
