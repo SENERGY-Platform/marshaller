@@ -8,6 +8,8 @@ github.com/RyanCarrier/dijkstra-1 v0.0.0-20170512020943-0e5801a26345 h1:fgSpoKVi
 github.com/RyanCarrier/dijkstra-1 v0.0.0-20170512020943-0e5801a26345/go.mod h1:OK4EvWJ441LQqGzed5NGB6vKBAE34n3z7iayPcEwr30=
 github.com/SENERGY-Platform/converter v0.0.0-20220516061431-8ae63b7fc0f8 h1:f5WPBtq+ysbyfXKJPpVsBKahDVHC61AXDX4CPBpZIIo=
 github.com/SENERGY-Platform/converter v0.0.0-20220516061431-8ae63b7fc0f8/go.mod h1:tNlmWollEzd2MTSMoPf2u+GXKakZnW/4v1iUxxm8YI4=
+github.com/SENERGY-Platform/converter v0.0.0-20220615132512-af1a6e3dceab h1:X/UFTt15hsXoNBt0OGjj79JceDOmpala0veJcHKLjBw=
+github.com/SENERGY-Platform/converter v0.0.0-20220615132512-af1a6e3dceab/go.mod h1:tNlmWollEzd2MTSMoPf2u+GXKakZnW/4v1iUxxm8YI4=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72 h1:uGeGZl8PxSq8VZGG4QK5njJTFA4/G/x5CYORvQVXtAE=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72/go.mod h1:o+JdB7VetTHjLhU0N57x18B9voDBQe0paApdEAEoEfw=
 github.com/cespare/xxhash v1.1.0 h1:a6HrQnmkObjyL+Gs60czilIUGqrzKutQD6XZog3p+ko=
