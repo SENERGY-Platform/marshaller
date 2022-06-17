@@ -47,7 +47,7 @@ func (this *Marshaller) setContentVariableValues(inputs []model.Content, paths [
 	for _, path := range paths {
 		pathParts := strings.Split(path, ".")
 		for _, input := range inputs {
-			input.ContentVariable, err = this.setContentVariableValue(input.ContentVariable, []string{}, pathParts, characteristic, value)
+			input.ContentVariable, err = this.setContentVariableValue(input.ContentVariable, []string{}, pathParts, characteristic, value, nil)
 			if err != nil {
 				return result, err
 			}
@@ -57,7 +57,10 @@ func (this *Marshaller) setContentVariableValues(inputs []model.Content, paths [
 	return result, nil
 }
 
-func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, currentPath []string, pathParts []string, characteristic string, value interface{}) (model.ContentVariable, error) {
+func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, currentPath []string, pathParts []string, characteristic string, value interface{}, rewrittenCharacteristics *map[string]model.Characteristic) (model.ContentVariable, error) {
+	if rewrittenCharacteristics == nil {
+		rewrittenCharacteristics = &map[string]model.Characteristic{}
+	}
 	currentPath = append(currentPath, variable.Name)
 	index := len(currentPath) - 1
 	//searched path is shorter than current path
@@ -73,7 +76,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	//not at the end of the correct path
 	if len(currentPath) < len(pathParts) {
 		for i, sub := range variable.SubContentVariables {
-			variable.SubContentVariables[i], err = this.setContentVariableValue(sub, currentPath, pathParts, characteristic, value)
+			variable.SubContentVariables[i], err = this.setContentVariableValue(sub, currentPath, pathParts, characteristic, value, rewrittenCharacteristics)
 			if err != nil {
 				return variable, err
 			}
@@ -121,10 +124,13 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	//handle complex variables/data-structures like rgb
 	if variable.CharacteristicId != "" && (variable.Type == model.Structure || variable.Type == model.List) {
 		if variable.Type == model.List && len(variable.SubContentVariables) == 1 && variable.SubContentVariables[0].Name == "*" {
-			variable, err = this.rewriteSubVariablesForList(variable)
+			variable, err = this.rewriteSubVariablesForList(variable, rewrittenCharacteristics)
+			if err != nil {
+				return variable, err
+			}
 		}
 		characteristicToVariablePath := getCharacteristicToPaths(variable, []string{})
-		targetCharacteristic, err := this.characteristics.GetCharacteristic(variable.CharacteristicId)
+		targetCharacteristic, err := this.getRewrittenCharacteristic(rewrittenCharacteristics, variable.CharacteristicId)
 		if err != nil {
 			return variable, err
 		}
@@ -133,11 +139,18 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 			return variable, err
 		}
 		characteristicPathToValue := this.getPathToValueMapFromObj([]string{targetCharacteristic.Name}, normalizedValue)
+		if targetCharacteristic.Type == model.List && len(targetCharacteristic.SubCharacteristics) == 1 && targetCharacteristic.SubCharacteristics[0].Name == "*" {
+			targetCharacteristic, err = this.rewriteSubCharacteristicForList(targetCharacteristic, characteristicPathToValue)
+			if err != nil {
+				return variable, err
+			}
+			this.setRewrittenCharacteristic(rewrittenCharacteristics, targetCharacteristic)
+		}
 		variablePathToCharacteristicsValue := getVariablePathToCharacteristicsValue(targetCharacteristic, []string{}, characteristicToVariablePath, characteristicPathToValue)
 		for subPath, subValue := range variablePathToCharacteristicsValue {
 			subPathParts := strings.Split(subPath, ".")
 			if !reflect.DeepEqual(currentPath, subPathParts) {
-				variable, err = this.setContentVariableValue(variable, []string{}, subPathParts, "", subValue)
+				variable, err = this.setContentVariableValue(variable, []string{}, subPathParts, "", subValue, rewrittenCharacteristics)
 				if err != nil {
 					return variable, err
 				}
@@ -149,12 +162,26 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	return variable, nil
 }
 
-func (this *Marshaller) rewriteSubVariablesForList(variable model.ContentVariable) (model.ContentVariable, error) {
+func (this *Marshaller) getRewrittenCharacteristic(characteristics *map[string]model.Characteristic, id string) (characteristic model.Characteristic, err error) {
+	if characteristic, ok := (*characteristics)[id]; ok {
+		return characteristic, nil
+	}
+	return this.characteristics.GetCharacteristic(id)
+}
+
+func (this *Marshaller) setRewrittenCharacteristic(characteristics *map[string]model.Characteristic, characteristic model.Characteristic) {
+	(*characteristics)[characteristic.Id] = characteristic
+	for _, sub := range characteristic.SubCharacteristics {
+		(*characteristics)[sub.Id] = sub
+	}
+}
+
+func (this *Marshaller) rewriteSubVariablesForList(variable model.ContentVariable, rewrittenCharacteristics *map[string]model.Characteristic) (model.ContentVariable, error) {
 	if variable.Type != model.List || len(variable.SubContentVariables) != 1 || variable.SubContentVariables[0].Name != "*" {
 		return variable, nil
 	}
 	characteristicToVariablePath := getCharacteristicToPaths(variable, []string{})
-	targetCharacteristic, err := this.characteristics.GetCharacteristic(variable.CharacteristicId)
+	targetCharacteristic, err := this.getRewrittenCharacteristic(rewrittenCharacteristics, variable.CharacteristicId)
 	if err != nil {
 		return variable, err
 	}
@@ -163,6 +190,13 @@ func (this *Marshaller) rewriteSubVariablesForList(variable model.ContentVariabl
 		return variable, err
 	}
 	characteristicPathToValue := this.getPathToValueMapFromObj([]string{targetCharacteristic.Name}, normalizedValue)
+	if targetCharacteristic.Type == model.List && len(targetCharacteristic.SubCharacteristics) == 1 && targetCharacteristic.SubCharacteristics[0].Name == "*" {
+		targetCharacteristic, err = this.rewriteSubCharacteristicForList(targetCharacteristic, characteristicPathToValue)
+		if err != nil {
+			return variable, err
+		}
+		this.setRewrittenCharacteristic(rewrittenCharacteristics, targetCharacteristic)
+	}
 	variablePathToCharacteristicsValue := getVariablePathToCharacteristicsValue(targetCharacteristic, []string{}, characteristicToVariablePath, characteristicPathToValue)
 
 	variableValue, ok := variablePathToCharacteristicsValue[variable.Name]
@@ -174,15 +208,41 @@ func (this *Marshaller) rewriteSubVariablesForList(variable model.ContentVariabl
 		return variable, nil
 	}
 
-	log.Println(variablePathToCharacteristicsValue)
 	orig := variable.SubContentVariables[0]
 	variable.SubContentVariables = []model.ContentVariable{}
 	for i, _ := range list {
 		newSub := orig
 		newSub.Name = strconv.Itoa(i)
+		if newSub.CharacteristicId != "" {
+			newSub.CharacteristicId = newSub.CharacteristicId + "_" + newSub.Name
+		}
 		variable.SubContentVariables = append(variable.SubContentVariables, newSub)
 	}
 	return variable, nil
+}
+
+func (this *Marshaller) rewriteSubCharacteristicForList(characteristic model.Characteristic, characteristicPathToValue map[string]interface{}) (model.Characteristic, error) {
+	if characteristic.Type != model.List || len(characteristic.SubCharacteristics) != 1 || characteristic.SubCharacteristics[0].Name != "*" {
+		return characteristic, nil
+	}
+	variableValue, ok := characteristicPathToValue[characteristic.Name]
+	if !ok {
+		return characteristic, nil
+	}
+	list, ok := variableValue.([]interface{})
+	if !ok {
+		return characteristic, nil
+	}
+	orig := characteristic.SubCharacteristics[0]
+	characteristic.SubCharacteristics = []model.Characteristic{}
+
+	for i, _ := range list {
+		newSub := orig
+		newSub.Name = strconv.Itoa(i)
+		newSub.Id = newSub.Id + "_" + newSub.Name
+		characteristic.SubCharacteristics = append(characteristic.SubCharacteristics, newSub)
+	}
+	return characteristic, nil
 }
 
 func normalize(value interface{}) (result interface{}, err error) {
@@ -203,27 +263,12 @@ func getVariablePathToCharacteristicsValue(characteristic model.Characteristic, 
 	result = map[string]interface{}{}
 	currentPath = append(currentPath, characteristic.Name)
 	if paths, ok := characteristicToVariablePath[characteristic.Id]; ok {
-		if len(currentPath) > 0 && currentPath[len(currentPath)-1] == "*" {
-			for characteristicsPath, value := range characteristicPathToValue {
-				characteristicsPathParts := strings.Split(characteristicsPath, ".")
-				if len(characteristicsPathParts) > 0 && reflect.DeepEqual(characteristicsPathParts[:len(characteristicsPathParts)-1], currentPath[:len(currentPath)-1]) {
-					for _, path := range paths {
-						if _, ok := result[path]; !ok {
-							result[path] = value
-							break
-						}
-					}
-				}
-			}
-		} else {
-			currentPathStr := strings.Join(currentPath, ".")
-			if value, ok := characteristicPathToValue[currentPathStr]; ok {
-				for _, path := range paths {
-					result[path] = value
-				}
+		currentPathStr := strings.Join(currentPath, ".")
+		if value, ok := characteristicPathToValue[currentPathStr]; ok {
+			for _, path := range paths {
+				result[path] = value
 			}
 		}
-
 	}
 	for _, sub := range characteristic.SubCharacteristics {
 		for subPath, subValue := range getVariablePathToCharacteristicsValue(sub, currentPath, characteristicToVariablePath, characteristicPathToValue) {

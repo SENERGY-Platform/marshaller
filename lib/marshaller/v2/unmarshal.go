@@ -241,7 +241,7 @@ func (this *Marshaller) variableStructureToCharacteristicsStructure(variablePath
 
 	pseudoVariable := characteristicToPseudoVariable(characteristic)
 	for characteristicsPath, subValue := range characteristicsPathToValue {
-		pseudoVariable, err = this.setContentVariableValue(pseudoVariable, []string{}, strings.Split(characteristicsPath, "."), "", subValue)
+		pseudoVariable, err = this.setContentVariableValue(pseudoVariable, []string{}, strings.Split(characteristicsPath, "."), "", subValue, nil)
 		if err != nil {
 			return result, err
 		}
