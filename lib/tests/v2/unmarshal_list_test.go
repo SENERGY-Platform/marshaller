@@ -25,6 +25,82 @@ import (
 	"testing"
 )
 
+func TestUnmarshalListCharacteristic(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		Id:          "sid",
+		LocalId:     "slid",
+		Name:        "sname",
+		Interaction: model.EVENT_AND_REQUEST,
+		ProtocolId:  "p1",
+		Outputs: []model.Content{
+			{
+				Id: "content",
+				ContentVariable: model.ContentVariable{
+					Id:               "root",
+					Name:             "root",
+					Type:             model.Structure,
+					CharacteristicId: "urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440",
+					FunctionId:       "urn:infai:ses:measuring-function:ced44f01-7328-43e3-8db0-ecd12f448758",
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "segment_ids",
+							Name:             "segment_ids",
+							Type:             model.List,
+							CharacteristicId: "urn:infai:ses:characteristic:b0bf0d79-8a23-40d3-a284-2b87e38138be",
+							SubContentVariables: []model.ContentVariable{
+								{
+									Id:               "var",
+									Name:             "*",
+									Type:             model.String,
+									CharacteristicId: "urn:infai:ses:characteristic:802c79a9-c96b-4848-848c-bae29fb00375",
+								},
+							},
+						},
+						{
+							Id:               "iterations",
+							Name:             "iterations",
+							Type:             model.Integer,
+							CharacteristicId: "urn:infai:ses:characteristic:63769613-47bd-4bb9-9624-083669ee6261",
+						},
+						{
+							Id:               "customOrder",
+							Name:             "customOrder",
+							Type:             model.Boolean,
+							CharacteristicId: "urn:infai:ses:characteristic:aeacd820-8a9e-4a68-a4c6-412537bb8afb",
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	t.Run("test", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: "urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440",
+		Message:          map[string]string{"body": `{"customOrder":true,"iterations":1,"segment_ids":["1","2"]}`},
+		FunctionId:       "urn:infai:ses:measuring-function:ced44f01-7328-43e3-8db0-ecd12f448758",
+	}, map[string]interface{}{"iterations": float64(1), "customOrder": true, "segment_ids": []interface{}{"1", "2"}}))
+
+}
+
 func TestUnmarshalListIndexed(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()

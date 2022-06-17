@@ -265,6 +265,7 @@ func characteristicToPseudoVariable(characteristic model.Characteristic) model.C
 	}
 	return model.ContentVariable{
 		Name:                characteristic.Name,
+		CharacteristicId:    characteristic.Id,
 		Type:                variableType,
 		SubContentVariables: subVariables,
 	}
