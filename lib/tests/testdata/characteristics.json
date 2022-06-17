@@ -1,5 +1,52 @@
 [
     {
+        "display_unit":"",
+        "id":"urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440",
+        "name":"Segment Cleaning Information (Valetudo)",
+        "sub_characteristics":[
+            {
+                "display_unit":"",
+                "id":"urn:infai:ses:characteristic:b0bf0d79-8a23-40d3-a284-2b87e38138be",
+                "name":"segment_ids",
+                "sub_characteristics":[
+                    {
+                        "display_unit":"",
+                        "id":"urn:infai:ses:characteristic:802c79a9-c96b-4848-848c-bae29fb00375",
+                        "name":"*",
+                        "sub_characteristics":[
+
+                        ],
+                        "type":"https://schema.org/Text"
+                    }
+                ],
+                "type":"https://schema.org/ItemList"
+            },
+            {
+                "display_unit":"",
+                "id":"urn:infai:ses:characteristic:63769613-47bd-4bb9-9624-083669ee6261",
+                "max_value":4,
+                "min_value":1,
+                "name":"iterations",
+                "sub_characteristics":[
+
+                ],
+                "type":"https://schema.org/Integer",
+                "value":1
+            },
+            {
+                "display_unit":"",
+                "id":"urn:infai:ses:characteristic:aeacd820-8a9e-4a68-a4c6-412537bb8afb",
+                "name":"customOrder",
+                "sub_characteristics":[
+
+                ],
+                "type":"https://schema.org/Boolean",
+                "value":true
+            }
+        ],
+        "type":"https://schema.org/StructuredValue"
+    },
+    {
         "display_unit": "µg/m³",
         "id": "urn:infai:ses:characteristic:f6b7ee6e-423c-47f1-8b1f-c489461d3039",
         "name": "benzene µg/m³",

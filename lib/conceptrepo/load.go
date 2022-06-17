@@ -94,6 +94,7 @@ func (this *ConceptRepo) register(concept model.Concept, characteristics []model
 		this.rootCharacteristicByCharacteristic[characteristic.Id] = characteristic
 		for _, descendent := range getCharacteristicDescendents(characteristic) {
 			this.rootCharacteristicByCharacteristic[descendent.Id] = characteristic
+			this.characteristics[descendent.Id] = descendent
 		}
 	}
 	this.concepts[concept.Id] = concept

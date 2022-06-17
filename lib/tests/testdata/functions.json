@@ -1,5 +1,35 @@
 [
     {
+        "concept_id":"urn:infai:ses:concept:70b40193-0bed-404c-86ec-5ebe9462712e",
+        "creator":"dd69ea0d-f553-4336-80f3-7f4567f85c7b",
+        "description":"",
+        "display_name":"Start Segment Cleaning",
+        "id":"urn:infai:ses:controlling-function:ced44f01-7328-43e3-8db0-ecd12f448758",
+        "name":"Set Start Segment Cleaning",
+        "permission_holders":{
+            "admin_users":[
+                "dd69ea0d-f553-4336-80f3-7f4567f85c7b"
+            ],
+            "execute_users":[
+                "dd69ea0d-f553-4336-80f3-7f4567f85c7b"
+            ],
+            "read_users":[
+                "dd69ea0d-f553-4336-80f3-7f4567f85c7b"
+            ],
+            "write_users":[
+                "dd69ea0d-f553-4336-80f3-7f4567f85c7b"
+            ]
+        },
+        "permissions":{
+            "a":true,
+            "r":true,
+            "w":true,
+            "x":true
+        },
+        "rdf_type":"",
+        "shared":false
+    },
+    {
         "concept_id":"urn:infai:ses:concept:ebfeabb3-50f0-44bd-b06e-95eb52df484e",
         "creator":"dd69ea0d-f553-4336-80f3-7f4567f85c7b",
         "description":"Checks if an alarm is triggered",

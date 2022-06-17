@@ -1,5 +1,14 @@
 [
     {
+        "id":"urn:infai:ses:concept:70b40193-0bed-404c-86ec-5ebe9462712e",
+        "name":"Segment Cleaning Information",
+        "characteristic_ids":[
+            "urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440"
+        ],
+        "base_characteristic_id":"urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440",
+        "conversions":null
+    },
+    {
         "base_characteristic_id": "urn:infai:ses:characteristic:f6b7ee6e-423c-47f1-8b1f-c489461d3039",
         "characteristic_ids": [
             "urn:infai:ses:characteristic:f6b7ee6e-423c-47f1-8b1f-c489461d3039"
