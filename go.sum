@@ -12,6 +12,8 @@ github.com/SENERGY-Platform/converter v0.0.0-20220727105823-2d11887c48ce h1:YO6R
 github.com/SENERGY-Platform/converter v0.0.0-20220727105823-2d11887c48ce/go.mod h1:tNlmWollEzd2MTSMoPf2u+GXKakZnW/4v1iUxxm8YI4=
 github.com/SENERGY-Platform/converter v0.0.0-20220810061609-f83ba3b15186 h1:FffNFJ9/aLja70MGn2kMdsDRIHL1xLEhZSw4YV7S+bQ=
 github.com/SENERGY-Platform/converter v0.0.0-20220810061609-f83ba3b15186/go.mod h1:tNlmWollEzd2MTSMoPf2u+GXKakZnW/4v1iUxxm8YI4=
+github.com/SENERGY-Platform/converter v0.0.0-20220810123448-27fbbf6ab679 h1:73IwfEYhENSbwB/OnBQ4zTg9F31pYacy1l4oY5kgHAM=
+github.com/SENERGY-Platform/converter v0.0.0-20220810123448-27fbbf6ab679/go.mod h1:tNlmWollEzd2MTSMoPf2u+GXKakZnW/4v1iUxxm8YI4=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72 h1:uGeGZl8PxSq8VZGG4QK5njJTFA4/G/x5CYORvQVXtAE=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72/go.mod h1:o+JdB7VetTHjLhU0N57x18B9voDBQe0paApdEAEoEfw=
 github.com/cespare/xxhash v1.1.0 h1:a6HrQnmkObjyL+Gs60czilIUGqrzKutQD6XZog3p+ko=

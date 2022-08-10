@@ -75,5 +75,5 @@ type ExtensionCall struct {
 
 type ExtensionCallResponse struct {
 	Output interface{} `json:"output"`
-	Error  error       `json:"error,omitempty"`
+	Error  string      `json:"error,omitempty"`
 }
