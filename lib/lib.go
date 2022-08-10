@@ -55,7 +55,7 @@ func Start(ctx context.Context, conf config.Config) (closed context.Context, err
 
 	marshallerV2 := v2.New(conf, converter, conceptRepo)
 
-	closed = api.Start(childCtx, conf, marshaller, marshallerV2, configurableService, devicerepo)
+	closed = api.Start(childCtx, conf, marshaller, marshallerV2, configurableService, devicerepo, converter)
 	go func() {
 		<-closed.Done()
 		cancel()

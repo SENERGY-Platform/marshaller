@@ -37,7 +37,7 @@ func setup(ctx context.Context, done *sync.WaitGroup) (serverUrl string) {
 	marshallerv2 := v2.New(config.Config{ReturnUnknownPathAsNull: true, Debug: true}, mocks.Converter{}, conceptRepo)
 	configurableService := configurables.New(conceptRepo)
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo))
+	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil))
 	serverUrl = server.URL
 	go func() {
 		<-ctx.Done()

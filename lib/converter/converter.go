@@ -58,3 +58,22 @@ func (this *Converter) CastWithExtension(in interface{}, from marshaller.Charact
 	}, &out)
 	return out, err
 }
+
+func (this *Converter) TryExtension(call ExtensionCall) (resp ExtensionCallResponse, err error) {
+	token, err := this.access.Ensure()
+	if err != nil {
+		return resp, err
+	}
+	err = token.PostJSON(this.config.ConverterUrl+"/extension-call", call, &resp)
+	return resp, err
+}
+
+type ExtensionCall struct {
+	Input     interface{}                       `json:"input"`
+	Extension convertermodel.ConverterExtension `json:"extension"`
+}
+
+type ExtensionCallResponse struct {
+	Output interface{} `json:"output"`
+	Error  error       `json:"error,omitempty"`
+}
