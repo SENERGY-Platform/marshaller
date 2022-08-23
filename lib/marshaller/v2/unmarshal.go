@@ -101,7 +101,7 @@ func substitudeVariableLenPlaceholderInPath(path string) string {
 	return path
 }
 
-func (this Marshaller) getPathToValueMapFromObj(startPath []string, value interface{}) (result map[string]interface{}) {
+func (this *Marshaller) getPathToValueMapFromObj(startPath []string, value interface{}) (result map[string]interface{}) {
 	result = map[string]interface{}{
 		strings.Join(startPath, "."): value,
 	}

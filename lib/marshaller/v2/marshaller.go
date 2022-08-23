@@ -20,6 +20,7 @@ import (
 	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"sort"
 	"strings"
 )
 
@@ -59,32 +60,54 @@ func (this *Marshaller) GetOutputPaths(service model.Service, functionId string,
 }
 
 func (this *Marshaller) getPathsFromContentsByCriteria(contents []model.Content, functionId string, aspectNode *model.AspectNode) (result []string) {
-	result = []string{}
+	withDistance := []pathWithDistance{}
 	for _, c := range contents {
-		subResults := this.getPathsFromVariableByCriteria(c.ContentVariable, functionId, aspectNode, []string{})
+		subResults := this.getPathsFromVariableByCriteriaWithDistance(c.ContentVariable, functionId, aspectNode, []string{})
 		if len(subResults) > 0 {
-			result = append(result, subResults...)
+			withDistance = append(withDistance, subResults...)
 		}
+	}
+	sort.Slice(withDistance, func(i, j int) bool {
+		return withDistance[i].distance < withDistance[j].distance
+	})
+	for _, element := range withDistance {
+		result = append(result, element.path)
 	}
 	return result
 }
 
-func (this *Marshaller) getPathsFromVariableByCriteria(variable model.ContentVariable, functionId string, aspectNode *model.AspectNode, currentPath []string) (result []string) {
+type pathWithDistance struct {
+	path     string
+	distance int
+}
+
+func (this *Marshaller) getPathsFromVariableByCriteriaWithDistance(variable model.ContentVariable, functionId string, aspectNode *model.AspectNode, currentPath []string) (result []pathWithDistance) {
 	currentPath = append(currentPath, variable.Name)
-	result = []string{}
-	aspectMatches := false
-	if aspectNode == nil || variable.AspectId == aspectNode.Id || contains(aspectNode.DescendentIds, variable.AspectId) {
-		aspectMatches = true
+	result = []pathWithDistance{}
+	aspectDistanceLevel := -1
+	if aspectNode == nil {
+		aspectDistanceLevel = 0
+	} else if variable.AspectId == aspectNode.Id {
+		aspectDistanceLevel = 0
+	} else if contains(aspectNode.ChildIds, variable.AspectId) {
+		aspectDistanceLevel = 1
+	} else if contains(aspectNode.DescendentIds, variable.AspectId) {
+		aspectDistanceLevel = 2
 	}
 	functionMatches := false
 	if functionId == "" || variable.FunctionId == functionId {
 		functionMatches = true
 	}
-	if aspectMatches && functionMatches {
-		return []string{strings.Join(currentPath, ".")}
+	if aspectDistanceLevel > -1 && functionMatches {
+		return []pathWithDistance{
+			{
+				path:     strings.Join(currentPath, "."),
+				distance: aspectDistanceLevel,
+			},
+		}
 	}
 	for _, sub := range variable.SubContentVariables {
-		subResults := this.getPathsFromVariableByCriteria(sub, functionId, aspectNode, currentPath)
+		subResults := this.getPathsFromVariableByCriteriaWithDistance(sub, functionId, aspectNode, currentPath)
 		if len(subResults) > 0 {
 			result = append(result, subResults...)
 		}
