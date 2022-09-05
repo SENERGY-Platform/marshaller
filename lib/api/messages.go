@@ -58,10 +58,12 @@ type UnmarshallingRequest struct {
 }
 
 type UnmarshallingV2Request struct {
-	Service          model.Service     `json:"service"`           //semi-optional, may be determined by request path
-	Protocol         model.Protocol    `json:"protocol"`          //semi-optional, may be determined by service
-	CharacteristicId string            `json:"characteristic_id"` //semi-optional, may be determined by request path
-	Message          map[string]string `json:"message"`
+	Service          model.Service  `json:"service"`           //semi-optional, may be determined by request path
+	Protocol         model.Protocol `json:"protocol"`          //semi-optional, may be determined by service
+	CharacteristicId string         `json:"characteristic_id"` //semi-optional, may be determined by request path
+
+	Message          map[string]string      `json:"message"`           //semi-optional; may be needed to create serialized_output
+	SerializedOutput map[string]interface{} `json:"serialized_output"` //semi-optional; may be created from message
 
 	Path         string           `json:"path"`           //semi-optional, may be determent by FunctionId and AspectNode
 	FunctionId   string           `json:"function_id"`    //semi-optional, to determine Path if not set

@@ -28,13 +28,16 @@ import (
 
 var PathNotFoundInMessage = errors.New("path not found in message")
 
-func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service, characteristicId string, path string, msg map[string]string) (result interface{}, err error) {
+func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service, characteristicId string, path string, msg map[string]string, outputObjectMap map[string]interface{}) (result interface{}, err error) {
 	path = substitudeVariableLenPlaceholderInPath(path)
 
-	outputObjectMap, err := serializeOutput(msg, service, protocol)
-	if err != nil {
-		return result, err
+	if outputObjectMap == nil || len(outputObjectMap) == 0 {
+		outputObjectMap, err = serializeOutput(msg, service, protocol)
+		if err != nil {
+			return result, err
+		}
 	}
+
 	pathToValue := this.getPathToValueMapFromObj([]string{}, outputObjectMap)
 	value, ok := pathToValue[path]
 	if !ok {

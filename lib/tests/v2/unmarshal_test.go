@@ -252,6 +252,7 @@ func TestUnmarshalling(t *testing.T) {
 	}
 
 	output := map[string]string{"body": `{"inside":400,"outside":500}`}
+	serializedOutput := map[string]interface{}{"temperature": map[string]interface{}{"inside": 400, "outside": 500}}
 
 	t.Run("inside path", testUnmarshal(apiurl, api.UnmarshallingV2Request{
 		Service:          service,
@@ -308,6 +309,66 @@ func TestUnmarshalling(t *testing.T) {
 		Service:          service,
 		Protocol:         protocol,
 		Message:          output,
+		CharacteristicId: characteristics.Celsius,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "inside_air",
+	}, 400.0))
+
+	t.Run("inside path serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Kelvin,
+		SerializedOutput: serializedOutput,
+		Path:             "temperature.inside",
+	}, 673.15))
+
+	t.Run("outside path serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Kelvin,
+		SerializedOutput: serializedOutput,
+		Path:             "temperature.outside",
+	}, 773.15))
+
+	t.Run("inside criteria serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Kelvin,
+		SerializedOutput: serializedOutput,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "inside_air",
+	}, 673.15))
+
+	t.Run("outside criteria serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Kelvin,
+		SerializedOutput: serializedOutput,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "outside_air",
+	}, 773.15))
+
+	t.Run("air criteria serialized", testUnmarshalAny(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Kelvin,
+		SerializedOutput: serializedOutput,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "air",
+	}, []interface{}{673.15, 773.15}))
+
+	t.Run("inside no cast serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		SerializedOutput: serializedOutput,
+		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
+		AspectNodeId:     "inside_air",
+	}, 400.0))
+
+	t.Run("inside °C serialized", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		SerializedOutput: serializedOutput,
 		CharacteristicId: characteristics.Celsius,
 		FunctionId:       model.MEASURING_FUNCTION_PREFIX + "getTemperature",
 		AspectNodeId:     "inside_air",
