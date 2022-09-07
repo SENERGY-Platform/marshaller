@@ -19,8 +19,9 @@ package devicerepository
 import (
 	"encoding/json"
 	"errors"
-	"github.com/coocood/freecache"
+	"github.com/patrickmn/go-cache"
 	"log"
+	"time"
 )
 
 var CacheExpiration = 60      // 60sec
@@ -28,7 +29,7 @@ var L1Size = 20 * 1024 * 1024 //20MB
 var Debug = false
 
 type Cache struct {
-	l1 *freecache.Cache
+	l1 *cache.Cache
 }
 
 type Item struct {
@@ -39,22 +40,25 @@ type Item struct {
 var ErrNotFound = errors.New("key not found in cache")
 
 func NewCache() *Cache {
-	return &Cache{l1: freecache.NewCache(L1Size)}
+	return &Cache{l1: cache.New(time.Duration(CacheExpiration)*time.Second, time.Duration(CacheExpiration)*time.Second)}
 }
 
 func (this *Cache) get(key string) (value []byte, err error) {
-	value, err = this.l1.Get([]byte(key))
-	if err == freecache.ErrNotFound {
+	temp, found := this.l1.Get(key)
+	if !found {
 		err = ErrNotFound
+	} else {
+		var ok bool
+		value, ok = temp.([]byte)
+		if !ok {
+			err = errors.New("unable to interprete cache result")
+		}
 	}
 	return
 }
 
 func (this *Cache) set(key string, value []byte) {
-	err := this.l1.Set([]byte(key), value, CacheExpiration)
-	if err != nil {
-		log.Println("WARNING: err in LocalCache::l1.Set()", err)
-	}
+	this.l1.Set(key, value, time.Duration(CacheExpiration)*time.Second)
 	return
 }
 func (this *Cache) Use(key string, getter func() (interface{}, error), result interface{}) (err error) {
