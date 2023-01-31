@@ -3,13 +3,15 @@ module github.com/SENERGY-Platform/marshaller
 go 1.19
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.0-20220810123448-27fbbf6ab679
+	github.com/SENERGY-Platform/converter v0.0.0-20230131075057-f47029811afa
 	github.com/clbanning/mxj v1.8.4
-	github.com/google/uuid v1.1.1
 	github.com/julienschmidt/httprouter v1.3.0
 )
 
-require github.com/patrickmn/go-cache v2.1.0+incompatible
+require (
+	github.com/SENERGY-Platform/models/go v0.0.0-20230105115534-8edcf0271764
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+)
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect

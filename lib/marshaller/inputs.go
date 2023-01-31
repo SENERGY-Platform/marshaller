@@ -23,6 +23,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
+	"github.com/SENERGY-Platform/models/go/models"
 	"log"
 	"reflect"
 	"runtime/debug"
@@ -69,7 +70,7 @@ func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Ser
 	return result, err
 }
 
-func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId string) (result string, err error) {
+func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId models.Serialization) (result string, err error) {
 	inputCharacteristic, err := this.ConceptRepo.GetCharacteristic(inputCharacteristicId)
 	if err != nil {
 		return result, err
@@ -156,7 +157,7 @@ func getVariableCharacteristics(variable model.ContentVariable) (result []Charac
 	return result
 }
 
-func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristicValue interface{}, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId string) (result string, err error) {
+func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristicValue interface{}, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId models.Serialization) (result string, err error) {
 	serviceCharacteristicValue := inputCharacteristicValue
 	serviceCharacteristicValue, err = this.converter.Cast(inputCharacteristicValue, inputCharacteristic.Id, serviceCharacteristic.Id)
 	if err != nil {
@@ -176,7 +177,7 @@ func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristi
 
 	marshaller, ok := serialization.Get(serializationId)
 	if !ok {
-		return result, errors.New("unknown serialization " + serializationId)
+		return result, errors.New("unknown serialization " + string(serializationId))
 	}
 
 	normalized, err = normalize(serviceVariableValue)

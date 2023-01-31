@@ -18,14 +18,14 @@ package mocks
 
 import (
 	converterService "github.com/SENERGY-Platform/converter/lib/converter"
-	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
+	"github.com/SENERGY-Platform/models/go/models"
 )
 
 type Converter struct{}
 
-func (this Converter) CastWithExtension(in interface{}, from v2.CharacteristicId, to v2.CharacteristicId, extensions []convertermodel.ConverterExtension) (out interface{}, err error) {
+func (this Converter) CastWithExtension(in interface{}, from v2.CharacteristicId, to v2.CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error) {
 	converter, err := converterService.New()
 	if err != nil {
 		return nil, err

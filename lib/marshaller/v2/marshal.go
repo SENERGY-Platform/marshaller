@@ -19,9 +19,9 @@ package v2
 import (
 	"encoding/json"
 	"errors"
-	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
+	"github.com/SENERGY-Platform/models/go/models"
 	"log"
 	"math"
 	"reflect"
@@ -90,7 +90,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	}
 
 	if characteristic != "" && variable.CharacteristicId != characteristic {
-		castExtensions := []convertermodel.ConverterExtension{}
+		castExtensions := []models.ConverterExtension{}
 		if variable.FunctionId != "" {
 			conceptId := this.characteristics.GetConceptIdOfFunction(variable.FunctionId)
 			if conceptId != "" {
@@ -302,7 +302,7 @@ func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []mode
 			}
 			s, ok := serialization.Get(input.Serialization)
 			if !ok {
-				return result, errors.New("unknown serialization " + input.Serialization)
+				return result, errors.New("unknown serialization " + string(input.Serialization))
 			}
 			segmentName := ""
 			for _, segment := range protocol.ProtocolSegments {

@@ -21,8 +21,9 @@ import (
 	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/json"
 	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/plaintext"
 	_ "github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/xml"
+	"github.com/SENERGY-Platform/models/go/models"
 )
 
-func Get(key string) (marshaller base.Marshaller, ok bool) {
+func Get(key models.Serialization) (marshaller base.Marshaller, ok bool) {
 	return base.Get(key)
 }

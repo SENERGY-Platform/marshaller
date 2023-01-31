@@ -18,9 +18,9 @@ package v2
 
 import (
 	"errors"
-	convertermodel "github.com/SENERGY-Platform/converter/lib/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
+	"github.com/SENERGY-Platform/models/go/models"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -70,7 +70,7 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 	if variableCharacteristic == characteristicId {
 		return value, nil
 	} else {
-		castExtensions := []convertermodel.ConverterExtension{}
+		castExtensions := []models.ConverterExtension{}
 		functionId := pathToFunction[path]
 		if functionId != "" {
 			conceptId := this.characteristics.GetConceptIdOfFunction(functionId)
@@ -180,7 +180,7 @@ func serializeOutput(output map[string]string, service model.Service, protocol m
 					marshaller, ok := serialization.Get(content.Serialization)
 					if !ok {
 						debug.PrintStack()
-						return result, errors.New("unknown serialization " + content.Serialization)
+						return result, errors.New("unknown serialization " + string(content.Serialization))
 					}
 					value, err := marshaller.Unmarshal(output, content.ContentVariable)
 					if err != nil {

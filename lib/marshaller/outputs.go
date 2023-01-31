@@ -102,7 +102,7 @@ func serializeOutput(output map[string]string, service model.Service, protocol m
 					marshaller, ok := serialization.Get(content.Serialization)
 					if !ok {
 						debug.PrintStack()
-						return result, errors.New("unknown serialization " + content.Serialization)
+						return result, errors.New("unknown serialization " + string(content.Serialization))
 					}
 					value, err := marshaller.Unmarshal(output, content.ContentVariable)
 					if err != nil {

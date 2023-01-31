@@ -18,6 +18,7 @@ package base
 
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/models/go/models"
 	"sync"
 )
 
@@ -26,17 +27,17 @@ type Marshaller interface {
 	Unmarshal(in string, variable model.ContentVariable) (out interface{}, err error)
 }
 
-var Marshallers = map[string]Marshaller{}
+var Marshallers = map[models.Serialization]Marshaller{}
 
 var mux = sync.Mutex{}
 
-func Register(key string, marshaller Marshaller) {
+func Register(key models.Serialization, marshaller Marshaller) {
 	mux.Lock()
 	defer mux.Unlock()
 	Marshallers[key] = marshaller
 }
 
-func Get(key string) (marshaller Marshaller, ok bool) {
+func Get(key models.Serialization) (marshaller Marshaller, ok bool) {
 	marshaller, ok = Marshallers[key]
 	return
 }
