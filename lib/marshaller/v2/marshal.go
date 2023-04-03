@@ -89,6 +89,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 		return variable, errors.New("wtf")
 	}
 
+	variable.OmitEmpty = false
 	if characteristic != "" && variable.CharacteristicId != characteristic {
 		castExtensions := []models.ConverterExtension{}
 		if variable.FunctionId != "" {
@@ -295,7 +296,7 @@ func getCharacteristicToPaths(variable model.ContentVariable, currentPath []stri
 func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []model.Content) (result map[string]string, err error) {
 	result = map[string]string{}
 	for _, input := range inputs {
-		if !input.ContentVariable.IsVoid {
+		if !input.ContentVariable.IsVoid && !input.ContentVariable.OmitEmpty {
 			_, obj, err := contentVariableToObject(input.ContentVariable)
 			if err != nil {
 				return result, err
@@ -340,7 +341,7 @@ func contentVariableToObject(variable model.ContentVariable) (name string, obj i
 	case model.Structure:
 		temp := map[string]interface{}{}
 		for _, sub := range variable.SubContentVariables {
-			if !sub.IsVoid {
+			if !sub.IsVoid && !sub.OmitEmpty {
 				subName, subObj, err := contentVariableToObject(sub)
 				if err != nil {
 					return name, obj, err
@@ -352,7 +353,7 @@ func contentVariableToObject(variable model.ContentVariable) (name string, obj i
 	case model.List:
 		temp := make([]interface{}, len(variable.SubContentVariables))
 		for _, sub := range variable.SubContentVariables {
-			if !sub.IsVoid {
+			if !sub.IsVoid && !sub.OmitEmpty {
 				subName, subObj, err := contentVariableToObject(sub)
 				if err != nil {
 					return name, obj, err

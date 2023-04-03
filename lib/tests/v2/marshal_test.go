@@ -23,6 +23,7 @@ import (
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
 	"github.com/SENERGY-Platform/marshaller/lib/api"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/models/go/models"
 	"net/http"
 	"reflect"
 	"sync"
@@ -181,6 +182,130 @@ func TestMarshalling(t *testing.T) {
 			},
 		},
 	}, map[string]string{"body": `{"inside":27,"outside":27}`}))
+}
+
+func TestOmitEmptyMarshalling(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		LocalId:     "set",
+		Name:        "set",
+		Interaction: "request",
+		ProtocolId:  protocol.Id,
+		Inputs: []models.Content{
+			{
+				ContentVariable: models.ContentVariable{
+					Name:   "value",
+					IsVoid: false,
+					Type:   "https://schema.org/StructuredValue",
+					SubContentVariables: []models.ContentVariable{
+						{
+							Name:             "brightness",
+							IsVoid:           false,
+							Type:             "https://schema.org/Float",
+							OmitEmpty:        true,
+							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "brightnessF",
+							CharacteristicId: characteristics.Lux,
+						},
+						{
+							Name:             "color_temp",
+							IsVoid:           false,
+							Type:             "https://schema.org/Float",
+							OmitEmpty:        true,
+							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "colorTempF",
+							CharacteristicId: characteristics.Kelvin,
+						},
+						{
+							Name:      "color_temp_startup",
+							IsVoid:    false,
+							Type:      "https://schema.org/Float",
+							OmitEmpty: true,
+						},
+						{
+							Name:             "color",
+							IsVoid:           false,
+							Type:             "https://schema.org/StructuredValue",
+							OmitEmpty:        true,
+							FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setColorF",
+							CharacteristicId: characteristics.Hsb,
+							SubContentVariables: []models.ContentVariable{
+								{
+									Name:             "hue",
+									IsVoid:           false,
+									Type:             "https://schema.org/Float",
+									OmitEmpty:        true,
+									CharacteristicId: characteristics.HsbH,
+								},
+								{
+									Name:             "saturation",
+									IsVoid:           false,
+									Type:             "https://schema.org/Float",
+									OmitEmpty:        true,
+									CharacteristicId: characteristics.HsbS,
+								},
+								{
+									Name:      "x",
+									IsVoid:    false,
+									Type:      "https://schema.org/Float",
+									OmitEmpty: true,
+								},
+								{
+									Name:      "y",
+									IsVoid:    false,
+									Type:      "https://schema.org/Float",
+									OmitEmpty: true,
+								},
+							},
+						},
+						{
+							Name:      "state",
+							IsVoid:    false,
+							Type:      "https://schema.org/Text",
+							OmitEmpty: true,
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: protocol.ProtocolSegments[0].Id},
+		},
+	}
+
+	t.Run("brightness", testMarshal(apiurl, api.MarshallingV2Request{
+		Service:  service,
+		Protocol: protocol,
+		Data: []model.MarshallingV2RequestData{
+			{
+				Value:            300,
+				CharacteristicId: characteristics.Lux,
+				FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "brightnessF",
+			},
+		},
+	}, map[string]string{"body": `{"brightness":300}`}))
+
+	t.Run("color", testMarshal(apiurl, api.MarshallingV2Request{
+		Service:  service,
+		Protocol: protocol,
+		Data: []model.MarshallingV2RequestData{
+			{
+				Value:            "#ff00aa",
+				CharacteristicId: characteristics.Hex,
+				FunctionId:       model.CONTROLLING_FUNCTION_PREFIX + "setColorF",
+			},
+		},
+	}, map[string]string{"body": `{"color":{"hue":320,"saturation":100}}`}))
 }
 
 func testMarshal(apiurl string, request api.MarshallingV2Request, expectedResult map[string]string) func(t *testing.T) {

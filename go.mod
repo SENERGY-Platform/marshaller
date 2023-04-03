@@ -1,6 +1,6 @@
 module github.com/SENERGY-Platform/marshaller
 
-go 1.19
+go 1.20
 
 require (
 	github.com/SENERGY-Platform/converter v0.0.0-20230131075057-f47029811afa
@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/SENERGY-Platform/models/go v0.0.0-20230105115534-8edcf0271764
+	github.com/SENERGY-Platform/models/go v0.0.0-20230403105615-a0efbf7846f7
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 
@@ -21,3 +21,4 @@ require (
 )
 
 //replace github.com/SENERGY-Platform/converter => ../converter-service
+//replace github.com/SENERGY-Platform/models/go => ../models/go

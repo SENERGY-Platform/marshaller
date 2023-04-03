@@ -6,8 +6,8 @@ github.com/RyanCarrier/dijkstra-1 v0.0.0-20170512020943-0e5801a26345 h1:fgSpoKVi
 github.com/RyanCarrier/dijkstra-1 v0.0.0-20170512020943-0e5801a26345/go.mod h1:OK4EvWJ441LQqGzed5NGB6vKBAE34n3z7iayPcEwr30=
 github.com/SENERGY-Platform/converter v0.0.0-20230131075057-f47029811afa h1:HdmC4RNOBr5mPUacTjVDTZy+d8DN6yBcWwyGinUij0k=
 github.com/SENERGY-Platform/converter v0.0.0-20230131075057-f47029811afa/go.mod h1:zt1zxWefWjiLJ4TckwueZtyx3VfwQXVU/dTY/Qf3kAc=
-github.com/SENERGY-Platform/models/go v0.0.0-20230105115534-8edcf0271764 h1:myrBDPxjD0l1QUwYbqTcDqiIOCMaPLMHxkxpspYtEck=
-github.com/SENERGY-Platform/models/go v0.0.0-20230105115534-8edcf0271764/go.mod h1:GqfI+440B0Yz7NshAxm4PgVwRGcNqvbxddoB+xUa6HQ=
+github.com/SENERGY-Platform/models/go v0.0.0-20230403105615-a0efbf7846f7 h1:QgZdZK7m/f9nSGw4ae4INkDQ/Qe2OUpmSg6ir6Tz8UQ=
+github.com/SENERGY-Platform/models/go v0.0.0-20230403105615-a0efbf7846f7/go.mod h1:i02ckqNwm4VOjfqTu2ZBce5HlxvUSIomsC6WlD19ZSs=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72 h1:uGeGZl8PxSq8VZGG4QK5njJTFA4/G/x5CYORvQVXtAE=
 github.com/albertorestifo/dijkstra v0.0.0-20160910063646-aba76f725f72/go.mod h1:o+JdB7VetTHjLhU0N57x18B9voDBQe0paApdEAEoEfw=
 github.com/clbanning/mxj v1.8.4 h1:HuhwZtbyvyOw+3Z1AowPkU87JkJUSv751ELWaiTpj8I=
