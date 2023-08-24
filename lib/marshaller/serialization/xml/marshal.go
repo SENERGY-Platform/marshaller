@@ -18,10 +18,19 @@ package xml
 
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/clbanning/mxj"
+	"slices"
+	"strings"
 )
 
 func (Marshaller) Marshal(in interface{}, variable model.ContentVariable) (out string, err error) {
+	in, err = rewriteFieldNamesFromSerializationOptions(in, variable, func(name string, options []string) string {
+		if !strings.HasPrefix(name, "-") && slices.Contains(options, models.SerializationOptionXmlAttribute) {
+			name = "-" + name
+		}
+		return name
+	})
 	mv, ok := in.(map[string]interface{})
 	if !ok {
 		mv = map[string]interface{}{variable.Name: in}

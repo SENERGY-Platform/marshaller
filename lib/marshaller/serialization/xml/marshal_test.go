@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization/base"
+	"github.com/SENERGY-Platform/models/go/models"
 )
 
 func ExampleMarshalPrimitiveInt() {
@@ -94,6 +95,26 @@ func ExampleMarshal() {
 		Type: model.Structure,
 		SubContentVariables: []model.ContentVariable{
 			{Name: "-attr"},
+			{Name: "body"},
+		},
+	}))
+
+	// Output:
+	//<example attr="attrVal"><body>bodyVal</body></example> <nil>
+}
+
+func ExampleMarshalSerializationOptionXmlAttribute() {
+	value := map[string]interface{}{"attr": "attrVal", "body": "bodyVal"}
+	marshaller, ok := base.Get(Format)
+	if !ok {
+		return
+	}
+
+	fmt.Println(marshaller.Marshal(value, model.ContentVariable{
+		Name: "example",
+		Type: model.Structure,
+		SubContentVariables: []model.ContentVariable{
+			{Name: "attr", SerializationOptions: []string{models.SerializationOptionXmlAttribute}},
 			{Name: "body"},
 		},
 	}))
