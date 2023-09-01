@@ -1,9 +1,9 @@
 github.com/Knetic/govaluate v3.0.0+incompatible h1:7o6+MAPhYTCF0+fdvoz1xDedhRb4f6s9Tn1Tt7/WTEg=
 github.com/Knetic/govaluate v3.0.0+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/RyanCarrier/dijkstra v1.2.0 h1:tOEDXK7lcg4pI3JOc9eQTNsrWYehqzWbe/+0iWMiPZk=
-github.com/RyanCarrier/dijkstra v1.2.0/go.mod h1:9egjhC7eVsfREX6NrYS+1wHzk9C/9v2Cz26/bqpjjTc=
-github.com/SENERGY-Platform/converter v0.0.0-20230413113429-b490a96aabba h1:7//DKY77RZdJoRBjkUohTkjegy5Lv9JFKgjlC2r2me0=
-github.com/SENERGY-Platform/converter v0.0.0-20230413113429-b490a96aabba/go.mod h1:MftDXexxLegRn0BKpbfBlBLo6OU9xSYiVtIi21DujUk=
+github.com/RyanCarrier/dijkstra v1.3.0 h1:lqrLMwKy8PtyDpWqZpcbzr9KkqnLJrDdQ9u3iNyNxm8=
+github.com/RyanCarrier/dijkstra v1.3.0/go.mod h1:9egjhC7eVsfREX6NrYS+1wHzk9C/9v2Cz26/bqpjjTc=
+github.com/SENERGY-Platform/converter v0.0.0-20230829101037-a44339c413f0 h1:yShpU5WaKLe5lIwO4joFPxMSibPQAFKWW2W+kgCfyyE=
+github.com/SENERGY-Platform/converter v0.0.0-20230829101037-a44339c413f0/go.mod h1:btnyQ+HafCfU36KacJKMBjUKbGpoQr+/8rGr5X6k1ZI=
 github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38 h1:PDvFwIJBnFyKt1KeepkABNIS57+WhVj4vBw7X5JGZJw=
 github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38/go.mod h1:bCREPNRN4P8oxLgpC3/ZKK4jXSy4MSPXoiomhohE+aw=
 github.com/clbanning/mxj v1.8.4 h1:HuhwZtbyvyOw+3Z1AowPkU87JkJUSv751ELWaiTpj8I=
