@@ -266,11 +266,13 @@ func characteristicToPseudoVariable(characteristic model.Characteristic) model.C
 	if variableType == "" && len(subVariables) > 0 {
 		variableType = model.Structure
 	}
+
 	return model.ContentVariable{
 		Name:                characteristic.Name,
 		CharacteristicId:    characteristic.Id,
 		Type:                variableType,
 		SubContentVariables: subVariables,
+		Value:               characteristic.Value,
 	}
 }
 

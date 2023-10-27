@@ -328,7 +328,8 @@
                 "name": "b",
                 "rdf_type": "https://senergy.infai.org/ontology/Characteristic",
                 "sub_characteristics": null,
-                "type": "https://schema.org/Integer"
+                "type": "https://schema.org/Integer",
+                "value": 50
             },
             {
                 "display_unit": "",

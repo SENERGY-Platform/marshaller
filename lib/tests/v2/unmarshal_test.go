@@ -29,6 +29,172 @@ import (
 	"testing"
 )
 
+func TestUnmarshalIncompleteCharacteristic(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	functionId := "urn:infai:ses:measuring-function:bdb6a7c8-4a3d-4fe0-bab3-ce02e09b5869" //Read Color
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		Id:          "sid",
+		LocalId:     "slid",
+		Name:        "sname",
+		Interaction: model.EVENT_AND_REQUEST,
+		ProtocolId:  "p1",
+		Outputs: []model.Content{
+			{
+				Id: "content",
+				ContentVariable: model.ContentVariable{
+					Id:   "root",
+					Name: "root",
+					Type: model.Structure,
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:               "color",
+							Name:             "color",
+							CharacteristicId: characteristics.Hsb,
+							FunctionId:       functionId,
+							AspectId:         "air",
+							Type:             model.Structure,
+							SubContentVariables: []model.ContentVariable{
+								{
+									Id:               "hue",
+									Name:             "hue",
+									Type:             model.Integer,
+									CharacteristicId: characteristics.HsbH,
+								},
+								{
+									Id:               "sat",
+									Name:             "sat",
+									Type:             model.Integer,
+									CharacteristicId: characteristics.HsbS,
+								},
+							},
+						},
+						{
+							Id:   "brightness",
+							Name: "brightness",
+							Type: model.Integer,
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	output := map[string]string{"body": `{"brightness":66,"color":{"hue": 219, "sat": 68}}`}
+
+	t.Run("run", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Rgb,
+		Message:          output,
+		FunctionId:       functionId,
+		AspectNodeId:     "air",
+	}, map[string]interface{}{"b": 128.0, "g": 71.0, "r": 41.0}))
+}
+
+func TestUnmarshalDiscombobulatedCharacteristic(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	apiurl := setup(ctx, wg)
+
+	functionId := "urn:infai:ses:measuring-function:bdb6a7c8-4a3d-4fe0-bab3-ce02e09b5869" //Read Color
+
+	protocol := model.Protocol{
+		Id:      "p1",
+		Name:    "p1",
+		Handler: "p1",
+		ProtocolSegments: []model.ProtocolSegment{
+			{Id: "p1.1", Name: "body"},
+			{Id: "p1.2", Name: "head"},
+		},
+	}
+	service := model.Service{
+		Id:          "sid",
+		LocalId:     "slid",
+		Name:        "sname",
+		Interaction: model.EVENT_AND_REQUEST,
+		ProtocolId:  "p1",
+		Outputs: []model.Content{
+			{
+				Id: "content",
+				ContentVariable: model.ContentVariable{
+					Id:               "root",
+					Name:             "root",
+					Type:             model.Structure,
+					CharacteristicId: characteristics.Hsb,
+					FunctionId:       functionId,
+					AspectId:         "air",
+					SubContentVariables: []model.ContentVariable{
+						{
+							Id:   "color",
+							Name: "color",
+							Type: model.Structure,
+							SubContentVariables: []model.ContentVariable{
+								{
+									Id:               "hue",
+									Name:             "hue",
+									Type:             model.Integer,
+									CharacteristicId: characteristics.HsbH,
+								},
+								{
+									Id:               "sat",
+									Name:             "sat",
+									Type:             model.Integer,
+									CharacteristicId: characteristics.HsbS,
+								},
+							},
+						},
+						{
+							Id:               "brightness",
+							Name:             "brightness",
+							Type:             model.Integer,
+							CharacteristicId: characteristics.HsbB,
+						},
+					},
+				},
+				Serialization:     "json",
+				ProtocolSegmentId: "p1.1",
+			},
+		},
+	}
+
+	t.Run("run_1", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Rgb,
+		Message:          map[string]string{"body": `{"brightness":66,"color":{"hue": 219, "sat": 68}}`},
+		FunctionId:       functionId,
+		AspectNodeId:     "air",
+	}, map[string]interface{}{"b": 168.0, "g": 94.0, "r": 54.0}))
+
+	t.Run("run_2", testUnmarshal(apiurl, api.UnmarshallingV2Request{
+		Service:          service,
+		Protocol:         protocol,
+		CharacteristicId: characteristics.Rgb,
+		Message:          map[string]string{"body": `{"brightness":50,"color":{"hue": 219, "sat": 68}}`},
+		FunctionId:       functionId,
+		AspectNodeId:     "air",
+	}, map[string]interface{}{"b": 128.0, "g": 71.0, "r": 41.0}))
+}
+
 func TestUnmarshalPrioritySort(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()
