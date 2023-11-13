@@ -12,7 +12,7 @@ require (
 
 require (
 	github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38
-	github.com/SENERGY-Platform/service-commons v0.0.0-20231110120655-c343b32062b0
+	github.com/SENERGY-Platform/service-commons v0.0.0-20231113123955-362784f65636
 )
 
 require (
@@ -39,8 +39,8 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/segmentio/kafka-go v0.4.44 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
 	gopkg.in/go-playground/colors.v1 v1.2.0 // indirect
 )
 

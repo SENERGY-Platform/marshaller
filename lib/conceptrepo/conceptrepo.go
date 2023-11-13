@@ -86,18 +86,13 @@ func New(ctx context.Context, conf config.Config, access Access, defaults ...Con
 			refresh()
 		}
 	}()
-	signal.Known.CacheInvalidationAll.Sub("concept-repo-all", func(string) {
+	f := func(_ string, _ *sync.WaitGroup) {
 		refresh()
-	})
-	signal.Known.CharacteristicCacheInvalidation.Sub("concept-repo-characteristics", func(string) {
-		refresh()
-	})
-	signal.Known.ConceptCacheInvalidation.Sub("concept-repo-concept", func(string) {
-		refresh()
-	})
-	signal.Known.FunctionCacheInvalidation.Sub("concept-repo-function", func(string) {
-		refresh()
-	})
+	}
+	signal.Known.CacheInvalidationAll.Sub("concept-repo-all", f)
+	signal.Known.CharacteristicCacheInvalidation.Sub("concept-repo-characteristics", f)
+	signal.Known.ConceptCacheInvalidation.Sub("concept-repo-concept", f)
+	signal.Known.FunctionCacheInvalidation.Sub("concept-repo-function", f)
 	return result, nil
 }
 
