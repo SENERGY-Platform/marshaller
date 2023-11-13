@@ -27,6 +27,11 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
+	"github.com/SENERGY-Platform/service-commons/pkg/cache/invalidator"
+	"github.com/SENERGY-Platform/service-commons/pkg/kafka"
+	"log"
+	"runtime/debug"
+	"time"
 )
 
 func Start(ctx context.Context, conf config.Config) (closed context.Context, err error) {
@@ -48,7 +53,11 @@ func Start(ctx context.Context, conf config.Config) (closed context.Context, err
 		return nil, err
 	}
 
-	devicerepo := devicerepository.New(conf, access)
+	devicerepo, err := devicerepository.New(conf, access)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 	converter := converter.New(conf, access)
 	marshaller := marshaller.New(converter, conceptRepo, devicerepo)
 	configurableService := configurables.New(conceptRepo)
@@ -61,4 +70,20 @@ func Start(ctx context.Context, conf config.Config) (closed context.Context, err
 		cancel()
 	}()
 	return closed, nil
+}
+
+func StartCacheInvalidator(ctx context.Context, conf config.Config) error {
+	if conf.KafkaUrl == "" || conf.KafkaUrl == "-" {
+		return nil
+	}
+	return invalidator.StartCacheInvalidatorAll(ctx, kafka.Config{
+		KafkaUrl:               conf.KafkaUrl,
+		StartOffset:            kafka.LastOffset,
+		Debug:                  conf.Debug,
+		PartitionWatchInterval: time.Minute,
+		OnError: func(err error) {
+			log.Println("ERROR:", err)
+			debug.PrintStack()
+		},
+	}, conf.CacheInvalidationKafkaTopics, nil)
 }

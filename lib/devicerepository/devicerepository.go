@@ -22,6 +22,8 @@ import (
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/service-commons/pkg/cache"
+	"github.com/SENERGY-Platform/service-commons/pkg/signal"
 	"net/http"
 	"net/url"
 	"runtime/debug"
@@ -29,21 +31,32 @@ import (
 )
 
 type DeviceRepository struct {
-	cache         *Cache
+	cache         *cache.Cache
 	repoUrl       string
 	permsearchUrl string
 	access        *config.Access
 }
 
-func New(config config.Config, access *config.Access) *DeviceRepository {
-	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: NewCache(), permsearchUrl: config.PermissionsSearchUrl, access: access}
+func New(config config.Config, access *config.Access) (*DeviceRepository, error) {
+	c, err := cache.New(cache.Config{
+		CacheInvalidationSignalHooks: map[cache.Signal]cache.ToKey{
+			signal.Known.CacheInvalidationAll:        nil,
+			signal.Known.DeviceTypeCacheInvalidation: nil, //invalidate all, because services are cached and dependent on device-types
+			signal.Known.AspectCacheInvalidation: func(signalValue string) (cacheKey string) {
+				return "aspect-nodes." + signalValue
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: c, permsearchUrl: config.PermissionsSearchUrl, access: access}, nil
 }
 
 func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {
-	err = this.cache.Use("protocol."+id, func() (interface{}, error) {
+	return cache.Use(this.cache, "protocol."+id, func() (model.Protocol, error) {
 		return this.getProtocol(id)
-	}, &result)
-	return
+	}, time.Minute)
 }
 
 func (this *DeviceRepository) getProtocol(id string) (result model.Protocol, err error) {
@@ -57,13 +70,11 @@ func (this *DeviceRepository) getProtocol(id string) (result model.Protocol, err
 
 func (this *DeviceRepository) GetDeviceType(id string) (result model.DeviceType, err error, code int) {
 	code = http.StatusOK
-	err = this.cache.Use("device-type."+id, func() (interface{}, error) {
-		var dt model.DeviceType
-		var terr error
+	result, err = cache.Use(this.cache, "device-type."+id, func() (dt model.DeviceType, terr error) {
 		dt, terr, code = this.getDeviceType(id)
 		return dt, terr
-	}, &result)
-	return
+	}, time.Minute)
+	return result, err, code
 }
 
 func (this *DeviceRepository) getDeviceType(id string) (result model.DeviceType, err error, code int) {
@@ -103,13 +114,11 @@ func (this *DeviceRepository) GetService(id string) (result model.Service, err e
 
 func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Service, err error, code int) {
 	code = http.StatusOK
-	err = this.cache.Use("service."+id, func() (interface{}, error) {
-		var service model.Service
-		var terr error
+	result, err = cache.Use(this.cache, "service."+id, func() (service model.Service, terr error) {
 		service, terr, code = this.getServiceWithErrCode(id)
 		return service, terr
-	}, &result)
-	return
+	}, time.Minute)
+	return result, err, code
 }
 
 func (this *DeviceRepository) getServiceWithErrCode(id string) (result model.Service, err error, code int) {
@@ -143,32 +152,31 @@ func (this *DeviceRepository) getServiceWithErrCode(id string) (result model.Ser
 }
 
 func (this *DeviceRepository) GetAspectNode(id string) (result model.AspectNode, err error) {
-	err = this.cache.Use("aspect-nodes."+id, func() (interface{}, error) {
+	result, err = cache.Use(this.cache, "aspect-nodes."+id, func() (aspect model.AspectNode, terr error) {
 		token, err := this.access.Ensure()
 		if err != nil {
-			return result, err
+			return aspect, err
 		}
 		req, err := http.NewRequest("GET", this.repoUrl+"/aspect-nodes/"+url.PathEscape(id), nil)
 		if err != nil {
 			debug.PrintStack()
-			return nil, err
+			return aspect, err
 		}
 		req.Header.Set("Authorization", string(token))
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			debug.PrintStack()
-			return nil, err
+			return aspect, err
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode >= 300 {
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(resp.Body)
 			debug.PrintStack()
-			return nil, errors.New(buf.String())
+			return aspect, errors.New(buf.String())
 		}
-		var aspect model.AspectNode
 		err = json.NewDecoder(resp.Body).Decode(&aspect)
 		return aspect, err
-	}, &result)
-	return
+	}, time.Minute)
+	return result, err
 }

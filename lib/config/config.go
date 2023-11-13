@@ -28,21 +28,23 @@ import (
 )
 
 type Config struct {
-	ServerPort                 string  `json:"server_port"`
-	AuthExpirationTimeBuffer   float64 `json:"auth_expiration_time_buffer"`
-	AuthEndpoint               string  `json:"auth_endpoint"`
-	AuthClientId               string  `json:"auth_client_id"`
-	AuthClientSecret           string  `json:"auth_client_secret"`
-	PermissionsSearchUrl       string  `json:"permissions_search_url"`
-	DeviceRepositoryUrl        string  `json:"device_repository_url"`
-	ConceptRepoRefreshInterval int64   `json:"concept_repo_refresh_interval"`
-	LogLevel                   string  `json:"log_level"`
-	ConverterUrl               string  `json:"converter_url"`
-	ReturnUnknownPathAsNull    bool    `json:"return_unknown_path_as_null"`
-	Debug                      bool    `json:"debug"`
+	ServerPort                   string   `json:"server_port"`
+	AuthExpirationTimeBuffer     float64  `json:"auth_expiration_time_buffer"`
+	AuthEndpoint                 string   `json:"auth_endpoint"`
+	AuthClientId                 string   `json:"auth_client_id"`
+	AuthClientSecret             string   `json:"auth_client_secret"`
+	PermissionsSearchUrl         string   `json:"permissions_search_url"`
+	DeviceRepositoryUrl          string   `json:"device_repository_url"`
+	ConceptRepoRefreshInterval   int64    `json:"concept_repo_refresh_interval"`
+	LogLevel                     string   `json:"log_level"`
+	ConverterUrl                 string   `json:"converter_url"`
+	ReturnUnknownPathAsNull      bool     `json:"return_unknown_path_as_null"`
+	Debug                        bool     `json:"debug"`
+	KafkaUrl                     string   `json:"kafka_url"`                       //optional, used for cache invalidation
+	CacheInvalidationKafkaTopics []string `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
 }
 
-//loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
+// loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
 func Load(location string) (config Config, err error) {
 	file, error := os.Open(location)
 	if error != nil {

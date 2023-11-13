@@ -21,6 +21,7 @@ import (
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/service-commons/pkg/signal"
 	"log"
 	"runtime/debug"
 	"sync"
@@ -73,14 +74,30 @@ func New(ctx context.Context, conf config.Config, access Access, defaults ...Con
 		defer ticker.Stop()
 		<-ctx.Done()
 	}()
+	refresh := func() {
+		log.Println("refresh concept-repo")
+		err = result.Load()
+		if err != nil {
+			log.Println("WARNING: unable to update concept repository", err)
+		}
+	}
 	go func() {
 		for range ticker.C {
-			err = result.Load()
-			if err != nil {
-				log.Println("WARNING: unable to update concept repository", err)
-			}
+			refresh()
 		}
 	}()
+	signal.Known.CacheInvalidationAll.Sub("concept-repo-all", func(string) {
+		refresh()
+	})
+	signal.Known.CharacteristicCacheInvalidation.Sub("concept-repo-characteristics", func(string) {
+		refresh()
+	})
+	signal.Known.ConceptCacheInvalidation.Sub("concept-repo-concept", func(string) {
+		refresh()
+	})
+	signal.Known.FunctionCacheInvalidation.Sub("concept-repo-function", func(string) {
+		refresh()
+	})
 	return result, nil
 }
 

@@ -43,6 +43,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = lib.StartCacheInvalidator(ctx, conf)
+	if err != nil {
+		log.Println("WARNING: unable to start cache invalidator", err)
+	}
+
 	go func() {
 		shutdownSignal := make(chan os.Signal, 1)
 		signal.Notify(shutdownSignal, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
