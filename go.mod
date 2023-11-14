@@ -12,7 +12,7 @@ require (
 
 require (
 	github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38
-	github.com/SENERGY-Platform/service-commons v0.0.0-20231114072816-ce57a8fdbb30
+	github.com/SENERGY-Platform/service-commons v0.0.0-20231114074450-0886d7451cce
 )
 
 require (
