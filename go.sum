@@ -16,8 +16,8 @@ github.com/SENERGY-Platform/converter v0.0.0-20231027124924-d43b98b1b5cc h1:Tn2C
 github.com/SENERGY-Platform/converter v0.0.0-20231027124924-d43b98b1b5cc/go.mod h1:btnyQ+HafCfU36KacJKMBjUKbGpoQr+/8rGr5X6k1ZI=
 github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38 h1:PDvFwIJBnFyKt1KeepkABNIS57+WhVj4vBw7X5JGZJw=
 github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38/go.mod h1:bCREPNRN4P8oxLgpC3/ZKK4jXSy4MSPXoiomhohE+aw=
-github.com/SENERGY-Platform/service-commons v0.0.0-20231114080900-3839f2f822b5 h1:0R+NXsHYlU/RtBjt8HmUtUtYljzSeoO4JNBcXmWficY=
-github.com/SENERGY-Platform/service-commons v0.0.0-20231114080900-3839f2f822b5/go.mod h1:1JjqDM3qfVrqU37VXRUlLIFRVWbnaXttsMEKNH8yCRA=
+github.com/SENERGY-Platform/service-commons v0.0.0-20231115074650-7021aeae60e4 h1:bEEbT/oUAT4g+pF1GWA212zJnib5tSrt9wT56VLKwk4=
+github.com/SENERGY-Platform/service-commons v0.0.0-20231115074650-7021aeae60e4/go.mod h1:1JjqDM3qfVrqU37VXRUlLIFRVWbnaXttsMEKNH8yCRA=
 github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 h1:N7oVaKyGp8bttX0bfZGmcGkjz7DLQXhAn3DNd3T0ous=
 github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874/go.mod h1:r5xuitiExdLAJ09PR7vBVENGvp4ZuTBeWTGtxuX3K+c=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=
