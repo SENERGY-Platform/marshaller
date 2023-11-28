@@ -73,6 +73,9 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	}
 	var err error
 
+	//a variable in this path will be changed -> this variable is not empty
+	variable.OmitEmpty = false
+
 	//not at the end of the correct path
 	if len(currentPath) < len(pathParts) {
 		for i, sub := range variable.SubContentVariables {
@@ -89,7 +92,6 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 		return variable, errors.New("wtf")
 	}
 
-	variable.OmitEmpty = false
 	if characteristic != "" && variable.CharacteristicId != characteristic {
 		castExtensions := []models.ConverterExtension{}
 		if variable.FunctionId != "" {
