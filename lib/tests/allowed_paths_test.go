@@ -72,11 +72,11 @@ func TestMarshallingWithAllowedPaths(t *testing.T) {
 			},
 		},
 	}
-	t.Run("k nil", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, nil, map[string]string{"body": `{"inside":27,"outside":27}`}))
-	t.Run("k []", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{}, map[string]string{"body": `{"inside":27,"outside":27}`}))
-	t.Run("k inside", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{"temperature.inside"}, map[string]string{"body": `{"inside":27,"outside":13}`}))
-	t.Run("k outside", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{"temperature.outside"}, map[string]string{"body": `{"inside":12,"outside":27}`}))
-	t.Run("k inside and outside", testMarshalInputs(protocol, service, 300, characteristics.Kelvin, []string{"temperature.inside", "temperature.outside"}, map[string]string{"body": `{"inside":27,"outside":27}`}))
+	t.Run("k nil", testMarshalInputs(protocol, service, 300.15, characteristics.Kelvin, nil, map[string]string{"body": `{"inside":27,"outside":27}`}))
+	t.Run("k []", testMarshalInputs(protocol, service, 300.15, characteristics.Kelvin, []string{}, map[string]string{"body": `{"inside":27,"outside":27}`}))
+	t.Run("k inside", testMarshalInputs(protocol, service, 300.15, characteristics.Kelvin, []string{"temperature.inside"}, map[string]string{"body": `{"inside":27,"outside":13}`}))
+	t.Run("k outside", testMarshalInputs(protocol, service, 300.15, characteristics.Kelvin, []string{"temperature.outside"}, map[string]string{"body": `{"inside":12,"outside":27}`}))
+	t.Run("k inside and outside", testMarshalInputs(protocol, service, 300.15, characteristics.Kelvin, []string{"temperature.inside", "temperature.outside"}, map[string]string{"body": `{"inside":27,"outside":27}`}))
 
 	t.Run("c nil", testMarshalInputs(protocol, service, 300, characteristics.Celsius, nil, map[string]string{"body": `{"inside":300,"outside":300}`}))
 	t.Run("c []", testMarshalInputs(protocol, service, 300, characteristics.Celsius, []string{}, map[string]string{"body": `{"inside":300,"outside":300}`}))

@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.3
+	github.com/SENERGY-Platform/converter v0.0.4
 	github.com/clbanning/mxj v1.8.4
 	github.com/julienschmidt/httprouter v1.3.0
 )
