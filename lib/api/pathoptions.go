@@ -33,7 +33,7 @@ func init() {
 	endpoints = append(endpoints, PathOptions)
 }
 
-func PathOptions(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, service *configurables.ConfigurableService, repo DeviceRepository, converter *converter.Converter) {
+func PathOptions(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, service *configurables.ConfigurableService, repo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
 
 	router.GET("/path-options", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		deviceTypeIdsStr := request.URL.Query().Get("device-type-ids")

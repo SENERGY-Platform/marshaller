@@ -31,7 +31,7 @@ func init() {
 	endpoints = append(endpoints, CharacteristicPathEndpoint)
 }
 
-func CharacteristicPathEndpoint(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter) {
+func CharacteristicPathEndpoint(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
 	resource := "/characteristic-paths"
 
 	router.GET(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {

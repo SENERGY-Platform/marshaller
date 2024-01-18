@@ -27,13 +27,14 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
+	"time"
 )
 
 func init() {
 	endpoints = append(endpoints, MarshallingV2)
 }
 
-func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter) {
+func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
 	resource := "/v2/marshal"
 
 	normalizeRequest := func(request *MarshallingV2Request) error {
@@ -55,6 +56,7 @@ func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *
 	}
 
 	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		start := time.Now()
 		msg := MarshallingV2Request{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
@@ -81,14 +83,17 @@ func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
+		metrics.LogMarshallingRequest(resource+"/:serviceId", msg, time.Since(start))
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		start := time.Now()
 		msg := MarshallingV2Request{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
@@ -110,6 +115,7 @@ func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
+		metrics.LogMarshallingRequest(resource, msg, time.Since(start))
 	})
 
 }

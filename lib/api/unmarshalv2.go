@@ -35,7 +35,7 @@ func init() {
 	endpoints = append(endpoints, UnmarshallingV2)
 }
 
-func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter) {
+func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
 	resource := "/v2/unmarshal"
 
 	normalizeRequest := func(request *UnmarshallingV2Request) error {
