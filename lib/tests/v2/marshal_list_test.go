@@ -19,7 +19,7 @@ package v2
 import (
 	"context"
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
-	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"sync"
 	"testing"
@@ -81,7 +81,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}
 
-	t.Run("inside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -94,7 +94,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[27,13]`}))
 
-	t.Run("inside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 300 kelvin path and function", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -107,7 +107,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[27,13]`}))
 
-	t.Run("outside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("outside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -120,7 +120,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[12,27]`}))
 
-	t.Run("outside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("outside 300 kelvin path and function", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -133,7 +133,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[12,27]`}))
 
-	t.Run("inside and outside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside and outside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -146,7 +146,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[27,27]`}))
 
-	t.Run("inside 400 and outside 500 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 400 and outside 500 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -165,7 +165,7 @@ func TestMarshalListIndexed(t *testing.T) {
 		},
 	}, map[string]string{"body": `[127,227]`}))
 
-	t.Run("inside and outside 300 kelvin functionId", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside and outside 300 kelvin functionId", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -226,7 +226,7 @@ func TestMarshalListVariable(t *testing.T) {
 		},
 	}
 
-	t.Run("* 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("* 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -239,7 +239,7 @@ func TestMarshalListVariable(t *testing.T) {
 		},
 	}, map[string]string{"body": `[27]`}))
 
-	t.Run("functionId 300 kelvin", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("functionId 300 kelvin", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -255,7 +255,7 @@ func TestMarshalListVariable(t *testing.T) {
 	t.Run("indexed setting of var len list values", func(t *testing.T) {
 		t.Skip("would be nice but is not supported")
 
-		t.Run("0 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+		t.Run("0 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 			Service:  service,
 			Protocol: protocol,
 			Data: []model.MarshallingV2RequestData{
@@ -268,7 +268,7 @@ func TestMarshalListVariable(t *testing.T) {
 			},
 		}, map[string]string{"body": `[27]`}))
 
-		t.Run("0 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+		t.Run("0 300 kelvin path and function", testMarshal(apiurl, messages.MarshallingV2Request{
 			Service:  service,
 			Protocol: protocol,
 			Data: []model.MarshallingV2RequestData{
@@ -281,7 +281,7 @@ func TestMarshalListVariable(t *testing.T) {
 			},
 		}, map[string]string{"body": `[27]`}))
 
-		t.Run("0 and 1 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+		t.Run("0 and 1 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 			Service:  service,
 			Protocol: protocol,
 			Data: []model.MarshallingV2RequestData{
@@ -294,7 +294,7 @@ func TestMarshalListVariable(t *testing.T) {
 			},
 		}, map[string]string{"body": `[27,27]`}))
 
-		t.Run("0 400 and 1 500 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+		t.Run("0 400 and 1 500 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 			Service:  service,
 			Protocol: protocol,
 			Data: []model.MarshallingV2RequestData{
@@ -381,7 +381,7 @@ func TestMarshalListCharacteristic(t *testing.T) {
 		},
 	}
 
-	t.Run("test marshal", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("test marshal", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{

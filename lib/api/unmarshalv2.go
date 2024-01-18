@@ -19,6 +19,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -35,10 +37,10 @@ func init() {
 	endpoints = append(endpoints, UnmarshallingV2)
 }
 
-func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
+func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
 	resource := "/v2/unmarshal"
 
-	normalizeRequest := func(request *UnmarshallingV2Request) error {
+	normalizeRequest := func(request *messages.UnmarshallingV2Request) error {
 		if config.Debug {
 			temp, _ := json.Marshal(request)
 			log.Println("DEBUG: UnmarshallingV2Request:", string(temp))
@@ -86,12 +88,12 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		return nil
 	}
 
-	unmarshal := func(request UnmarshallingV2Request) (interface{}, error) {
+	unmarshal := func(request messages.UnmarshallingV2Request) (interface{}, error) {
 		return marshallerV2.Unmarshal(request.Protocol, request.Service, request.CharacteristicId, request.Path, request.Message, request.SerializedOutput)
 	}
 
 	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := UnmarshallingV2Request{}
+		msg := messages.UnmarshallingV2Request{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
 			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
@@ -125,7 +127,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := UnmarshallingV2Request{}
+		msg := messages.UnmarshallingV2Request{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)

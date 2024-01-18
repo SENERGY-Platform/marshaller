@@ -19,6 +19,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -33,10 +35,10 @@ func init() {
 	endpoints = append(endpoints, Marshalling)
 }
 
-func Marshalling(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
+func Marshalling(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
 	resource := "/marshal"
 
-	normalizeRequest := func(request *MarshallingRequest) error {
+	normalizeRequest := func(request *messages.MarshallingRequest) error {
 		if request.Protocol == nil {
 			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
@@ -50,12 +52,12 @@ func Marshalling(router *httprouter.Router, config config.Config, marshaller *ma
 		return nil
 	}
 
-	marshal := func(request MarshallingRequest) (map[string]string, error) {
+	marshal := func(request messages.MarshallingRequest) (map[string]string, error) {
 		return marshaller.MarshalInputs(*request.Protocol, request.Service, request.Data, request.CharacteristicId, request.PathAllowList, request.Configurables...)
 	}
 
 	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := MarshallingRequest{}
+		msg := messages.MarshallingRequest{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
 			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
@@ -95,7 +97,7 @@ func Marshalling(router *httprouter.Router, config config.Config, marshaller *ma
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := MarshallingRequest{}
+		msg := messages.MarshallingRequest{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)

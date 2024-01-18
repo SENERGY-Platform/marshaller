@@ -18,7 +18,7 @@ package v2
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"sync"
 	"testing"
@@ -64,7 +64,7 @@ func TestMarshallingVoidToggle(t *testing.T) {
 			},
 		},
 	}
-	t.Run("toggle nil", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("toggle nil", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data:     []model.MarshallingV2RequestData{},

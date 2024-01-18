@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package api
+package metrics
 
 import (
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -63,12 +63,7 @@ type Metrics struct {
 	MarshallingRequests        *prometheus.HistogramVec
 }
 
-func (this *Metrics) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	log.Printf("%v [%v] %v \n", request.RemoteAddr, request.Method, request.URL)
-	this.httphandler.ServeHTTP(writer, request)
-}
-
-func (this *Metrics) LogMarshallingRequest(endpoint string, msg MarshallingV2Request, duration time.Duration) {
+func (this *Metrics) LogMarshallingRequest(endpoint string, msg messages.MarshallingV2Request, duration time.Duration) {
 	if this == nil {
 		return
 	}

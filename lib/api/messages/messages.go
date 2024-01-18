@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package api
+package messages
 
 import (
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"

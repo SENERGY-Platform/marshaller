@@ -19,6 +19,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -34,10 +36,10 @@ func init() {
 	endpoints = append(endpoints, MarshallingV2)
 }
 
-func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
+func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
 	resource := "/v2/marshal"
 
-	normalizeRequest := func(request *MarshallingV2Request) error {
+	normalizeRequest := func(request *messages.MarshallingV2Request) error {
 		if request.Protocol.Id == "" {
 			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
@@ -51,13 +53,13 @@ func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *
 		return nil
 	}
 
-	marshal := func(request MarshallingV2Request) (map[string]string, error) {
+	marshal := func(request messages.MarshallingV2Request) (map[string]string, error) {
 		return marshallerV2.Marshal(request.Protocol, request.Service, request.Data)
 	}
 
 	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		start := time.Now()
-		msg := MarshallingV2Request{}
+		msg := messages.MarshallingV2Request{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
 			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
@@ -94,7 +96,7 @@ func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		start := time.Now()
-		msg := MarshallingV2Request{}
+		msg := messages.MarshallingV2Request{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)

@@ -29,6 +29,7 @@ import (
 
 type Config struct {
 	ServerPort                   string   `json:"server_port"`
+	PrometheusPort               string   `json:"prometheus_port"`
 	AuthExpirationTimeBuffer     float64  `json:"auth_expiration_time_buffer"`
 	AuthEndpoint                 string   `json:"auth_endpoint"`
 	AuthClientId                 string   `json:"auth_client_id"`

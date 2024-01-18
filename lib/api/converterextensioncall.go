@@ -18,6 +18,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -32,7 +33,7 @@ func init() {
 	endpoints = append(endpoints, ConversionExtensionEndpoints)
 }
 
-func ConversionExtensionEndpoints(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, c *converter.Converter, metrics *Metrics) {
+func ConversionExtensionEndpoints(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, c *converter.Converter, metrics *metrics.Metrics) {
 	resource := "/converter/extension-call"
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, ps httprouter.Params) {

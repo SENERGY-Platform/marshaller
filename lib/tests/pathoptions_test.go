@@ -19,7 +19,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
@@ -880,7 +880,7 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 func testPathOptions(deviceTypes []string, functionId string, aspect string, characteristicsFilter []string, withoutEnvelope bool, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
 		buff := bytes.Buffer{}
-		err := json.NewEncoder(&buff).Encode(api.PathOptionsQuery{
+		err := json.NewEncoder(&buff).Encode(messages.PathOptionsQuery{
 			DeviceTypeIds:          deviceTypes,
 			FunctionId:             functionId,
 			AspectId:               aspect,

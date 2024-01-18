@@ -18,6 +18,7 @@ package api
 
 import (
 	"context"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/api/util"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
@@ -40,11 +41,15 @@ type DeviceRepository interface {
 	GetAspectNode(id string) (model.AspectNode, error)
 }
 
-var endpoints = []func(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics){}
+var endpoints = []func(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics){}
 
 func Start(ctx context.Context, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter) (closed context.Context) {
 	log.Println("start api")
-	router := GetRouter(config, marshaller, marshallerV2, configurableService, deviceRepo, converter, NewMetrics())
+	m, err := metrics.Start(ctx, config)
+	if err != nil {
+		log.Println("WARNING: unable to serve metrics", err)
+	}
+	router := GetRouter(config, marshaller, marshallerV2, configurableService, deviceRepo, converter, m)
 	log.Println("add logging and cors")
 	corsHandler := util.NewCors(router)
 	logger := util.NewLogger(corsHandler, config.LogLevel)
@@ -68,11 +73,8 @@ func Start(ctx context.Context, config config.Config, marshaller *marshaller.Mar
 	return closed
 }
 
-func GetRouter(config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) (router *httprouter.Router) {
+func GetRouter(config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) (router *httprouter.Router) {
 	router = httprouter.New()
-
-	router.Handler(http.MethodGet, "/metrics", metrics)
-
 	for _, e := range endpoints {
 		log.Println("add endpoints: " + runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
 		e(router, config, marshaller, marshallerV2, configurableService, deviceRepo, converter, metrics)

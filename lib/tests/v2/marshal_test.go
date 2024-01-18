@@ -21,7 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
-	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/models/go/models"
 	"net/http"
@@ -86,7 +86,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}
 
-	t.Run("inside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -99,7 +99,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":27,"outside":13}`}))
 
-	t.Run("inside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 300 kelvin path and function", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -112,7 +112,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":27,"outside":13}`}))
 
-	t.Run("outside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("outside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -125,7 +125,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":12,"outside":27}`}))
 
-	t.Run("outside 300 kelvin path and function", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("outside 300 kelvin path and function", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -138,7 +138,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":12,"outside":27}`}))
 
-	t.Run("inside and outside 300 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside and outside 300 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -151,7 +151,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":27,"outside":27}`}))
 
-	t.Run("inside 400 and outside 500 kelvin path", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside 400 and outside 500 kelvin path", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -170,7 +170,7 @@ func TestMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":127,"outside":227}`}))
 
-	t.Run("inside and outside 300 kelvin functionId", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("inside and outside 300 kelvin functionId", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -283,7 +283,7 @@ func TestOmitEmptyMarshalling(t *testing.T) {
 		},
 	}
 
-	t.Run("brightness", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("brightness", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -295,7 +295,7 @@ func TestOmitEmptyMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"brightness":300}`}))
 
-	t.Run("color", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("color", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -376,7 +376,7 @@ func TestRootOmitEmptyMarshalling(t *testing.T) {
 		},
 	}
 
-	t.Run("brightness", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("brightness", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -388,7 +388,7 @@ func TestRootOmitEmptyMarshalling(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"brightness":300}`}))
 
-	t.Run("color", testMarshal(apiurl, api.MarshallingV2Request{
+	t.Run("color", testMarshal(apiurl, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -401,7 +401,7 @@ func TestRootOmitEmptyMarshalling(t *testing.T) {
 	}, map[string]string{"body": `{"brightness":null,"color":{"hue":320,"saturation":100}}`}))
 }
 
-func testMarshal(apiurl string, request api.MarshallingV2Request, expectedResult map[string]string) func(t *testing.T) {
+func testMarshal(apiurl string, request messages.MarshallingV2Request, expectedResult map[string]string) func(t *testing.T) {
 	return func(t *testing.T) {
 		body := new(bytes.Buffer)
 		err := json.NewEncoder(body).Encode(request)

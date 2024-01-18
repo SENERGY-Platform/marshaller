@@ -17,7 +17,7 @@
 package tests
 
 import (
-	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
@@ -26,7 +26,7 @@ import (
 )
 
 func TestConfigurablesPostRequest(t *testing.T) {
-	message := api.FindConfigurablesRequest{
+	message := messages.FindConfigurablesRequest{
 		CharacteristicId: temperature.Celsius,
 		Services:         []model.Service{serviceExample1, serviceExample2},
 	}

@@ -18,6 +18,8 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -34,7 +36,7 @@ func init() {
 	endpoints = append(endpoints, Configurables)
 }
 
-func Configurables(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *Metrics) {
+func Configurables(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
 	resource := "/configurables"
 
 	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -71,7 +73,7 @@ func Configurables(router *httprouter.Router, config config.Config, marshaller *
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := FindConfigurablesRequest{}
+		msg := messages.FindConfigurablesRequest{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
