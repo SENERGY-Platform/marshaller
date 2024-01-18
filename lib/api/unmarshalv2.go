@@ -31,6 +31,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 func init() {
@@ -93,6 +94,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 	}
 
 	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		start := time.Now()
 		msg := messages.UnmarshallingV2Request{}
 		serviceId := params.ByName("serviceId")
 		if serviceId == "" {
@@ -124,9 +126,11 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
+		metrics.LogUnmarshallingRequest(resource+"/:serviceId", msg, time.Since(start))
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+		start := time.Now()
 		msg := messages.UnmarshallingV2Request{}
 		err := json.NewDecoder(request.Body).Decode(&msg)
 		if err != nil {
@@ -148,6 +152,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
+		metrics.LogUnmarshallingRequest(resource, msg, time.Since(start))
 	})
 
 }

@@ -41,16 +41,28 @@ func NewMetrics() *Metrics {
 			Help: "summary for handling duration (in μs) of marshalling request",
 		}),
 		MarshallingRequests: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name: "marshaller_marshalling_request_handling_duration",
-			Help: "histogram vec for handling duration (in μs) of marshalling request",
-			//TODO: replace buckets with values consistent with MarshallingRequestsSummary
-			Buckets: []float64{100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 10000, 25000, 50000, 100000, 500000, 1000000},
+			Name:    "marshaller_marshalling_request_handling_duration",
+			Help:    "histogram vec for handling duration (in μs) of marshalling request",
+			Buckets: []float64{500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 10000, 50000, 100000, 1000000},
+		}, []string{"endpoint", "service_id", "function_ids"}),
+
+		UnmarshallingRequestsSummary: prometheus.NewSummary(prometheus.SummaryOpts{
+			Name: "marshaller_unmarshalling_request_handling_duration_summary",
+			Help: "summary for handling duration (in μs) of unmarshalling request",
+		}),
+		UnmarshallingRequests: prometheus.NewHistogramVec(prometheus.HistogramOpts{
+			Name:    "marshaller_unmarshalling_request_handling_duration",
+			Help:    "histogram vec for handling duration (in μs) of unmarshalling request",
+			Buckets: []float64{500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 10000, 50000, 100000, 1000000},
 		}, []string{"endpoint", "service_id", "function_ids"}),
 	}
 
 	reg.MustRegister(
 		result.MarshallingRequestsSummary,
-		//result.MarshallingRequests, //TODO: enable with buckets matching MarshallingRequestsSummary
+		result.MarshallingRequests,
+
+		result.UnmarshallingRequestsSummary,
+		result.UnmarshallingRequests,
 	)
 
 	return result
@@ -61,6 +73,9 @@ type Metrics struct {
 
 	MarshallingRequestsSummary prometheus.Summary
 	MarshallingRequests        *prometheus.HistogramVec
+
+	UnmarshallingRequestsSummary prometheus.Summary
+	UnmarshallingRequests        *prometheus.HistogramVec
 }
 
 func (this *Metrics) LogMarshallingRequest(endpoint string, msg messages.MarshallingV2Request, duration time.Duration) {
@@ -77,4 +92,13 @@ func (this *Metrics) LogMarshallingRequest(endpoint string, msg messages.Marshal
 	}
 	sort.Strings(functionIds)
 	this.MarshallingRequests.WithLabelValues(endpoint, msg.Service.Id, strings.Join(functionIds, ",")).Observe(dur)
+}
+
+func (this *Metrics) LogUnmarshallingRequest(endpoint string, msg messages.UnmarshallingV2Request, duration time.Duration) {
+	if this == nil {
+		return
+	}
+	dur := float64(duration.Microseconds())
+	this.MarshallingRequestsSummary.Observe(dur)
+	this.MarshallingRequests.WithLabelValues(endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
 }
