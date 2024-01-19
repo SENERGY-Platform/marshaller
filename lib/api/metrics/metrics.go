@@ -20,6 +20,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net"
 	"net/http"
 	"sort"
 	"strings"
@@ -44,7 +45,7 @@ func NewMetrics() *Metrics {
 			Name:    "marshaller_marshalling_request_handling_duration",
 			Help:    "histogram vec for handling duration (in μs) of marshalling request",
 			Buckets: []float64{500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 10000, 50000, 100000, 1000000},
-		}, []string{"endpoint", "service_id", "function_ids"}),
+		}, []string{"call_source", "endpoint", "service_id", "function_ids"}),
 
 		UnmarshallingRequestsSummary: prometheus.NewSummary(prometheus.SummaryOpts{
 			Name: "marshaller_unmarshalling_request_handling_duration_summary",
@@ -54,7 +55,7 @@ func NewMetrics() *Metrics {
 			Name:    "marshaller_unmarshalling_request_handling_duration",
 			Help:    "histogram vec for handling duration (in μs) of unmarshalling request",
 			Buckets: []float64{500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 10000, 50000, 100000, 1000000},
-		}, []string{"endpoint", "service_id", "function_ids"}),
+		}, []string{"call_source", "endpoint", "service_id", "function_ids"}),
 	}
 
 	reg.MustRegister(
@@ -78,7 +79,7 @@ type Metrics struct {
 	UnmarshallingRequests        *prometheus.HistogramVec
 }
 
-func (this *Metrics) LogMarshallingRequest(endpoint string, msg messages.MarshallingV2Request, duration time.Duration) {
+func (this *Metrics) LogMarshallingRequest(request *http.Request, endpoint string, msg messages.MarshallingV2Request, duration time.Duration) {
 	if this == nil {
 		return
 	}
@@ -91,14 +92,27 @@ func (this *Metrics) LogMarshallingRequest(endpoint string, msg messages.Marshal
 		functionIds = append(functionIds, data.FunctionId)
 	}
 	sort.Strings(functionIds)
-	this.MarshallingRequests.WithLabelValues(endpoint, msg.Service.Id, strings.Join(functionIds, ",")).Observe(dur)
+
+	this.MarshallingRequests.WithLabelValues(getCallSource(request), endpoint, msg.Service.Id, strings.Join(functionIds, ",")).Observe(dur)
 }
 
-func (this *Metrics) LogUnmarshallingRequest(endpoint string, msg messages.UnmarshallingV2Request, duration time.Duration) {
+func (this *Metrics) LogUnmarshallingRequest(request *http.Request, endpoint string, msg messages.UnmarshallingV2Request, duration time.Duration) {
 	if this == nil {
 		return
 	}
 	dur := float64(duration.Microseconds())
 	this.MarshallingRequestsSummary.Observe(dur)
-	this.MarshallingRequests.WithLabelValues(endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
+	this.MarshallingRequests.WithLabelValues(getCallSource(request), endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
+}
+
+func getCallSource(req *http.Request) (result string) {
+	result = req.RemoteAddr
+	remoteAddr, _, err := net.SplitHostPort(result)
+	if err == nil && remoteAddr != "" {
+		remoteHosts, _ := net.LookupAddr(remoteAddr)
+		if len(remoteHosts) > 0 {
+			result = remoteHosts[0]
+		}
+	}
+	return result
 }

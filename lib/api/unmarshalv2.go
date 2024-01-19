@@ -126,7 +126,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
-		metrics.LogUnmarshallingRequest(resource+"/:serviceId", msg, time.Since(start))
+		metrics.LogUnmarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
 	})
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -152,7 +152,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
 		}
-		metrics.LogUnmarshallingRequest(resource, msg, time.Since(start))
+		metrics.LogUnmarshallingRequest(request, resource, msg, time.Since(start))
 	})
 
 }
