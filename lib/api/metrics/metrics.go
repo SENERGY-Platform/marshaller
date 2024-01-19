@@ -22,8 +22,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net"
 	"net/http"
+	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -31,6 +33,7 @@ func NewMetrics() *Metrics {
 	reg := prometheus.NewRegistry()
 
 	result := &Metrics{
+		getCallSourceCache: map[string]string{},
 		httphandler: promhttp.HandlerFor(
 			reg,
 			promhttp.HandlerOpts{
@@ -70,7 +73,9 @@ func NewMetrics() *Metrics {
 }
 
 type Metrics struct {
-	httphandler http.Handler
+	httphandler           http.Handler
+	getCallSourceCache    map[string]string
+	getCallSourceCacheMux sync.Mutex
 
 	MarshallingRequestsSummary prometheus.Summary
 	MarshallingRequests        *prometheus.HistogramVec
@@ -93,7 +98,7 @@ func (this *Metrics) LogMarshallingRequest(request *http.Request, endpoint strin
 	}
 	sort.Strings(functionIds)
 
-	this.MarshallingRequests.WithLabelValues(getCallSource(request), endpoint, msg.Service.Id, strings.Join(functionIds, ",")).Observe(dur)
+	this.MarshallingRequests.WithLabelValues(this.getCallSource(request), endpoint, msg.Service.Id, strings.Join(functionIds, ",")).Observe(dur)
 }
 
 func (this *Metrics) LogUnmarshallingRequest(request *http.Request, endpoint string, msg messages.UnmarshallingV2Request, duration time.Duration) {
@@ -102,10 +107,18 @@ func (this *Metrics) LogUnmarshallingRequest(request *http.Request, endpoint str
 	}
 	dur := float64(duration.Microseconds())
 	this.MarshallingRequestsSummary.Observe(dur)
-	this.MarshallingRequests.WithLabelValues(getCallSource(request), endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
+	this.MarshallingRequests.WithLabelValues(this.getCallSource(request), endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
 }
 
-func getCallSource(req *http.Request) (result string) {
+func (this *Metrics) getCallSource(req *http.Request) (result string) {
+	this.getCallSourceCacheMux.Lock()
+	var cacheHit bool
+	result, cacheHit = this.getCallSourceCache[req.RemoteAddr]
+	this.getCallSourceCacheMux.Unlock()
+	if cacheHit {
+		return result
+	}
+
 	result = req.RemoteAddr
 	remoteAddr, _, err := net.SplitHostPort(result)
 	if err == nil && remoteAddr != "" {
@@ -113,7 +126,15 @@ func getCallSource(req *http.Request) (result string) {
 		if len(remoteHosts) > 0 {
 			sort.Strings(remoteHosts)
 			result = remoteHosts[0]
+
+			//remove leading ips if exist (e.g. 10-42-17-133.pessimistic-worker-metrics.process-task-worker.svc.cluster.local.)
+			result = regexp.MustCompile(`^(\d{3}|\d{2}|\d{1})-(\d{3}|\d{2}|\d{1})-(\d{3}|\d{2}|\d{1})-(\d{3}|\d{2}|\d{1})\.`).ReplaceAllString(result, "")
+
+			this.getCallSourceCacheMux.Lock()
+			this.getCallSourceCache[req.RemoteAddr] = result
+			this.getCallSourceCacheMux.Unlock()
 		}
 	}
+
 	return result
 }
