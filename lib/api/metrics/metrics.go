@@ -111,6 +111,7 @@ func getCallSource(req *http.Request) (result string) {
 	if err == nil && remoteAddr != "" {
 		remoteHosts, _ := net.LookupAddr(remoteAddr)
 		if len(remoteHosts) > 0 {
+			sort.Strings(remoteHosts)
 			result = remoteHosts[0]
 		}
 	}
