@@ -106,8 +106,8 @@ func (this *Metrics) LogUnmarshallingRequest(request *http.Request, endpoint str
 		return
 	}
 	dur := float64(duration.Microseconds())
-	this.MarshallingRequestsSummary.Observe(dur)
-	this.MarshallingRequests.WithLabelValues(this.getCallSource(request), endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
+	this.UnmarshallingRequestsSummary.Observe(dur)
+	this.UnmarshallingRequests.WithLabelValues(this.getCallSource(request), endpoint, msg.Service.Id, msg.FunctionId).Observe(dur)
 }
 
 func (this *Metrics) getCallSource(req *http.Request) (result string) {
