@@ -56,6 +56,11 @@ func New(config config.Config, access *config.Access) (*DeviceRepository, error)
 func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {
 	return cache.Use(this.cache, "protocol."+id, func() (model.Protocol, error) {
 		return this.getProtocol(id)
+	}, func(protocol model.Protocol) error {
+		if protocol.Id == "" {
+			return errors.New("invalid protocol loaded from cache")
+		}
+		return nil
 	}, time.Minute)
 }
 
@@ -73,6 +78,11 @@ func (this *DeviceRepository) GetDeviceType(id string) (result model.DeviceType,
 	result, err = cache.Use(this.cache, "device-type."+id, func() (dt model.DeviceType, terr error) {
 		dt, terr, code = this.getDeviceType(id)
 		return dt, terr
+	}, func(deviceType model.DeviceType) error {
+		if deviceType.Id == "" {
+			return errors.New("invalid device-type loaded from cache")
+		}
+		return nil
 	}, time.Minute)
 	return result, err, code
 }
@@ -117,6 +127,11 @@ func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Ser
 	result, err = cache.Use(this.cache, "service."+id, func() (service model.Service, terr error) {
 		service, terr, code = this.getServiceWithErrCode(id)
 		return service, terr
+	}, func(service model.Service) error {
+		if service.Id == "" {
+			return errors.New("invalid service loaded from cache")
+		}
+		return nil
 	}, time.Minute)
 	return result, err, code
 }
@@ -177,6 +192,11 @@ func (this *DeviceRepository) GetAspectNode(id string) (result model.AspectNode,
 		}
 		err = json.NewDecoder(resp.Body).Decode(&aspect)
 		return aspect, err
+	}, func(aspectNode model.AspectNode) error {
+		if aspectNode.Id == "" {
+			return errors.New("invalid aspect-node loaded from cache")
+		}
+		return nil
 	}, time.Minute)
 	return result, err
 }

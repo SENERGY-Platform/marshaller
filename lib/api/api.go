@@ -26,6 +26,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
+	"github.com/SENERGY-Platform/service-commons/pkg/accesslog"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -52,7 +53,7 @@ func Start(ctx context.Context, config config.Config, marshaller *marshaller.Mar
 	router := GetRouter(config, marshaller, marshallerV2, configurableService, deviceRepo, converter, m)
 	log.Println("add logging and cors")
 	corsHandler := util.NewCors(router)
-	logger := util.NewLogger(corsHandler, config.LogLevel)
+	logger := accesslog.New(corsHandler)
 	log.Println("listen on port", config.ServerPort)
 	srv := &http.Server{Addr: ":" + config.ServerPort, Handler: logger}
 	closed, close := context.WithCancel(context.Background())
