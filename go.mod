@@ -10,7 +10,7 @@ require (
 
 require (
 	github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38
-	github.com/SENERGY-Platform/service-commons v0.0.0-20240313123621-ce10fbe36496
+	github.com/SENERGY-Platform/service-commons v0.0.0-20240314112519-5bde66831b0d
 	github.com/prometheus/client_golang v1.19.0
 )
 
