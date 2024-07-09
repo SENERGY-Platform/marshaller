@@ -3,14 +3,14 @@ module github.com/SENERGY-Platform/marshaller
 go 1.22
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.7
+	github.com/SENERGY-Platform/converter v0.0.8
 	github.com/clbanning/mxj v1.8.4
 	github.com/julienschmidt/httprouter v1.3.0
 )
 
 require (
 	github.com/SENERGY-Platform/models/go v0.0.0-20240627082833-157bd627a94f
-	github.com/SENERGY-Platform/service-commons v0.0.0-20240423132428-8eccbc027e71
+	github.com/SENERGY-Platform/service-commons v0.0.0-20240708085423-94423a495d7f
 	github.com/prometheus/client_golang v1.19.1
 )
 
