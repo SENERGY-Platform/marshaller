@@ -5,7 +5,6 @@
   "auth_endpoint":"",
   "auth_client_id":"",
   "auth_client_secret":"",
-  "permissions_search_url":"",
   "device_repository_url":"",
   "converter_url":"",
   "concept_repo_refresh_interval":3600,

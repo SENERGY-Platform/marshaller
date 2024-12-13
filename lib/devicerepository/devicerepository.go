@@ -31,10 +31,9 @@ import (
 )
 
 type DeviceRepository struct {
-	cache         *cache.Cache
-	repoUrl       string
-	permsearchUrl string
-	access        *config.Access
+	cache   *cache.Cache
+	repoUrl string
+	access  *config.Access
 }
 
 func New(config config.Config, access *config.Access) (*DeviceRepository, error) {
@@ -50,7 +49,7 @@ func New(config config.Config, access *config.Access) (*DeviceRepository, error)
 	if err != nil {
 		return nil, err
 	}
-	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: c, permsearchUrl: config.PermissionsSearchUrl, access: access}, nil
+	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: c, access: access}, nil
 }
 
 func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {

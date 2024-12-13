@@ -18,17 +18,15 @@ package mocks
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
+	"github.com/SENERGY-Platform/device-repository/lib/api"
+	"github.com/SENERGY-Platform/device-repository/lib/client"
+	devicerepoconfig "github.com/SENERGY-Platform/device-repository/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/testdata"
-	"log"
-	"net/http"
 	"net/http/httptest"
-	"strconv"
-	"strings"
 )
 
 const exampleColor = "example_color"
@@ -51,92 +49,39 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 		return nil, err
 	}
 
-	searchMockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		//endpoint := this.config.PermissionsSearchUrl + "/v3/resources/concepts?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
-		//endpoint := this.config.PermissionsSearchUrl + "/v3/resources/functions?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
+	c, db, err := client.NewTestClient()
+	if err != nil {
+		return nil, err
+	}
 
-		log.Println("TEST-DEBUG: searchMockServer:", request.Method, request.URL.String(), request.URL.Path)
-
-		limitStr := request.URL.Query().Get("limit")
-		limit := 100
-		if limitStr != "" {
-			limit, err = strconv.Atoi(limitStr)
-			if err != nil {
-				http.Error(writer, err.Error(), http.StatusBadRequest)
-				return
-			}
+	for _, function := range functions {
+		err = db.SetFunction(ctx, function)
+		if err != nil {
+			return nil, err
 		}
-
-		offsetStr := request.URL.Query().Get("offset")
-		offset := 0
-		if offsetStr != "" {
-			offset, err = strconv.Atoi(offsetStr)
-			if err != nil {
-				http.Error(writer, err.Error(), http.StatusBadRequest)
-				return
-			}
+	}
+	for _, concept := range concepts {
+		err = db.SetConcept(ctx, concept)
+		if err != nil {
+			return nil, err
 		}
-		if strings.Contains(request.URL.String(), "/v3/resources/functions") {
-			end := limit + offset
-			if end > len(functions) {
-				end = len(functions)
-			}
-			json.NewEncoder(writer).Encode(functions[offset:end])
-			return
+	}
+	for _, characteristic := range characteristicsList {
+		err = db.SetCharacteristic(ctx, characteristic)
+		if err != nil {
+			return nil, err
 		}
+	}
 
-		if strings.Contains(request.URL.String(), "/v3/resources/concepts") {
-			end := limit + offset
-			if end > len(concepts) {
-				end = len(concepts)
-			}
-			json.NewEncoder(writer).Encode(concepts[offset:end])
-			return
-		}
-
-		http.Error(writer, request.URL.String(), http.StatusNotFound)
-	}))
-
-	devicerepoMockServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		//this.config.DeviceRepositoryUrl+"/concepts/"+url.PathEscape(id)
-		//this.config.DeviceRepositoryUrl+"/characteristics/"+url.PathEscape(id)
-
-		log.Println("TEST-DEBUG: devicerepoMockServer:", request.Method, request.URL.String(), request.URL.Path)
-
-		parts := strings.Split(request.URL.Path, "/")
-		id := parts[len(parts)-1]
-
-		if strings.Contains(request.URL.String(), "/concepts/") {
-			for _, element := range concepts {
-				if element.Id == id {
-					json.NewEncoder(writer).Encode(element)
-					return
-				}
-			}
-		}
-
-		if strings.Contains(request.URL.String(), "/characteristics/") {
-			for _, element := range characteristicsList {
-				if element.Id == id {
-					json.NewEncoder(writer).Encode(element)
-					return
-				}
-			}
-		}
-
-		log.Println("TEST_ERROR: no match found", request.URL.Path, request.URL.String())
-		http.Error(writer, request.URL.Path, http.StatusNotFound)
-	}))
+	server := httptest.NewServer(api.GetRouter(devicerepoconfig.Config{}, c))
 
 	go func() {
 		<-ctx.Done()
-		searchMockServer.Close()
-		devicerepoMockServer.Close()
+		server.Close()
 	}()
 
 	config := config.Config{
-		PermissionsSearchUrl:       searchMockServer.URL,
-		DeviceRepositoryUrl:        devicerepoMockServer.URL,
+		DeviceRepositoryUrl:        server.URL,
 		ConceptRepoRefreshInterval: 42000,
 		LogLevel:                   "DEBUG",
 	}

@@ -17,10 +17,11 @@
 package conceptrepo
 
 import (
+	"github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/models/go/models"
 	"log"
 	"net/url"
-	"strconv"
 )
 
 func (this *ConceptRepo) Load() error {
@@ -105,17 +106,16 @@ type IdWrapper struct {
 }
 
 func (this *ConceptRepo) loadConceptIds() (ids []string, err error) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return ids, err
-	}
-	limit := 100
+	limit := 1000
 	offset := 0
-	temp := []IdWrapper{}
+	temp := []models.Concept{}
+	c := client.NewClient(this.config.DeviceRepositoryUrl)
 	for len(temp) == limit || offset == 0 {
-		temp = []IdWrapper{}
-		endpoint := this.config.PermissionsSearchUrl + "/v3/resources/concepts?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
-		err = token.GetJSON(endpoint, &temp)
+		temp, _, err, _ = c.ListConcepts(client.ConceptListOptions{
+			Limit:  int64(limit),
+			Offset: int64(offset),
+			SortBy: "name.asc",
+		})
 		if err != nil {
 			return ids, err
 		}
@@ -134,21 +134,25 @@ type FunctionInfo struct {
 
 func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err error) {
 	log.Println("load functions")
-	token, err := this.access.Ensure()
-	if err != nil {
-		return functionInfos, err
-	}
 	limit := 100
 	offset := 0
-	temp := []FunctionInfo{}
+	temp := []models.Function{}
+	c := client.NewClient(this.config.DeviceRepositoryUrl)
 	for len(temp) == limit || offset == 0 {
-		temp = []FunctionInfo{}
-		endpoint := this.config.PermissionsSearchUrl + "/v3/resources/functions?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset) + "&sort=name.asc&rights=r"
-		err = token.GetJSON(endpoint, &temp)
+		temp, _, err, _ = c.ListFunctions(client.FunctionListOptions{
+			Limit:  int64(limit),
+			Offset: int64(offset),
+			SortBy: "name.asc",
+		})
 		if err != nil {
 			return functionInfos, err
 		}
-		functionInfos = append(functionInfos, temp...)
+		for _, f := range temp {
+			functionInfos = append(functionInfos, FunctionInfo{
+				Id:        f.Id,
+				ConceptId: f.ConceptId,
+			})
+		}
 		offset = offset + limit
 	}
 	return functionInfos, err
