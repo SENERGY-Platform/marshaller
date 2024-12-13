@@ -73,7 +73,7 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 		}
 	}
 
-	server := httptest.NewServer(api.GetRouter(devicerepoconfig.Config{}, c))
+	server := httptest.NewServer(api.GetRouterWithoutMiddleware(devicerepoconfig.Config{}, c))
 
 	go func() {
 		<-ctx.Done()
