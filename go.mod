@@ -5,13 +5,13 @@ go 1.23
 toolchain go1.23.0
 
 require (
-	github.com/SENERGY-Platform/converter v0.0.9
+	github.com/SENERGY-Platform/converter v0.0.10
 	github.com/clbanning/mxj v1.8.4
 	github.com/julienschmidt/httprouter v1.3.0
 )
 
 require (
-	github.com/SENERGY-Platform/device-repository v0.1.50
+	github.com/SENERGY-Platform/device-repository v0.1.51
 	github.com/SENERGY-Platform/models/go v0.0.0-20241007061544-de7132ae94e4
 	github.com/SENERGY-Platform/service-commons v0.0.0-20240813072046-91b3195dd8fc
 	github.com/prometheus/client_golang v1.19.1
