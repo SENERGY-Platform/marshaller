@@ -109,7 +109,7 @@ func (this *ConceptRepo) loadConceptIds() (ids []string, err error) {
 	limit := 1000
 	offset := 0
 	temp := []models.Concept{}
-	c := client.NewClient(this.config.DeviceRepositoryUrl)
+	c := client.NewClient(this.config.DeviceRepositoryUrl, nil)
 	for len(temp) == limit || offset == 0 {
 		temp, _, err, _ = c.ListConcepts(client.ConceptListOptions{
 			Limit:  int64(limit),
@@ -137,7 +137,7 @@ func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err erro
 	limit := 100
 	offset := 0
 	temp := []models.Function{}
-	c := client.NewClient(this.config.DeviceRepositoryUrl)
+	c := client.NewClient(this.config.DeviceRepositoryUrl, nil)
 	for len(temp) == limit || offset == 0 {
 		temp, _, err, _ = c.ListFunctions(client.FunctionListOptions{
 			Limit:  int64(limit),

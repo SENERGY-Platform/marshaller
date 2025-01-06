@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/SENERGY-Platform/device-repository v0.1.51
+	github.com/SENERGY-Platform/device-repository v0.1.52
 	github.com/SENERGY-Platform/models/go v0.0.0-20241007061544-de7132ae94e4
 	github.com/SENERGY-Platform/service-commons v0.0.0-20240813072046-91b3195dd8fc
 	github.com/prometheus/client_golang v1.19.1
