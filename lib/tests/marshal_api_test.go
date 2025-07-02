@@ -19,12 +19,13 @@ package tests
 import (
 	"fmt"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
+	"io"
 	"io/ioutil"
 	"net/url"
 	"strings"
 )
 
-func ExampleMarshalEmpty() {
+func Example_api_MarshalEmpty() {
 	resp, err := post(
 		ServerUrl+"/marshal",
 		"application/json",
@@ -42,7 +43,7 @@ func ExampleMarshalEmpty() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	fmt.Println(err, string(result))
 
 	//output:
@@ -50,7 +51,7 @@ func ExampleMarshalEmpty() {
 
 }
 
-func ExampleMarshal1() {
+func Example_api_Marshal1() {
 	mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
@@ -69,7 +70,7 @@ func ExampleMarshal1() {
 
 }
 
-func ExampleMarshal2() {
+func Example_api_Marshal2() {
 	mocks.DeviceRepo.SetServiceJson(philipsHueServiceStr).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
@@ -104,7 +105,7 @@ func ExampleMarshal2() {
 
 }
 
-func ExampleMarshal3() {
+func Example_api_Marshal3() {
 	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
 	resp, err := post(
@@ -139,7 +140,7 @@ func ExampleMarshal3() {
 
 }
 
-func ExampleMarshal4() {
+func Example_api_Marshal4() {
 	resp, err := post(
 		ServerUrl+"/marshal",
 		"application/json",
@@ -173,7 +174,7 @@ func ExampleMarshal4() {
 
 }
 
-func ExampleMarshalWithUnusedConfigurable() {
+func Example_api_MarshalWithUnusedConfigurable() {
 	resp, err := post(
 		ServerUrl+"/marshal",
 		"application/json",

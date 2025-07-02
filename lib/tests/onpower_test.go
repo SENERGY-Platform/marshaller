@@ -21,7 +21,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func ExampleOnPower() {
+func ExampleMarshaller_MarshalInputs_onPower() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",

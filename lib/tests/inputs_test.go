@@ -22,7 +22,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func ExampleConfigurable1() {
+func ExampleConfigurableService_Find_configurable1() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -170,7 +170,7 @@ func ExampleConfigurable1() {
 	//map[body:{"bar":"foo2","color":"#ffff00","color_2":"#ffff00","foo":"bar2","temperature":37}] <nil>
 }
 
-func ExampleConfigurableUnused() {
+func ExampleConfigurableService_Find_configurableUnused() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -256,7 +256,7 @@ func ExampleConfigurableUnused() {
 	//map[body:{"color":{"blue":0,"foo":"bar1","green":0,"red":0},"temperature":37}] <nil>
 }
 
-func ExampleMarshalInput1() {
+func ExampleMarshaller_MarshalInputs_marshalInput1() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -321,7 +321,7 @@ func ExampleMarshalInput1() {
 	//map[body:{"color":{"blue":100,"green":0,"red":255}}] <nil>
 }
 
-func ExampleMarshalMultiInput1() {
+func ExampleMarshaller_MarshalInputs_marshalMultiInput1() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -413,7 +413,7 @@ func ExampleMarshalMultiInput1() {
 	//map[body:{"color":{"blue":100,"green":0,"red":255},"color_2":{"blue":100,"green":0,"red":255}}] <nil>
 }
 
-func ExampleMarshalMultiInput2() {
+func ExampleMarshaller_MarshalInputs_marshalMultiInput2() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -485,7 +485,7 @@ func ExampleMarshalMultiInput2() {
 	//map[body:{"color":{"blue":100,"green":0,"red":255},"color_2":"#ff0064"}] <nil>
 }
 
-func ExampleMarshalInput2() {
+func ExampleMarshaller_MarshalInputs_marshalInput2() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -535,7 +535,7 @@ func ExampleMarshalInput2() {
 	//map[body:{"color":"#ff0064"}] <nil>
 }
 
-func ExampleMarshalInputMulti() {
+func ExampleMarshaller_MarshalInputs_marshalInputMulti() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -609,7 +609,7 @@ func ExampleMarshalInputMulti() {
 	//map[body:{"bri":25,"color":{"blue":255,"green":255,"red":255}}] <nil>
 }
 
-func ExampleMarshalInputMultiXml() {
+func ExampleMarshaller_MarshalInputs_marshalInputMultiXml() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -683,7 +683,7 @@ func ExampleMarshalInputMultiXml() {
 	//map[body:<payload><bri>25</bri><color blue="255" green="255" red="255"/></payload>] <nil>
 }
 
-func ExampleMarshalInputNull() {
+func ExampleMarshaller_MarshalInputs_marshalInputNull() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -769,7 +769,7 @@ func ExampleMarshalInputNull() {
 	//map[body:<payload><bri>100</bri><color blue="100" green="0" red="255"/></payload>] <nil>
 }
 
-func ExampleMarshalEmptyService() {
+func ExampleMarshaller_MarshalInputs_marshalEmptyService() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",

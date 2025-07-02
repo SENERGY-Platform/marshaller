@@ -21,7 +21,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func ExampleUnmarshalOutput1() {
+func ExampleMarshaller_UnmarshalOutputs_unmarshalOutput1() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -86,7 +86,7 @@ func ExampleUnmarshalOutput1() {
 	//#ff0064 <nil>
 }
 
-func ExampleUnmarshalOutput2() {
+func ExampleMarshaller_UnmarshalOutputs_unmarshalOutput2() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -125,7 +125,7 @@ func ExampleUnmarshalOutput2() {
 	//map[b:100 g:0 r:255] <nil>
 }
 
-func ExampleUnmarshalOutputMulti() {
+func ExampleMarshaller_UnmarshalOutputs_unmarshalOutputMulti() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",
@@ -199,7 +199,7 @@ func ExampleUnmarshalOutputMulti() {
 	//25 <nil>
 }
 
-func ExampleMarshalOutputMultiXml() {
+func ExampleMarshaller_UnmarshalOutputs_unmarshalOutputMultiXml() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",

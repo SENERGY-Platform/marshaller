@@ -25,7 +25,7 @@ import (
 	"testing"
 )
 
-func ExampleFindConfigurablesShort() {
+func ExampleConfigurableService_Find_configurablesShort() {
 	if !testing.Short() {
 		//skip
 		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]`)
@@ -37,7 +37,7 @@ func ExampleFindConfigurablesShort() {
 	//[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]
 }
 
-func ExampleFindConfigurablesLong() {
+func ExampleConfigurableService_Find_configurablesLong() {
 	if testing.Short() {
 		//skip
 		fmt.Println(`[{"characteristic_id":"urn:infai:ses:characteristic:5b4eea52-e8e5-4e80-9455-0382f81a1b43","values":[{"label":"RGB b","path":"b","value":"0"},{"label":"RGB g","path":"g","value":"0"},{"label":"RGB r","path":"r","value":"0"}]}]`)

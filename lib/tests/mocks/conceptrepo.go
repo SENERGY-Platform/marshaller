@@ -21,7 +21,7 @@ import (
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
 	"github.com/SENERGY-Platform/device-repository/lib/api"
 	"github.com/SENERGY-Platform/device-repository/lib/client"
-	devicerepoconfig "github.com/SENERGY-Platform/device-repository/lib/config"
+	devicerepoconfig "github.com/SENERGY-Platform/device-repository/lib/configuration"
 	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -34,6 +34,10 @@ const exampleRgb = "example_rgb"
 const exampleHex = "example_hex"
 const exampleBrightness = "example_brightness"
 const exampleLux = "example_lux"
+
+func NilCallback[T any](T) error {
+	return nil
+}
 
 func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 	functions, err := testdata.GetFunctions()
@@ -55,19 +59,19 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 	}
 
 	for _, function := range functions {
-		err = db.SetFunction(ctx, function)
+		err = db.SetFunction(ctx, function, NilCallback)
 		if err != nil {
 			return nil, err
 		}
 	}
 	for _, concept := range concepts {
-		err = db.SetConcept(ctx, concept)
+		err = db.SetConcept(ctx, concept, NilCallback)
 		if err != nil {
 			return nil, err
 		}
 	}
 	for _, characteristic := range characteristicsList {
-		err = db.SetCharacteristic(ctx, characteristic)
+		err = db.SetCharacteristic(ctx, characteristic, NilCallback)
 		if err != nil {
 			return nil, err
 		}

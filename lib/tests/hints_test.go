@@ -21,7 +21,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func ExampleHints1() {
+func ExampleMarshaller_UnmarshalOutputs_hints1() {
 	protocol := model.Protocol{
 		Id:      "p1",
 		Name:    "p1",

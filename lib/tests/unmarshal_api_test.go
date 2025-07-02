@@ -19,13 +19,13 @@ package tests
 import (
 	"fmt"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/url"
 	"strings"
 )
 
-func ExampleUnmarshal1() {
+func Example_api_Unmarshal1() {
 	mocks.DeviceRepo.SetServiceJson(danfossTemperatureService).SetProtocolJson(protocolJson)
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //Danfoss Radiator Thermostat getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
@@ -42,7 +42,7 @@ func ExampleUnmarshal1() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	fmt.Println(err, string(result))
 
 	//output:
@@ -50,7 +50,7 @@ func ExampleUnmarshal1() {
 
 }
 
-func ExampleUnmarshal2() {
+func Example_api_Unmarshal2() {
 	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
 	resp, err := post(
@@ -69,7 +69,7 @@ func ExampleUnmarshal2() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	fmt.Println(err, string(result))
 
 	//output:
@@ -77,7 +77,7 @@ func ExampleUnmarshal2() {
 
 }
 
-func ExampleUnmarshal3() {
+func Example_api_Unmarshal3() {
 	resp, err := post(
 		ServerUrl+"/unmarshal",
 		"application/json",
@@ -95,7 +95,7 @@ func ExampleUnmarshal3() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	fmt.Println(err, string(result))
 
 	//output:
@@ -103,7 +103,7 @@ func ExampleUnmarshal3() {
 
 }
 
-func ExampleUnmarshalWithHints1() {
+func Example_api_UnmarshalWithHints1() {
 	resp, err := post(
 		ServerUrl+"/unmarshal",
 		"application/json",
@@ -122,7 +122,7 @@ func ExampleUnmarshalWithHints1() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return
@@ -134,7 +134,7 @@ func ExampleUnmarshalWithHints1() {
 
 }
 
-func ExampleUnmarshalWithHints2() {
+func Example_api_UnmarshalWithHints2() {
 	resp, err := post(
 		ServerUrl+"/unmarshal",
 		"application/json",
@@ -153,7 +153,7 @@ func ExampleUnmarshalWithHints2() {
 		return
 	}
 	defer resp.Body.Close()
-	result, err := ioutil.ReadAll(resp.Body)
+	result, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return
@@ -165,7 +165,7 @@ func ExampleUnmarshalWithHints2() {
 
 }
 
-//Danfoss Radiator Thermostat
+// Danfoss Radiator Thermostat
 const danfossTemperatureService = `{
    "id":"urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b",
    "local_id":"get_level:67-1",
@@ -228,7 +228,7 @@ const danfossTemperatureService = `{
    "rdf_type":""
 }`
 
-//Danfoss Radiator Thermostat
+// Danfoss Radiator Thermostat
 const danfossTemperatureServiceForHints = `{
    "id":"urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b",
    "local_id":"get_level:67-1",
