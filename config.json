@@ -12,5 +12,6 @@
   "return_unknown_path_as_null": true,
   "debug": false,
   "kafka_url": "",
-  "cache_invalidation_kafka_topics": ["device-types", "aspects", "concepts"]
+  "cache_invalidation_kafka_topics": ["device-types", "aspects", "concepts"],
+  "init_topics": false
 }

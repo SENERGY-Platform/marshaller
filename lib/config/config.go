@@ -42,6 +42,7 @@ type Config struct {
 	Debug                        bool     `json:"debug"`
 	KafkaUrl                     string   `json:"kafka_url"`                       //optional, used for cache invalidation
 	CacheInvalidationKafkaTopics []string `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
+	InitTopics                   bool     `json:"init_topics"`
 }
 
 // loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
