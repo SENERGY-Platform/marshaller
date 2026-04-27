@@ -19,6 +19,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
@@ -27,8 +29,6 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
-	"log"
-	"net/http"
 )
 
 func init() {
@@ -92,7 +92,7 @@ func Marshalling(router *httprouter.Router, config config.Config, marshaller *ma
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			config.GetLogger().Error("unable to encode response", "error", err)
 		}
 	})
 
@@ -116,7 +116,7 @@ func Marshalling(router *httprouter.Router, config config.Config, marshaller *ma
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			config.GetLogger().Error("unable to encode response", "error", err)
 		}
 	})
 

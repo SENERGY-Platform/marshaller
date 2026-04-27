@@ -17,11 +17,11 @@
 package conceptrepo
 
 import (
+	"net/url"
+
 	"github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/models/go/models"
-	"log"
-	"net/url"
 )
 
 func (this *ConceptRepo) Load() error {
@@ -86,9 +86,9 @@ func (this *ConceptRepo) resetToDefault() {
 }
 
 func (this *ConceptRepo) register(concept model.Concept, characteristics []model.Characteristic) {
-	log.Println("load concept", concept.Name, concept.Id)
+	this.config.GetLogger().Info("load concept", "concept", concept.Name, "id", concept.Id)
 	for _, characteristic := range characteristics {
-		log.Println("    load characteristic", characteristic.Name, characteristic.Id)
+		this.config.GetLogger().Info("load characteristic", "concept", concept.Name, "characteristic", characteristic.Name, "id", characteristic.Id)
 		concept.CharacteristicIds = append(concept.CharacteristicIds, characteristic.Id)
 		this.characteristics[characteristic.Id] = characteristic
 		this.conceptByCharacteristic[characteristic.Id] = append(this.conceptByCharacteristic[characteristic.Id], concept)
@@ -133,7 +133,7 @@ type FunctionInfo struct {
 }
 
 func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err error) {
-	log.Println("load functions")
+	this.config.GetLogger().Info("load functions")
 	limit := 100
 	offset := 0
 	temp := []models.Function{}

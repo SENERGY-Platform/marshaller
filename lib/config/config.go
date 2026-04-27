@@ -20,11 +20,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"reflect"
 	"regexp"
+	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
+
+	struct_logger "github.com/SENERGY-Platform/go-service-base/struct-logger"
 )
 
 type Config struct {
@@ -36,13 +41,15 @@ type Config struct {
 	AuthClientSecret             string   `json:"auth_client_secret"`
 	DeviceRepositoryUrl          string   `json:"device_repository_url"`
 	ConceptRepoRefreshInterval   int64    `json:"concept_repo_refresh_interval"`
-	LogLevel                     string   `json:"log_level"`
 	ConverterUrl                 string   `json:"converter_url"`
 	ReturnUnknownPathAsNull      bool     `json:"return_unknown_path_as_null"`
 	Debug                        bool     `json:"debug"`
 	KafkaUrl                     string   `json:"kafka_url"`                       //optional, used for cache invalidation
 	CacheInvalidationKafkaTopics []string `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
 	InitTopics                   bool     `json:"init_topics"`
+
+	LogLevel string       `json:"log_level"`
+	logger   *slog.Logger `json:"-"`
 }
 
 // loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
@@ -121,4 +128,36 @@ func handleEnvironmentVars(config *Config) {
 			}
 		}
 	}
+}
+
+func (this *Config) GetLogger() *slog.Logger {
+	if this.logger == nil {
+		if this.Debug {
+			this.LogLevel = "debug"
+		}
+		info, ok := debug.ReadBuildInfo()
+		project := ""
+		org := ""
+		if ok {
+			if parts := strings.Split(info.Main.Path, "/"); len(parts) > 2 {
+				project = strings.Join(parts[2:], "/")
+				org = strings.Join(parts[:2], "/")
+			}
+		}
+		this.logger = struct_logger.New(
+			struct_logger.Config{
+				Handler:    struct_logger.JsonHandlerSelector,
+				Level:      this.LogLevel,
+				TimeFormat: time.RFC3339Nano,
+				TimeUtc:    true,
+				AddMeta:    true,
+			},
+			os.Stdout,
+			org,
+			project,
+		)
+		slog.SetDefault(this.logger)
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	}
+	return this.logger
 }

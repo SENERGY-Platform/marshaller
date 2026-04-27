@@ -17,13 +17,14 @@
 package v2
 
 import (
-	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	"log"
+	"fmt"
+	"log/slog"
 	"math"
 	"reflect"
 	"sort"
 	"strings"
+
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 type PathAspectInfo struct {
@@ -60,10 +61,7 @@ func (this *Marshaller) SortPathsByAspectDistance(repo DeviceRepository, service
 	for _, info := range infoList {
 		result = append(result, info.Path)
 	}
-	if this.config.Debug {
-		temp, _ := json.Marshal(infoList)
-		log.Println("DEBUG: path aspect distance info", aspect.Id, aspect.Name, string(temp))
-	}
+	slog.Debug("path aspect distance info", "aspectId", aspect.Id, "aspectName", aspect.Name, "infoList", fmt.Sprintf("%#v", infoList))
 	return result, nil
 }
 

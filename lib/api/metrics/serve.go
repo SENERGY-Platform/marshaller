@@ -20,14 +20,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"log"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 )
 
 func (this *Metrics) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	log.Printf("%v [%v] %v \n", request.RemoteAddr, request.Method, request.URL)
+	this.config.GetLogger().Info("metrics request", "remote_addr", request.RemoteAddr, "method", request.Method, "url", request.URL)
 	this.httphandler.ServeHTTP(writer, request)
 }
 
@@ -38,7 +39,7 @@ func Start(ctx context.Context, config config.Config) (metrics *Metrics, err err
 		}
 	}()
 
-	metrics = NewMetrics()
+	metrics = NewMetrics(config)
 
 	if config.PrometheusPort == "" || config.PrometheusPort == "-" {
 		return metrics, nil
@@ -50,15 +51,16 @@ func Start(ctx context.Context, config config.Config) (metrics *Metrics, err err
 
 	server := &http.Server{Addr: ":" + config.PrometheusPort, Handler: router}
 	go func() {
-		log.Println("listening on ", server.Addr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		config.GetLogger().Info("metrics listening", "address", server.Addr)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			debug.PrintStack()
+			config.GetLogger().Error("FATAL: unable to listen and serve metrics", "error", err)
 			log.Fatal("FATAL:", err)
 		}
 	}()
 	go func() {
 		<-ctx.Done()
-		log.Println("metrics shutdown", server.Shutdown(context.Background()))
+		config.GetLogger().Info("metrics shutdown", "result", server.Shutdown(context.Background()))
 	}()
 	return
 }

@@ -17,9 +17,6 @@
 package metrics
 
 import (
-	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net"
 	"net/http"
 	"regexp"
@@ -27,12 +24,18 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func NewMetrics() *Metrics {
+func NewMetrics(conf config.Config) *Metrics {
 	reg := prometheus.NewRegistry()
 
 	result := &Metrics{
+		config:             conf,
 		getCallSourceCache: map[string]string{},
 		httphandler: promhttp.HandlerFor(
 			reg,
@@ -82,6 +85,7 @@ type Metrics struct {
 
 	UnmarshallingRequestsSummary prometheus.Summary
 	UnmarshallingRequests        *prometheus.HistogramVec
+	config                       config.Config
 }
 
 func (this *Metrics) LogMarshallingRequest(request *http.Request, endpoint string, msg messages.MarshallingV2Request, duration time.Duration) {

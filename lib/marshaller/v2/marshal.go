@@ -19,15 +19,16 @@ package v2
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
-	"github.com/SENERGY-Platform/models/go/models"
-	"log"
+	"log/slog"
 	"math"
 	"reflect"
 	"runtime/debug"
 	"strconv"
 	"strings"
+
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
+	"github.com/SENERGY-Platform/models/go/models"
 )
 
 func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
@@ -320,7 +321,7 @@ func (this *Marshaller) contentsToMessage(protocol model.Protocol, inputs []mode
 					return result, err
 				}
 			} else {
-				log.Println("WARNING: protocol-segment not found " + input.ProtocolSegmentId)
+				slog.Warn("protocol-segment not found " + input.ProtocolSegmentId)
 			}
 		}
 	}

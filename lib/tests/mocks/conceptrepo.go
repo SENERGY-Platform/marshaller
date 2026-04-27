@@ -18,6 +18,8 @@ package mocks
 
 import (
 	"context"
+	"net/http/httptest"
+
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
 	"github.com/SENERGY-Platform/device-repository/lib/api"
 	"github.com/SENERGY-Platform/device-repository/lib/client"
@@ -26,7 +28,6 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/testdata"
-	"net/http/httptest"
 )
 
 const exampleColor = "example_color"
@@ -87,7 +88,7 @@ func NewMockConceptRepo(ctx context.Context) (*conceptrepo.ConceptRepo, error) {
 	config := config.Config{
 		DeviceRepositoryUrl:        server.URL,
 		ConceptRepoRefreshInterval: 42000,
-		LogLevel:                   "DEBUG",
+		LogLevel:                   "debug",
 	}
 	return conceptrepo.New(ctx, config, MockAccess{},
 		conceptrepo.ConceptRepoDefault{

@@ -18,6 +18,12 @@ package api
 
 import (
 	"context"
+	"errors"
+	"net/http"
+	"reflect"
+	"runtime"
+	"time"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/api/util"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
@@ -28,11 +34,6 @@ import (
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/service-commons/pkg/accesslog"
 	"github.com/julienschmidt/httprouter"
-	"log"
-	"net/http"
-	"reflect"
-	"runtime"
-	"time"
 )
 
 type DeviceRepository interface {
@@ -45,22 +46,22 @@ type DeviceRepository interface {
 var endpoints = []func(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics){}
 
 func Start(ctx context.Context, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter) (closed context.Context) {
-	log.Println("start api")
+	config.GetLogger().Info("start api")
 	m, err := metrics.Start(ctx, config)
 	if err != nil {
-		log.Println("WARNING: unable to serve metrics", err)
+		config.GetLogger().Warn("unable to serve metrics", "error", err)
 	}
 	router := GetRouter(config, marshaller, marshallerV2, configurableService, deviceRepo, converter, m)
-	log.Println("add logging and cors")
+	config.GetLogger().Info("add logging and cors")
 	corsHandler := util.NewCors(router)
 	logger := accesslog.New(corsHandler)
-	log.Println("listen on port", config.ServerPort)
+	config.GetLogger().Info("listen on port", "port", config.ServerPort)
 	srv := &http.Server{Addr: ":" + config.ServerPort, Handler: logger}
 	closed, close := context.WithCancel(context.Background())
 	go func() {
 		err := srv.ListenAndServe()
-		if err != http.ErrServerClosed {
-			log.Println("ERROR:", err)
+		if !errors.Is(err, http.ErrServerClosed) {
+			config.GetLogger().Error("unable to listen and serve http", "error", err)
 		}
 		close()
 	}()
@@ -77,7 +78,7 @@ func Start(ctx context.Context, config config.Config, marshaller *marshaller.Mar
 func GetRouter(config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) (router *httprouter.Router) {
 	router = httprouter.New()
 	for _, e := range endpoints {
-		log.Println("add endpoints: " + runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
+		config.GetLogger().Info("add endpoints", "endpoint", runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
 		e(router, config, marshaller, marshallerV2, configurableService, deviceRepo, converter, metrics)
 	}
 	return

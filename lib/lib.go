@@ -18,6 +18,9 @@ package lib
 
 import (
 	"context"
+	"runtime/debug"
+	"time"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api"
 	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
@@ -29,9 +32,6 @@ import (
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/service-commons/pkg/cache/invalidator"
 	"github.com/SENERGY-Platform/service-commons/pkg/kafka"
-	"log"
-	"runtime/debug"
-	"time"
 )
 
 func Start(ctx context.Context, conf config.Config) (closed context.Context, err error) {
@@ -83,7 +83,7 @@ func StartCacheInvalidator(ctx context.Context, conf config.Config) error {
 		PartitionWatchInterval: time.Minute,
 		InitTopic:              conf.InitTopics,
 		OnError: func(err error) {
-			log.Println("ERROR:", err)
+			conf.GetLogger().Error("cache invalidator error", "error", err)
 			debug.PrintStack()
 		},
 	}, conf.CacheInvalidationKafkaTopics, nil)

@@ -19,12 +19,13 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/SENERGY-Platform/marshaller/lib"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/SENERGY-Platform/marshaller/lib"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
 )
 
 func main() {
@@ -40,23 +41,24 @@ func main() {
 
 	closed, err := lib.Start(ctx, conf)
 	if err != nil {
+		conf.GetLogger().Error("FATAL: unable to start server", "error", err)
 		log.Fatal(err)
 	}
 
 	err = lib.StartCacheInvalidator(ctx, conf)
 	if err != nil {
-		log.Println("WARNING: unable to start cache invalidator", err)
+		conf.GetLogger().Warn("unable to start cache invalidator", "error", err)
 	}
 
 	go func() {
 		shutdownSignal := make(chan os.Signal, 1)
 		signal.Notify(shutdownSignal, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 		sig := <-shutdownSignal
-		log.Println("received shutdown signal", sig)
+		conf.GetLogger().Info("received shutdown signal", "signal", sig)
 		shutdown()
 	}()
 
 	<-closed.Done()
-	log.Println("server closed")
+	conf.GetLogger().Info("server closed")
 
 }

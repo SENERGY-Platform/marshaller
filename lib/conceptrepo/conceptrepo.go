@@ -19,13 +19,14 @@ package conceptrepo
 import (
 	"context"
 	"errors"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	"github.com/SENERGY-Platform/service-commons/pkg/signal"
-	"log"
+	"fmt"
 	"runtime/debug"
 	"sync"
 	"time"
+
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	"github.com/SENERGY-Platform/service-commons/pkg/signal"
 )
 
 type ConceptRepo struct {
@@ -75,10 +76,10 @@ func New(ctx context.Context, conf config.Config, access Access, defaults ...Con
 		<-ctx.Done()
 	}()
 	refresh := func() {
-		log.Println("refresh concept-repo")
+		conf.GetLogger().Info("refresh concept-repo")
 		err = result.Load()
 		if err != nil {
-			log.Println("WARNING: unable to update concept repository", err)
+			conf.GetLogger().Warn("unable to update concept repository", "error", err)
 		}
 	}
 	go func() {
@@ -176,7 +177,7 @@ func (this *ConceptRepo) registerFunction(f FunctionInfo) {
 	if f.ConceptId != "" {
 		concept, ok := this.concepts[f.ConceptId]
 		if !ok {
-			log.Println("WARNING: unable to register function with unknown concept", f)
+			this.config.GetLogger().Warn("unable to register function with unknown concept", "function", fmt.Sprintf("%#v", f))
 			return
 		}
 		this.characteristicsOfFunction[f.Id] = concept.CharacteristicIds

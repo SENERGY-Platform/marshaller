@@ -22,13 +22,12 @@ import (
 	"errors"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"time"
 
 	"net/url"
-
-	"io/ioutil"
 )
 
 type Impersonate string
@@ -49,7 +48,7 @@ func (this Impersonate) Post(url string, contentType string, body io.Reader) (re
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 		resp.Body.Close()
-		log.Println(buf.String())
+		slog.Error("http access denied response", "url", url, "status", resp.StatusCode, "error", buf.String())
 		err = errors.New("access denied")
 	}
 	return
@@ -105,13 +104,13 @@ func (this Impersonate) GetJSON(url string, result interface{}) (err error) {
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		temp, _ := io.ReadAll(resp.Body)
 		err = errors.New(string(temp))
-		log.Println("ERROR:", url, resp.StatusCode, err)
+		slog.Error("http error response", "url", url, "status", resp.StatusCode, "error", err)
 		debug.PrintStack()
 		return err
 	}
 	err = json.NewDecoder(resp.Body).Decode(result)
 	if err != nil {
-		log.Println("ERROR:", url, resp.StatusCode, err)
+		slog.Error("unable to decode http response", "url", url, "status", resp.StatusCode, "error", err)
 		debug.PrintStack()
 		return err
 	}
@@ -148,20 +147,20 @@ func (this *Access) Ensure() (token Impersonate, err error) {
 	}
 
 	if this.openid.RefreshToken != "" && this.openid.RefreshExpiresIn-this.config.AuthExpirationTimeBuffer > duration {
-		log.Println("refresh token", this.openid.RefreshExpiresIn, duration)
+		this.config.GetLogger().Info("refresh token", "expires_in", this.openid.RefreshExpiresIn, "duration", duration)
 		err = refreshOpenidToken(this.openid, this.config)
 		if err != nil {
-			log.Println("WARNING: unable to use refreshtoken", err)
+			this.config.GetLogger().Warn("unable to use refreshtoken", "error", err)
 		} else {
 			token = Impersonate("Bearer " + this.openid.AccessToken)
 			return
 		}
 	}
 
-	log.Println("get new access token")
+	this.config.GetLogger().Info("get new access token")
 	err = getOpenidToken(this.openid, this.config)
 	if err != nil {
-		log.Println("ERROR: unable to get new access token", err)
+		this.config.GetLogger().Warn("unable to get new access token", "error", err)
 		this.openid = &OpenidToken{}
 	}
 	token = Impersonate("Bearer " + this.openid.AccessToken)
@@ -177,12 +176,12 @@ func getOpenidToken(token *OpenidToken, config Config) (err error) {
 	})
 
 	if err != nil {
-		log.Println("ERROR: getOpenidToken::PostForm()", err)
+		config.GetLogger().Error("ERROR: getOpenidToken::PostForm()", "error", err)
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		log.Println("ERROR: getOpenidToken()", resp.StatusCode, string(body))
+		body, _ := io.ReadAll(resp.Body)
+		config.GetLogger().Error("ERROR: getOpenidToken()", "status", resp.StatusCode, "error", string(body))
 		err = errors.New("access denied")
 		resp.Body.Close()
 		return
@@ -205,8 +204,8 @@ func refreshOpenidToken(token *OpenidToken, config Config) (err error) {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		log.Println("ERROR: refreshOpenidToken()", resp.StatusCode, string(body))
+		body, _ := io.ReadAll(resp.Body)
+		config.GetLogger().Error("ERROR: refreshOpenidToken()", "status", resp.StatusCode, "error", string(body))
 		err = errors.New("access denied")
 		resp.Body.Close()
 		return

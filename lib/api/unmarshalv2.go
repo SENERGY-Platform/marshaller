@@ -19,6 +19,11 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
+	"runtime/debug"
+	"time"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
@@ -28,10 +33,6 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
-	"log"
-	"net/http"
-	"runtime/debug"
-	"time"
 )
 
 func init() {
@@ -42,10 +43,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 	resource := "/v2/unmarshal"
 
 	normalizeRequest := func(request *messages.UnmarshallingV2Request) error {
-		if config.Debug {
-			temp, _ := json.Marshal(request)
-			log.Println("DEBUG: UnmarshallingV2Request:", string(temp))
-		}
+		config.GetLogger().Debug("UnmarshallingV2Request", "request", fmt.Sprintf("%#v", request))
 		if request.Protocol.Id == "" {
 			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
 			if err != nil {
@@ -73,13 +71,11 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 				var err error
 				paths, err = marshallerV2.SortPathsByAspectDistance(deviceRepo, request.Service, aspect, paths)
 				if err != nil {
-					log.Println("ERROR:", err)
+					config.GetLogger().Error("unable to sort paths by aspect distance", "error", err)
 					debug.PrintStack()
 					return err
 				}
-				if config.Debug {
-					log.Println("WARNING: only one path found by FunctionId and AspectNode is used for Unmarshal")
-				}
+				config.GetLogger().Debug("WARNING: only one path found by FunctionId and AspectNode is used for Unmarshal", "paths", fmt.Sprintf("%#v", paths))
 			}
 			if len(paths) == 0 {
 				return errors.New("no output path found for criteria")
@@ -124,7 +120,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			config.GetLogger().Error("unable to encode response", "error", err)
 		}
 		metrics.LogUnmarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
 	})
@@ -150,7 +146,7 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			config.GetLogger().Error("unable to encode response", "error", err)
 		}
 		metrics.LogUnmarshallingRequest(request, resource, msg, time.Since(start))
 	})

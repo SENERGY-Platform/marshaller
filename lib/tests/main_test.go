@@ -22,14 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"github.com/SENERGY-Platform/marshaller/lib/api"
-	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 	"io"
 	"log"
 	"net/http"
@@ -38,6 +30,15 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
+	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
+	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 )
 
 var ServerUrl string
@@ -105,7 +106,7 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
 	TestFindConfigurables = configurableService.Find
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil, metrics.NewMetrics()))
+	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil, metrics.NewMetrics(config.Config{})))
 	ServerUrl = server.URL
 	go func() {
 		<-ctx.Done()

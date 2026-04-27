@@ -19,15 +19,16 @@ package marshaller
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
+	"reflect"
+	"runtime/debug"
+	"strings"
+
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
 	"github.com/SENERGY-Platform/models/go/models"
-	"log"
-	"reflect"
-	"runtime/debug"
-	"strings"
 )
 
 type CharacteristicId = string
@@ -171,7 +172,7 @@ func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristi
 
 	serviceVariableValue, err := mapping.MapActuator(normalized, serviceCharacteristic, serviceVariable, partial)
 	if err != nil {
-		log.Println("ERROR: unable to map actuator", serviceCharacteristic.Id, serviceCharacteristic.Value, "-->", serviceVariable.Id, serviceVariable.Name, ":", err)
+		slog.Error("unable to map actuator", "service-characteristic", serviceCharacteristic.Id, "service-characteristic-value", serviceCharacteristic.Value, "service-variable", serviceVariable.Id, "service-variable-name", serviceVariable.Name, "error", err.Error())
 		return result, err
 	}
 
