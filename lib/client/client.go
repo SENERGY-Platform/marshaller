@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api"
@@ -98,10 +97,4 @@ func get[T any](baseUrl string, path string, optionalAuthTokenForApiGatewayReque
 		return result, err, http.StatusInternalServerError
 	}
 	return do[T](req, optionalAuthTokenForApiGatewayRequest)
-}
-
-// pathSegment escapes an id for use in a request path. Service and characteristic ids are
-// urns, so they carry characters that have to survive the round trip.
-func pathSegment(id string) string {
-	return url.PathEscape(id)
 }

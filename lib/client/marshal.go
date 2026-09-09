@@ -17,6 +17,8 @@
 package client
 
 import (
+	"net/url"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 )
 
@@ -25,7 +27,7 @@ func (c *Client) Marshal(request messages.MarshallingRequest) (result map[string
 }
 
 func (c *Client) MarshalForService(serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/marshal/"+pathSegment(serviceId)+"/"+pathSegment(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
+	return post[map[string]string](c.baseUrl, "/marshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
 }
 
 func (c *Client) MarshalV2(request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
@@ -33,7 +35,7 @@ func (c *Client) MarshalV2(request messages.MarshallingV2Request) (result map[st
 }
 
 func (c *Client) MarshalV2ForService(serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/v2/marshal/"+pathSegment(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
+	return post[map[string]string](c.baseUrl, "/v2/marshal/"+url.PathEscape(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
 }
 
 func (c *Client) Unmarshal(request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
@@ -41,7 +43,7 @@ func (c *Client) Unmarshal(request messages.UnmarshallingRequest) (result interf
 }
 
 func (c *Client) UnmarshalForService(serviceId string, characteristicId string, request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/unmarshal/"+pathSegment(serviceId)+"/"+pathSegment(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
+	return post[interface{}](c.baseUrl, "/unmarshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
 }
 
 func (c *Client) UnmarshalV2(request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
@@ -49,5 +51,5 @@ func (c *Client) UnmarshalV2(request messages.UnmarshallingV2Request) (result in
 }
 
 func (c *Client) UnmarshalV2ForService(serviceId string, request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/v2/unmarshal/"+pathSegment(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
+	return post[interface{}](c.baseUrl, "/v2/unmarshal/"+url.PathEscape(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
 }

@@ -28,7 +28,7 @@ import (
 )
 
 func (c *Client) GetCharacteristicPaths(serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int) {
-	return get[marshaller.CharacteristicsPathResponse](c.baseUrl, "/characteristic-paths/"+pathSegment(serviceId)+"/"+pathSegment(characteristicId), c.optionalAuthTokenForApiGatewayRequest)
+	return get[marshaller.CharacteristicsPathResponse](c.baseUrl, "/characteristic-paths/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), c.optionalAuthTokenForApiGatewayRequest)
 }
 
 // GetPathOptions uses the request-body form of the endpoint, because it is the one whose
