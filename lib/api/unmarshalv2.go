@@ -31,6 +31,18 @@ func init() {
 
 type UnmarshallingV2 struct{}
 
+// UnmarshalV2 godoc
+// @Summary      unmarshal a protocol message into a value
+// @Description  returns the value at the requested path; without a path it is determined from the function and the requested aspects, closest aspect first
+// @Tags         unmarshal, v2
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        message body messages.UnmarshallingV2Request true "service, protocol and the message to unmarshal"
+// @Success      200 {object} interface{} "the value in the requested characteristic"
+// @Failure      400 {string} string "the body is not valid json, the service does not reference the given protocol, or no output path matches the criteria"
+// @Failure      500 {string} string
+// @Router       /v2/unmarshal [POST]
 func (this *UnmarshallingV2) UnmarshalV2(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	resource := "/v2/unmarshal"
 	router.HandleFunc("POST "+resource, func(writer http.ResponseWriter, request *http.Request) {
@@ -49,6 +61,19 @@ func (this *UnmarshallingV2) UnmarshalV2(config config.Config, router *http.Serv
 	})
 }
 
+// UnmarshalV2ForService godoc
+// @Summary      unmarshal a protocol message into a value, service from the path
+// @Description  like POST /v2/unmarshal, but the service is read from the device-repository by the id in the path
+// @Tags         unmarshal, v2
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        serviceId path string true "id of the service the message came from"
+// @Param        message body messages.UnmarshallingV2Request true "the message to unmarshal"
+// @Success      200 {object} interface{} "the value in the requested characteristic"
+// @Failure      400 {string} string "the body is not valid json, the service does not reference the given protocol, or no output path matches the criteria"
+// @Failure      500 {string} string
+// @Router       /v2/unmarshal/{serviceId} [POST]
 func (this *UnmarshallingV2) UnmarshalV2ForService(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	resource := "/v2/unmarshal"
 	router.HandleFunc("POST "+resource+"/{serviceId}", func(writer http.ResponseWriter, request *http.Request) {

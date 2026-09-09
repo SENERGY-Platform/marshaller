@@ -1,0 +1,971 @@
+basePath: /
+definitions:
+  configurables.Configurable:
+    properties:
+      characteristic_id:
+        type: string
+      values:
+        items:
+          $ref: '#/definitions/configurables.ConfigurableCharacteristicValue'
+        type: array
+    type: object
+  configurables.ConfigurableCharacteristicValue:
+    properties:
+      label:
+        type: string
+      path:
+        type: string
+      value:
+        type: string
+    type: object
+  converter.ExtensionCall:
+    properties:
+      extension:
+        $ref: '#/definitions/models.ConverterExtension'
+      input: {}
+    type: object
+  converter.ExtensionCallResponse:
+    properties:
+      error:
+        type: string
+      output: {}
+    type: object
+  marshaller.CharacteristicsPathResponse:
+    properties:
+      path:
+        type: string
+      service_characteristic_id:
+        type: string
+    type: object
+  marshaller.PathOptionsResultElement:
+    properties:
+      json_path:
+        items:
+          type: string
+        type: array
+      path_to_characteristic_id:
+        additionalProperties:
+          type: string
+        type: object
+      service_id:
+        type: string
+    type: object
+  messages.FindConfigurablesRequest:
+    properties:
+      characteristic_id:
+        type: string
+      services:
+        items:
+          $ref: '#/definitions/model.Service'
+        type: array
+    type: object
+  messages.MarshallingRequest:
+    properties:
+      characteristic_id:
+        description: semi-optional, may be determined by request path
+        type: string
+      configurables:
+        description: optional, may be empty
+        items:
+          $ref: '#/definitions/configurables.Configurable'
+        type: array
+      data: {}
+      path_allow_list:
+        description: "optional\n\t\tif len > 0: apply data only on given ContentVariable
+          paths\n\t\tuseful if 2 variables have the same characteristic assigned but
+          are used with different functions or aspects"
+        items:
+          type: string
+        type: array
+      protocol:
+        allOf:
+        - $ref: '#/definitions/model.Protocol'
+        description: semi-optional, may be determined by request path
+      service:
+        allOf:
+        - $ref: '#/definitions/model.Service'
+        description: semi-optional, may be determined by request path
+    type: object
+  messages.MarshallingV2Request:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.MarshallingV2RequestData'
+        type: array
+      protocol:
+        allOf:
+        - $ref: '#/definitions/model.Protocol'
+        description: semi-optional, may be determined by service
+      service:
+        allOf:
+        - $ref: '#/definitions/model.Service'
+        description: semi-optional, may be determined by request path
+    type: object
+  messages.PathOptionsQuery:
+    properties:
+      aspect_id:
+        description: 'deprecated: please use AspectIds'
+        type: string
+      aspect_ids:
+        items:
+          type: string
+        type: array
+      characteristic_id_filter:
+        items:
+          type: string
+        type: array
+      device_type_ids:
+        items:
+          type: string
+        type: array
+      function_id:
+        type: string
+      without_envelope:
+        type: boolean
+    type: object
+  messages.UnmarshallingRequest:
+    properties:
+      characteristic_id:
+        description: semi-optional, may be determined by request path
+        type: string
+      content_variable_hints:
+        description: optional
+        items:
+          type: string
+        type: array
+      message:
+        additionalProperties:
+          type: string
+        type: object
+      path_allow_list:
+        description: "optional\n\t\tif len > 0: apply data only on given ContentVariable
+          paths\n\t\tuseful if 2 variables have the same characteristic assigned but
+          are used with different functions or aspects"
+        items:
+          type: string
+        type: array
+      protocol:
+        allOf:
+        - $ref: '#/definitions/model.Protocol'
+        description: semi-optional, may be determined by service
+      service:
+        allOf:
+        - $ref: '#/definitions/model.Service'
+        description: semi-optional, may be determined by request path
+    type: object
+  messages.UnmarshallingV2Request:
+    properties:
+      aspect_node:
+        allOf:
+        - $ref: '#/definitions/model.AspectNode'
+        description: 'deprecated: please use AspectNodes'
+      aspect_node_id:
+        description: 'deprecated: please use AspectNodeIds'
+        type: string
+      aspect_node_ids:
+        description: semi-optional, to determine AspectNodes if not set
+        items:
+          type: string
+        type: array
+      aspect_nodes:
+        description: semi-optional, to determine Path if not set, may themselves be
+          determent by AspectNodeIds
+        items:
+          $ref: '#/definitions/model.AspectNode'
+        type: array
+      characteristic_id:
+        description: semi-optional, may be determined by request path
+        type: string
+      function_id:
+        description: semi-optional, to determine Path if not set
+        type: string
+      message:
+        additionalProperties:
+          type: string
+        description: semi-optional; may be needed to create serialized_output
+        type: object
+      path:
+        description: semi-optional, may be determent by FunctionId and AspectNodes
+        type: string
+      protocol:
+        allOf:
+        - $ref: '#/definitions/model.Protocol'
+        description: semi-optional, may be determined by service
+      serialized_output:
+        additionalProperties: true
+        description: semi-optional; may be created from message
+        type: object
+      service:
+        allOf:
+        - $ref: '#/definitions/model.Service'
+        description: semi-optional, may be determined by request path
+    type: object
+  model.AspectNode:
+    properties:
+      ancestor_ids:
+        items:
+          type: string
+        type: array
+      aspect_class_id:
+        type: string
+      child_ids:
+        items:
+          type: string
+        type: array
+      descendent_ids:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      root_id:
+        type: string
+    type: object
+  model.MarshallingV2RequestData:
+    properties:
+      aspect_node:
+        allOf:
+        - $ref: '#/definitions/model.AspectNode'
+        description: 'deprecated: please use AspectNodes'
+      aspect_nodes:
+        description: optional, to determine Paths if they are not set, may be empty
+          if only FunctionId should be searched
+        items:
+          $ref: '#/definitions/model.AspectNode'
+        type: array
+      characteristic_id:
+        type: string
+      function_id:
+        description: semi-optional, to determine Paths if they are not set
+        type: string
+      paths:
+        description: semi-optional, may be determent by FunctionId
+        items:
+          type: string
+        type: array
+      value: {}
+    type: object
+  model.Protocol:
+    properties:
+      constraints:
+        items:
+          type: string
+        type: array
+      handler:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      protocol_segments:
+        items:
+          $ref: '#/definitions/models.ProtocolSegment'
+        type: array
+    type: object
+  model.Service:
+    properties:
+      attributes:
+        items:
+          $ref: '#/definitions/models.Attribute'
+        type: array
+      description:
+        type: string
+      id:
+        type: string
+      inputs:
+        items:
+          $ref: '#/definitions/models.Content'
+        type: array
+      interaction:
+        $ref: '#/definitions/models.Interaction'
+      local_id:
+        type: string
+      name:
+        type: string
+      outputs:
+        items:
+          $ref: '#/definitions/models.Content'
+        type: array
+      protocol_id:
+        type: string
+      service_group_key:
+        type: string
+    type: object
+  models.Attribute:
+    properties:
+      key:
+        type: string
+      origin:
+        type: string
+      value:
+        type: string
+    type: object
+  models.Content:
+    properties:
+      content_variable:
+        $ref: '#/definitions/models.ContentVariable'
+      id:
+        type: string
+      protocol_segment_id:
+        type: string
+      serialization:
+        $ref: '#/definitions/models.Serialization'
+    type: object
+  models.ContentVariable:
+    properties:
+      aspect_id:
+        description: 'deprecated: please use AspectIds'
+        type: string
+      aspect_ids:
+        items:
+          type: string
+        type: array
+      characteristic_id:
+        type: string
+      function_id:
+        type: string
+      id:
+        type: string
+      is_void:
+        type: boolean
+      name:
+        type: string
+      omit_empty:
+        type: boolean
+      serialization_options:
+        items:
+          type: string
+        type: array
+      sub_content_variables:
+        items:
+          $ref: '#/definitions/models.ContentVariable'
+        type: array
+      type:
+        $ref: '#/definitions/models.Type'
+      unit_reference:
+        type: string
+      value: {}
+    type: object
+  models.ConverterExtension:
+    properties:
+      distance:
+        type: integer
+      formula:
+        type: string
+      from:
+        type: string
+      placeholder_name:
+        type: string
+      to:
+        type: string
+    type: object
+  models.Interaction:
+    enum:
+    - event
+    - request
+    - event+request
+    type: string
+    x-enum-varnames:
+    - EVENT
+    - REQUEST
+    - EVENT_AND_REQUEST
+  models.ProtocolSegment:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.Serialization:
+    enum:
+    - xml
+    - json
+    - plain-text
+    type: string
+    x-enum-varnames:
+    - XML
+    - JSON
+    - PlainText
+  models.Type:
+    enum:
+    - https://schema.org/Text
+    - https://schema.org/Integer
+    - https://schema.org/Float
+    - https://schema.org/Boolean
+    - https://schema.org/ItemList
+    - https://schema.org/StructuredValue
+    type: string
+    x-enum-varnames:
+    - String
+    - Integer
+    - Float
+    - Boolean
+    - List
+    - Structure
+info:
+  contact: {}
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Marshaller API
+  version: "0.1"
+paths:
+  /characteristic-paths/{serviceId}/{characteristicId}:
+    get:
+      description: returns the content-variable paths of the service that carry the
+        given characteristic
+      parameters:
+      - description: id of the service
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: id of the characteristic
+        in: path
+        name: characteristicId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/marshaller.CharacteristicsPathResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: the service is unknown
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: list the paths a characteristic can be read from
+      tags:
+      - characteristic-paths
+  /configurables:
+    get:
+      description: returns the values that can be configured alongside the given characteristic
+        in the listed services
+      parameters:
+      - description: id of the characteristic that is already set
+        in: query
+        name: characteristicId
+        required: true
+        type: string
+      - description: comma separated service ids
+        in: query
+        name: serviceIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/configurables.Configurable'
+            type: array
+        "400":
+          description: characteristicId or serviceIds is missing
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: find configurables for a characteristic
+      tags:
+      - configurables
+    post:
+      consumes:
+      - application/json
+      description: the request-body form of GET /configurables, for callers that hold
+        the services already
+      parameters:
+      - description: the characteristic and the services to search
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/messages.FindConfigurablesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/configurables.Configurable'
+            type: array
+        "400":
+          description: the body is not valid json, or characteristic_id is missing
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: find configurables for a characteristic
+      tags:
+      - configurables
+  /converter/extension-call:
+    post:
+      consumes:
+      - application/json
+      description: runs a single converter extension against an input and returns
+        its output, for developing an extension
+      parameters:
+      - description: the extension and the input to run it on
+        in: body
+        name: call
+        required: true
+        schema:
+          $ref: '#/definitions/converter.ExtensionCall'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/converter.ExtensionCallResponse'
+        "400":
+          description: the body is not valid json, or the extension failed
+          schema:
+            type: string
+        "500":
+          description: the service runs without a converter
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: try a converter extension
+      tags:
+      - converter
+  /marshal:
+    post:
+      consumes:
+      - application/json
+      description: marshals the given data into the message format of the service,
+        using the characteristic to interpret it
+      parameters:
+      - description: service, protocol and the data to marshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.MarshallingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the protocol segments of the message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: marshal a value into a protocol message
+      tags:
+      - marshal
+  /marshal/{serviceId}/{characteristicId}:
+    post:
+      consumes:
+      - application/json
+      description: like POST /marshal, but the service is read from the device-repository
+        by the id in the path and the characteristic comes from the path as well
+      parameters:
+      - description: id of the service the message is for
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: id of the characteristic the data is given in
+        in: path
+        name: characteristicId
+        required: true
+        type: string
+      - description: the data to marshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.MarshallingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the protocol segments of the message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: marshal a value into a protocol message, service and characteristic
+        from the path
+      tags:
+      - marshal
+  /path-options:
+    get:
+      description: returns the matching paths per device-type. Naming more than one
+        aspect is an AND on one content variable, and each aspect covers its own subtree.
+      parameters:
+      - description: comma separated device-type ids; an absent parameter yields an
+          empty result
+        in: query
+        name: device-type-ids
+        required: true
+        type: string
+      - description: comma separated characteristic ids; an absent parameter yields
+          an empty result
+        in: query
+        name: characteristic-filter
+        required: true
+        type: string
+      - description: id of the function the path has to serve
+        in: query
+        name: function-id
+        type: string
+      - description: comma separated aspect ids
+        in: query
+        name: aspect-ids
+        type: string
+      - description: 'deprecated: use aspect-ids; an alias for a list with one element'
+        in: query
+        name: aspect-id
+        type: string
+      - description: omit the value. prefix from the returned paths
+        in: query
+        name: without-envelope
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/marshaller.PathOptionsResultElement'
+              type: array
+            type: object
+        "400":
+          description: without-envelope is not a bool
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: list the paths of device-types that match a function and aspects
+      tags:
+      - path-options
+  /query/path-options:
+    post:
+      consumes:
+      - application/json
+      description: the request-body form of GET /path-options. An empty characteristic_id_filter
+        means "do not filter" here, unlike the absent query parameter.
+      parameters:
+      - description: the device-types, function and aspects to match
+        in: body
+        name: query
+        required: true
+        schema:
+          $ref: '#/definitions/messages.PathOptionsQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/marshaller.PathOptionsResultElement'
+              type: array
+            type: object
+        "400":
+          description: the body is not valid json
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: list the paths of device-types that match a function and aspects
+      tags:
+      - path-options
+  /unmarshal:
+    post:
+      consumes:
+      - application/json
+      description: reads the message of the given service and returns its value in
+        the requested characteristic
+      parameters:
+      - description: service, protocol and the message to unmarshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.UnmarshallingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the value in the requested characteristic
+          schema: {}
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: unmarshal a protocol message into a value
+      tags:
+      - unmarshal
+  /unmarshal/{serviceId}/{characteristicId}:
+    post:
+      consumes:
+      - application/json
+      description: like POST /unmarshal, but the service is read from the device-repository
+        by the id in the path and the characteristic comes from the path as well
+      parameters:
+      - description: id of the service the message came from
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: id of the characteristic the value is wanted in
+        in: path
+        name: characteristicId
+        required: true
+        type: string
+      - description: the message to unmarshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.UnmarshallingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the value in the requested characteristic
+          schema: {}
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: unmarshal a protocol message, service and characteristic from the path
+      tags:
+      - unmarshal
+  /v2/marshal:
+    post:
+      consumes:
+      - application/json
+      description: marshals every entry of data into the message format of the service;
+        an entry without paths is placed by its function and aspects
+      parameters:
+      - description: service, protocol and the values to marshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.MarshallingV2Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the protocol segments of the message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: marshal values into a protocol message
+      tags:
+      - marshal
+      - v2
+  /v2/marshal/{serviceId}:
+    post:
+      consumes:
+      - application/json
+      description: like POST /v2/marshal, but the service is read from the device-repository
+        by the id in the path
+      parameters:
+      - description: id of the service the message is for
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: the values to marshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.MarshallingV2Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the protocol segments of the message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: the body is not valid json, or the service does not reference
+            the given protocol
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: marshal values into a protocol message, service from the path
+      tags:
+      - marshal
+      - v2
+  /v2/unmarshal:
+    post:
+      consumes:
+      - application/json
+      description: returns the value at the requested path; without a path it is determined
+        from the function and the requested aspects, closest aspect first
+      parameters:
+      - description: service, protocol and the message to unmarshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.UnmarshallingV2Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the value in the requested characteristic
+          schema: {}
+        "400":
+          description: the body is not valid json, the service does not reference
+            the given protocol, or no output path matches the criteria
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: unmarshal a protocol message into a value
+      tags:
+      - unmarshal
+      - v2
+  /v2/unmarshal/{serviceId}:
+    post:
+      consumes:
+      - application/json
+      description: like POST /v2/unmarshal, but the service is read from the device-repository
+        by the id in the path
+      parameters:
+      - description: id of the service the message came from
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      - description: the message to unmarshal
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/messages.UnmarshallingV2Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the value in the requested characteristic
+          schema: {}
+        "400":
+          description: the body is not valid json, the service does not reference
+            the given protocol, or no output path matches the criteria
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: unmarshal a protocol message into a value, service from the path
+      tags:
+      - unmarshal
+      - v2
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

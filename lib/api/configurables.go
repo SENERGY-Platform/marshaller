@@ -31,6 +31,18 @@ func init() {
 
 type Configurables struct{}
 
+// GetConfigurables godoc
+// @Summary      find configurables for a characteristic
+// @Description  returns the values that can be configured alongside the given characteristic in the listed services
+// @Tags         configurables
+// @Produce      json
+// @Security     Bearer
+// @Param        characteristicId query string true "id of the characteristic that is already set"
+// @Param        serviceIds query string true "comma separated service ids"
+// @Success      200 {object} configurables.Configurables
+// @Failure      400 {string} string "characteristicId or serviceIds is missing"
+// @Failure      500 {string} string
+// @Router       /configurables [GET]
 func (this *Configurables) GetConfigurables(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("GET /configurables", func(writer http.ResponseWriter, request *http.Request) {
 		serviceIds := []string{}
@@ -46,6 +58,18 @@ func (this *Configurables) GetConfigurables(config config.Config, router *http.S
 	})
 }
 
+// FindConfigurables godoc
+// @Summary      find configurables for a characteristic
+// @Description  the request-body form of GET /configurables, for callers that hold the services already
+// @Tags         configurables
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        query body messages.FindConfigurablesRequest true "the characteristic and the services to search"
+// @Success      200 {object} configurables.Configurables
+// @Failure      400 {string} string "the body is not valid json, or characteristic_id is missing"
+// @Failure      500 {string} string
+// @Router       /configurables [POST]
 func (this *Configurables) FindConfigurables(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("POST /configurables", func(writer http.ResponseWriter, request *http.Request) {
 		msg, ok := decodeBody[messages.FindConfigurablesRequest](writer, request)

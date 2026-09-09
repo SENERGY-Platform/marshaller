@@ -1,0 +1,1450 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Marshaller API",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "0.1"
+    },
+    "basePath": "/",
+    "paths": {
+        "/characteristic-paths/{serviceId}/{characteristicId}": {
+            "get": {
+                "description": "returns the content-variable paths of the service that carry the given characteristic",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "characteristic-paths"
+                ],
+                "summary": "list the paths a characteristic can be read from",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the service",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the characteristic",
+                        "name": "characteristicId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/marshaller.CharacteristicsPathResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "the service is unknown",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/configurables": {
+            "get": {
+                "description": "returns the values that can be configured alongside the given characteristic in the listed services",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configurables"
+                ],
+                "summary": "find configurables for a characteristic",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the characteristic that is already set",
+                        "name": "characteristicId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comma separated service ids",
+                        "name": "serviceIds",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/configurables.Configurable"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "characteristicId or serviceIds is missing",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "description": "the request-body form of GET /configurables, for callers that hold the services already",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configurables"
+                ],
+                "summary": "find configurables for a characteristic",
+                "parameters": [
+                    {
+                        "description": "the characteristic and the services to search",
+                        "name": "query",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.FindConfigurablesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/configurables.Configurable"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or characteristic_id is missing",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/converter/extension-call": {
+            "post": {
+                "description": "runs a single converter extension against an input and returns its output, for developing an extension",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "converter"
+                ],
+                "summary": "try a converter extension",
+                "parameters": [
+                    {
+                        "description": "the extension and the input to run it on",
+                        "name": "call",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/converter.ExtensionCall"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/converter.ExtensionCallResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the extension failed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "the service runs without a converter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/marshal": {
+            "post": {
+                "description": "marshals the given data into the message format of the service, using the characteristic to interpret it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "marshal"
+                ],
+                "summary": "marshal a value into a protocol message",
+                "parameters": [
+                    {
+                        "description": "service, protocol and the data to marshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.MarshallingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the protocol segments of the message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/marshal/{serviceId}/{characteristicId}": {
+            "post": {
+                "description": "like POST /marshal, but the service is read from the device-repository by the id in the path and the characteristic comes from the path as well",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "marshal"
+                ],
+                "summary": "marshal a value into a protocol message, service and characteristic from the path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the service the message is for",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the characteristic the data is given in",
+                        "name": "characteristicId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the data to marshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.MarshallingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the protocol segments of the message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/path-options": {
+            "get": {
+                "description": "returns the matching paths per device-type. Naming more than one aspect is an AND on one content variable, and each aspect covers its own subtree.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "path-options"
+                ],
+                "summary": "list the paths of device-types that match a function and aspects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "comma separated device-type ids; an absent parameter yields an empty result",
+                        "name": "device-type-ids",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comma separated characteristic ids; an absent parameter yields an empty result",
+                        "name": "characteristic-filter",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the function the path has to serve",
+                        "name": "function-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "comma separated aspect ids",
+                        "name": "aspect-ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "deprecated: use aspect-ids; an alias for a list with one element",
+                        "name": "aspect-id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "omit the value. prefix from the returned paths",
+                        "name": "without-envelope",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/marshaller.PathOptionsResultElement"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "without-envelope is not a bool",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/query/path-options": {
+            "post": {
+                "description": "the request-body form of GET /path-options. An empty characteristic_id_filter means \"do not filter\" here, unlike the absent query parameter.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "path-options"
+                ],
+                "summary": "list the paths of device-types that match a function and aspects",
+                "parameters": [
+                    {
+                        "description": "the device-types, function and aspects to match",
+                        "name": "query",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.PathOptionsQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/marshaller.PathOptionsResultElement"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/unmarshal": {
+            "post": {
+                "description": "reads the message of the given service and returns its value in the requested characteristic",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "unmarshal"
+                ],
+                "summary": "unmarshal a protocol message into a value",
+                "parameters": [
+                    {
+                        "description": "service, protocol and the message to unmarshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.UnmarshallingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the value in the requested characteristic",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/unmarshal/{serviceId}/{characteristicId}": {
+            "post": {
+                "description": "like POST /unmarshal, but the service is read from the device-repository by the id in the path and the characteristic comes from the path as well",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "unmarshal"
+                ],
+                "summary": "unmarshal a protocol message, service and characteristic from the path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the service the message came from",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of the characteristic the value is wanted in",
+                        "name": "characteristicId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the message to unmarshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.UnmarshallingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the value in the requested characteristic",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/v2/marshal": {
+            "post": {
+                "description": "marshals every entry of data into the message format of the service; an entry without paths is placed by its function and aspects",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "marshal",
+                    "v2"
+                ],
+                "summary": "marshal values into a protocol message",
+                "parameters": [
+                    {
+                        "description": "service, protocol and the values to marshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.MarshallingV2Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the protocol segments of the message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/v2/marshal/{serviceId}": {
+            "post": {
+                "description": "like POST /v2/marshal, but the service is read from the device-repository by the id in the path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "marshal",
+                    "v2"
+                ],
+                "summary": "marshal values into a protocol message, service from the path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the service the message is for",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the values to marshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.MarshallingV2Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the protocol segments of the message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "the body is not valid json, or the service does not reference the given protocol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/v2/unmarshal": {
+            "post": {
+                "description": "returns the value at the requested path; without a path it is determined from the function and the requested aspects, closest aspect first",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "unmarshal",
+                    "v2"
+                ],
+                "summary": "unmarshal a protocol message into a value",
+                "parameters": [
+                    {
+                        "description": "service, protocol and the message to unmarshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.UnmarshallingV2Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the value in the requested characteristic",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "the body is not valid json, the service does not reference the given protocol, or no output path matches the criteria",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        },
+        "/v2/unmarshal/{serviceId}": {
+            "post": {
+                "description": "like POST /v2/unmarshal, but the service is read from the device-repository by the id in the path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "unmarshal",
+                    "v2"
+                ],
+                "summary": "unmarshal a protocol message into a value, service from the path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of the service the message came from",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the message to unmarshal",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/messages.UnmarshallingV2Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the value in the requested characteristic",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "the body is not valid json, the service does not reference the given protocol, or no output path matches the criteria",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "configurables.Configurable": {
+            "type": "object",
+            "properties": {
+                "characteristic_id": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/configurables.ConfigurableCharacteristicValue"
+                    }
+                }
+            }
+        },
+        "configurables.ConfigurableCharacteristicValue": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "converter.ExtensionCall": {
+            "type": "object",
+            "properties": {
+                "extension": {
+                    "$ref": "#/definitions/models.ConverterExtension"
+                },
+                "input": {}
+            }
+        },
+        "converter.ExtensionCallResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "output": {}
+            }
+        },
+        "marshaller.CharacteristicsPathResponse": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "service_characteristic_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "marshaller.PathOptionsResultElement": {
+            "type": "object",
+            "properties": {
+                "json_path": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "path_to_characteristic_id": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "service_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "messages.FindConfigurablesRequest": {
+            "type": "object",
+            "properties": {
+                "characteristic_id": {
+                    "type": "string"
+                },
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Service"
+                    }
+                }
+            }
+        },
+        "messages.MarshallingRequest": {
+            "type": "object",
+            "properties": {
+                "characteristic_id": {
+                    "description": "semi-optional, may be determined by request path",
+                    "type": "string"
+                },
+                "configurables": {
+                    "description": "optional, may be empty",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/configurables.Configurable"
+                    }
+                },
+                "data": {},
+                "path_allow_list": {
+                    "description": "optional\n\t\tif len \u003e 0: apply data only on given ContentVariable paths\n\t\tuseful if 2 variables have the same characteristic assigned but are used with different functions or aspects",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "protocol": {
+                    "description": "semi-optional, may be determined by request path",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Protocol"
+                        }
+                    ]
+                },
+                "service": {
+                    "description": "semi-optional, may be determined by request path",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Service"
+                        }
+                    ]
+                }
+            }
+        },
+        "messages.MarshallingV2Request": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.MarshallingV2RequestData"
+                    }
+                },
+                "protocol": {
+                    "description": "semi-optional, may be determined by service",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Protocol"
+                        }
+                    ]
+                },
+                "service": {
+                    "description": "semi-optional, may be determined by request path",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Service"
+                        }
+                    ]
+                }
+            }
+        },
+        "messages.PathOptionsQuery": {
+            "type": "object",
+            "properties": {
+                "aspect_id": {
+                    "description": "deprecated: please use AspectIds",
+                    "type": "string"
+                },
+                "aspect_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "characteristic_id_filter": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "device_type_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "function_id": {
+                    "type": "string"
+                },
+                "without_envelope": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "messages.UnmarshallingRequest": {
+            "type": "object",
+            "properties": {
+                "characteristic_id": {
+                    "description": "semi-optional, may be determined by request path",
+                    "type": "string"
+                },
+                "content_variable_hints": {
+                    "description": "optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "path_allow_list": {
+                    "description": "optional\n\t\tif len \u003e 0: apply data only on given ContentVariable paths\n\t\tuseful if 2 variables have the same characteristic assigned but are used with different functions or aspects",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "protocol": {
+                    "description": "semi-optional, may be determined by service",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Protocol"
+                        }
+                    ]
+                },
+                "service": {
+                    "description": "semi-optional, may be determined by request path",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Service"
+                        }
+                    ]
+                }
+            }
+        },
+        "messages.UnmarshallingV2Request": {
+            "type": "object",
+            "properties": {
+                "aspect_node": {
+                    "description": "deprecated: please use AspectNodes",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.AspectNode"
+                        }
+                    ]
+                },
+                "aspect_node_id": {
+                    "description": "deprecated: please use AspectNodeIds",
+                    "type": "string"
+                },
+                "aspect_node_ids": {
+                    "description": "semi-optional, to determine AspectNodes if not set",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "aspect_nodes": {
+                    "description": "semi-optional, to determine Path if not set, may themselves be determent by AspectNodeIds",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AspectNode"
+                    }
+                },
+                "characteristic_id": {
+                    "description": "semi-optional, may be determined by request path",
+                    "type": "string"
+                },
+                "function_id": {
+                    "description": "semi-optional, to determine Path if not set",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "semi-optional; may be needed to create serialized_output",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "path": {
+                    "description": "semi-optional, may be determent by FunctionId and AspectNodes",
+                    "type": "string"
+                },
+                "protocol": {
+                    "description": "semi-optional, may be determined by service",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Protocol"
+                        }
+                    ]
+                },
+                "serialized_output": {
+                    "description": "semi-optional; may be created from message",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "service": {
+                    "description": "semi-optional, may be determined by request path",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Service"
+                        }
+                    ]
+                }
+            }
+        },
+        "model.AspectNode": {
+            "type": "object",
+            "properties": {
+                "ancestor_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "aspect_class_id": {
+                    "type": "string"
+                },
+                "child_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "descendent_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "root_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.MarshallingV2RequestData": {
+            "type": "object",
+            "properties": {
+                "aspect_node": {
+                    "description": "deprecated: please use AspectNodes",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.AspectNode"
+                        }
+                    ]
+                },
+                "aspect_nodes": {
+                    "description": "optional, to determine Paths if they are not set, may be empty if only FunctionId should be searched",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AspectNode"
+                    }
+                },
+                "characteristic_id": {
+                    "type": "string"
+                },
+                "function_id": {
+                    "description": "semi-optional, to determine Paths if they are not set",
+                    "type": "string"
+                },
+                "paths": {
+                    "description": "semi-optional, may be determent by FunctionId",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "value": {}
+            }
+        },
+        "model.Protocol": {
+            "type": "object",
+            "properties": {
+                "constraints": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "handler": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "protocol_segments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProtocolSegment"
+                    }
+                }
+            }
+        },
+        "model.Service": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Attribute"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Content"
+                    }
+                },
+                "interaction": {
+                    "$ref": "#/definitions/models.Interaction"
+                },
+                "local_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Content"
+                    }
+                },
+                "protocol_id": {
+                    "type": "string"
+                },
+                "service_group_key": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Attribute": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "origin": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Content": {
+            "type": "object",
+            "properties": {
+                "content_variable": {
+                    "$ref": "#/definitions/models.ContentVariable"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "protocol_segment_id": {
+                    "type": "string"
+                },
+                "serialization": {
+                    "$ref": "#/definitions/models.Serialization"
+                }
+            }
+        },
+        "models.ContentVariable": {
+            "type": "object",
+            "properties": {
+                "aspect_id": {
+                    "description": "deprecated: please use AspectIds",
+                    "type": "string"
+                },
+                "aspect_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "characteristic_id": {
+                    "type": "string"
+                },
+                "function_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_void": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "omit_empty": {
+                    "type": "boolean"
+                },
+                "serialization_options": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "sub_content_variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ContentVariable"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/models.Type"
+                },
+                "unit_reference": {
+                    "type": "string"
+                },
+                "value": {}
+            }
+        },
+        "models.ConverterExtension": {
+            "type": "object",
+            "properties": {
+                "distance": {
+                    "type": "integer"
+                },
+                "formula": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "placeholder_name": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Interaction": {
+            "type": "string",
+            "enum": [
+                "event",
+                "request",
+                "event+request"
+            ],
+            "x-enum-varnames": [
+                "EVENT",
+                "REQUEST",
+                "EVENT_AND_REQUEST"
+            ]
+        },
+        "models.ProtocolSegment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Serialization": {
+            "type": "string",
+            "enum": [
+                "xml",
+                "json",
+                "plain-text"
+            ],
+            "x-enum-varnames": [
+                "XML",
+                "JSON",
+                "PlainText"
+            ]
+        },
+        "models.Type": {
+            "type": "string",
+            "enum": [
+                "https://schema.org/Text",
+                "https://schema.org/Integer",
+                "https://schema.org/Float",
+                "https://schema.org/Boolean",
+                "https://schema.org/ItemList",
+                "https://schema.org/StructuredValue"
+            ],
+            "x-enum-varnames": [
+                "String",
+                "Integer",
+                "Float",
+                "Boolean",
+                "List",
+                "Structure"
+            ]
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -20,6 +20,20 @@ jobs:
       - name: Build
         run: go build -v ./...
 
+      # the generated spec under docs/ is committed so it is readable without a build.
+      # That owes a guarantee that it is not stale, which is this step. swag is pinned by
+      # the tool directive in go.mod, so the generator cannot drift on its own either.
+      - name: OpenAPI
+        run: |
+          go generate ./...
+          git diff --exit-code -- docs/
+          untracked="$(git ls-files --others --exclude-standard -- docs/)"
+          if [ -n "$untracked" ]; then
+            echo "go generate created files that are not committed:"
+            echo "$untracked"
+            exit 1
+          fi
+
       - name: Test
         timeout-minutes: 120
         uses: nick-fields/retry@v2

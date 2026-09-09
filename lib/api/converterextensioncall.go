@@ -31,6 +31,18 @@ func init() {
 
 type ConverterExtension struct{}
 
+// TryConverterExtension godoc
+// @Summary      try a converter extension
+// @Description  runs a single converter extension against an input and returns its output, for developing an extension
+// @Tags         converter
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        call body converter.ExtensionCall true "the extension and the input to run it on"
+// @Success      200 {object} converter.ExtensionCallResponse
+// @Failure      400 {string} string "the body is not valid json, or the extension failed"
+// @Failure      500 {string} string "the service runs without a converter"
+// @Router       /converter/extension-call [POST]
 func (this *ConverterExtension) TryConverterExtension(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("POST /converter/extension-call", func(writer http.ResponseWriter, request *http.Request) {
 		call := converter.ExtensionCall{}

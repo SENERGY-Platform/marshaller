@@ -47,6 +47,7 @@ type Config struct {
 	KafkaUrl                     string   `json:"kafka_url"`                       //optional, used for cache invalidation
 	CacheInvalidationKafkaTopics []string `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
 	InitTopics                   bool     `json:"init_topics"`
+	EnableSwaggerUi              bool     `json:"enable_swagger_ui"` //optional, serves the swagger ui under /swagger; the spec itself is always served under /doc
 
 	LogLevel string       `json:"log_level"`
 	logger   *slog.Logger `json:"-"`

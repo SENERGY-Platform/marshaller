@@ -33,6 +33,22 @@ func init() {
 
 type PathOptions struct{}
 
+// GetPathOptions godoc
+// @Summary      list the paths of device-types that match a function and aspects
+// @Description  returns the matching paths per device-type. Naming more than one aspect is an AND on one content variable, and each aspect covers its own subtree.
+// @Tags         path-options
+// @Produce      json
+// @Security     Bearer
+// @Param        device-type-ids query string true "comma separated device-type ids; an absent parameter yields an empty result"
+// @Param        characteristic-filter query string true "comma separated characteristic ids; an absent parameter yields an empty result"
+// @Param        function-id query string false "id of the function the path has to serve"
+// @Param        aspect-ids query string false "comma separated aspect ids"
+// @Param        aspect-id query string false "deprecated: use aspect-ids; an alias for a list with one element"
+// @Param        without-envelope query bool false "omit the value. prefix from the returned paths"
+// @Success      200 {object} map[string][]marshaller.PathOptionsResultElement
+// @Failure      400 {string} string "without-envelope is not a bool"
+// @Failure      500 {string} string
+// @Router       /path-options [GET]
 func (this *PathOptions) GetPathOptions(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("GET /path-options", func(writer http.ResponseWriter, request *http.Request) {
 		//an absent device-type or characteristic filter is an empty query here and is
@@ -67,6 +83,18 @@ func (this *PathOptions) GetPathOptions(config config.Config, router *http.Serve
 	})
 }
 
+// QueryPathOptions godoc
+// @Summary      list the paths of device-types that match a function and aspects
+// @Description  the request-body form of GET /path-options. An empty characteristic_id_filter means "do not filter" here, unlike the absent query parameter.
+// @Tags         path-options
+// @Accept       json
+// @Produce      json
+// @Security     Bearer
+// @Param        query body messages.PathOptionsQuery true "the device-types, function and aspects to match"
+// @Success      200 {object} map[string][]marshaller.PathOptionsResultElement
+// @Failure      400 {string} string "the body is not valid json"
+// @Failure      500 {string} string
+// @Router       /query/path-options [POST]
 func (this *PathOptions) QueryPathOptions(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("POST /query/path-options", func(writer http.ResponseWriter, request *http.Request) {
 		query, ok := decodeBody[messages.PathOptionsQuery](writer, request)

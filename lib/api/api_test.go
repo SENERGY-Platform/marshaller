@@ -50,6 +50,7 @@ func TestRoutesAreRegistered(t *testing.T) {
 		{http.MethodGet, "/configurables"},
 		{http.MethodPost, "/configurables"},
 		{http.MethodPost, "/converter/extension-call"},
+		{http.MethodGet, "/doc"},
 	}
 
 	router := GetRouterWithoutMiddleware(config.Config{LogLevel: "error"}, &controllerStub{}, nil)
