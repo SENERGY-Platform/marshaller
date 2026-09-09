@@ -17,8 +17,8 @@
 package tests
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -192,21 +192,18 @@ func TestPathOptionsDeprecatedContentVariableAspectId(t *testing.T) {
 
 func testPathOptionsQuery(query messages.PathOptionsQuery, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
-		buff := bytes.Buffer{}
-		err := json.NewEncoder(&buff).Encode(query)
+		result, err, code := TestClient.GetPathOptions(query)
 		if err != nil {
-			t.Error(err.Error())
+			t.Error(code, err)
 			return
 		}
-		req, err := http.NewRequest("POST", ServerUrl+"/query/path-options", &buff)
-		if err != nil {
-			t.Error(err.Error())
-			return
-		}
-		checkPathOptionsResponse(t, req, expectedResult)
+		comparePathOptions(t, result, expectedResult)
 	}
 }
 
+// testPathOptionsGet drives the query-parameter form. The client has no method for it on
+// purpose — it uses the request-body form, whose semantics do not depend on which
+// parameters are present — so these subtests stay on a hand-built request.
 func testPathOptionsGet(deviceTypeId string, functionId string, aspectId string, aspectIds []string, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
 		query := url.Values{}
@@ -219,41 +216,37 @@ func testPathOptionsGet(deviceTypeId string, functionId string, aspectId string,
 		if len(aspectIds) > 0 {
 			query.Set("aspect-ids", strings.Join(aspectIds, ","))
 		}
-		req, err := http.NewRequest("GET", ServerUrl+"/path-options?"+query.Encode(), nil)
+		result, err := getPathOptions(query)
 		if err != nil {
-			t.Error(err.Error())
+			t.Error(err)
 			return
 		}
-		checkPathOptionsResponse(t, req, expectedResult)
+		comparePathOptions(t, result, expectedResult)
 	}
 }
 
-func checkPathOptionsResponse(t *testing.T, req *http.Request, expectedResult map[string][]marshaller.PathOptionsResultElement) {
+func comparePathOptions(t *testing.T, result map[string][]marshaller.PathOptionsResultElement, expectedResult map[string][]marshaller.PathOptionsResultElement) {
 	t.Helper()
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		temp, _ := io.ReadAll(resp.Body)
-		t.Error(resp.StatusCode, string(temp))
-		return
-	}
-	result := map[string][]marshaller.PathOptionsResultElement{}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		t.Error(err.Error())
-		return
-	}
 	if !reflect.DeepEqual(result, expectedResult) {
 		resultJson, _ := json.Marshal(result)
 		expectedJson, _ := json.Marshal(expectedResult)
 		t.Error("\n", string(resultJson), "\n", string(expectedJson))
-		return
 	}
+}
+
+// getPathOptions calls GET /path-options, the one endpoint with no client method.
+func getPathOptions(query url.Values) (result map[string][]marshaller.PathOptionsResultElement, err error) {
+	resp, err := (&http.Client{Timeout: 10 * time.Second}).Get(ServerUrl + "/path-options?" + query.Encode())
+	if err != nil {
+		return result, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return result, fmt.Errorf("unexpected statuscode %v: %v", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	return result, err
 }
 
 // TestPathOptionsWithoutEnvelope covers the without-envelope query parameter of
@@ -339,11 +332,11 @@ func testPathOptionsGetRaw(deviceTypeId string, functionId string, withoutEnvelo
 		if withoutEnvelope != "" {
 			query.Set("without-envelope", withoutEnvelope)
 		}
-		req, err := http.NewRequest("GET", ServerUrl+"/path-options?"+query.Encode(), nil)
+		result, err := getPathOptions(query)
 		if err != nil {
-			t.Error(err.Error())
+			t.Error(err)
 			return
 		}
-		checkPathOptionsResponse(t, req, expectedResult)
+		comparePathOptions(t, result, expectedResult)
 	}
 }

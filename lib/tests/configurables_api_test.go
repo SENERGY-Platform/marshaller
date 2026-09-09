@@ -21,7 +21,6 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
-	"net/url"
 	"testing"
 )
 
@@ -31,11 +30,9 @@ func TestConfigurablesPostRequest(t *testing.T) {
 		Services:         []model.Service{serviceExample1, serviceExample2},
 	}
 
-	result := []configurables.Configurable{}
-
-	err := postJSON(ServerUrl+"/configurables", message, &result)
+	result, err, code := TestClient.FindConfigurables(message.CharacteristicId, message.Services)
 	if err != nil {
-		t.Error(err)
+		t.Error(code, err)
 		return
 	}
 
@@ -65,11 +62,9 @@ func TestConfigurablesPostRequest(t *testing.T) {
 func TestConfigurablesMockGetRequest(t *testing.T) {
 	mocks.DeviceRepo.Init().SetService(serviceExample1).SetService(serviceExample2)
 
-	result := []configurables.Configurable{}
-
-	err := getJSON(ServerUrl+"/configurables?characteristicId="+url.QueryEscape(temperature.Celsius)+"&serviceIds="+url.QueryEscape(serviceExample1.Id)+","+url.QueryEscape(serviceExample2.Id), &result)
+	result, err, code := TestClient.FindConfigurablesForServiceIds(temperature.Celsius, []string{serviceExample1.Id, serviceExample2.Id})
 	if err != nil {
-		t.Error(err)
+		t.Error(code, err)
 		return
 	}
 

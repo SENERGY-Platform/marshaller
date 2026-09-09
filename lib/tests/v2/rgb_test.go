@@ -30,7 +30,7 @@ func TestRgbMarshal(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -91,7 +91,7 @@ func TestRgbMarshal(t *testing.T) {
 		},
 	}
 
-	t.Run("marshal hex to rgb", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("marshal hex to rgb", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -103,7 +103,7 @@ func TestRgbMarshal(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"rgb":{"blau":100,"grün":0,"rot":255}}`}))
 
-	t.Run("marshal rgb to rgb", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("marshal rgb to rgb", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -121,7 +121,7 @@ func TestRgbUnmarshal(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -184,7 +184,7 @@ func TestRgbUnmarshal(t *testing.T) {
 
 	output := map[string]string{"body": `{"rgb":{"blau":100,"grün":0,"rot":255}}`}
 
-	t.Run("unmarshal rgb to hex", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("unmarshal rgb to hex", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Hex,
@@ -192,7 +192,7 @@ func TestRgbUnmarshal(t *testing.T) {
 		Path:             "color.rgb",
 	}, "#ff0064"))
 
-	t.Run("unmarshal rgb to rgb", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("unmarshal rgb to rgb", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Rgb,

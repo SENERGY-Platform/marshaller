@@ -29,7 +29,7 @@ func TestMarshallingVoidToggle(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -64,7 +64,7 @@ func TestMarshallingVoidToggle(t *testing.T) {
 			},
 		},
 	}
-	t.Run("toggle nil", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("toggle nil", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data:     []model.MarshallingV2RequestData{},

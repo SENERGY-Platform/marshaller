@@ -19,6 +19,7 @@ package v2
 import (
 	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"github.com/SENERGY-Platform/marshaller/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/controller"
@@ -29,7 +30,10 @@ import (
 	"sync"
 )
 
-func setup(ctx context.Context, done *sync.WaitGroup) (serverUrl string) {
+// setup runs the api over http and returns a client for it. The tests drive the service
+// through the client on purpose: it is the surface consumers use, so a mismatch between a
+// client method and its endpoint fails a real test rather than only the client's own.
+func setup(ctx context.Context, done *sync.WaitGroup) (c client.Interface) {
 	conceptRepo, err := mocks.NewMockConceptRepo(ctx)
 	if err != nil {
 		panic(err)
@@ -40,11 +44,10 @@ func setup(ctx context.Context, done *sync.WaitGroup) (serverUrl string) {
 	done.Add(1)
 	ctrl := controller.New(config.Config{ReturnUnknownPathAsNull: true, Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil)
 	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, ctrl, nil))
-	serverUrl = server.URL
 	go func() {
 		<-ctx.Done()
 		server.Close()
 		done.Done()
 	}()
-	return
+	return client.NewClient(server.URL, nil)
 }

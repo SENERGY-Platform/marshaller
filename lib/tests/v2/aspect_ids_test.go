@@ -17,47 +17,29 @@
 package v2
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"net/http"
+	"strings"
 	"sync"
 	"testing"
 
 	"github.com/SENERGY-Platform/converter/lib/converter/characteristics"
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 // testUnmarshalNoPath expects the request to be rejected because its criteria select no
 // output path at all.
-func testUnmarshalNoPath(apiurl string, request messages.UnmarshallingV2Request) func(t *testing.T) {
+func testUnmarshalNoPath(c client.Interface, request messages.UnmarshallingV2Request) func(t *testing.T) {
 	return func(t *testing.T) {
-		body := new(bytes.Buffer)
-		err := json.NewEncoder(body).Encode(request)
-		if err != nil {
-			t.Error(err)
+		_, err, code := c.UnmarshalV2(request)
+		if code != http.StatusBadRequest {
+			t.Error("expected 400, got", code, err)
 			return
 		}
-		req, err := http.NewRequest("POST", apiurl+"/v2/unmarshal", body)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		defer resp.Body.Close()
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-		if resp.StatusCode != http.StatusBadRequest {
-			t.Error(resp.StatusCode, buf.String())
-			return
-		}
-		if !bytes.Contains(buf.Bytes(), []byte("no output path found for criteria")) {
-			t.Error(buf.String())
+		if err == nil || !strings.Contains(err.Error(), "no output path found for criteria") {
+			t.Error("expected the no-output-path error, got", err)
 			return
 		}
 	}
@@ -71,7 +53,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	functionId := model.MEASURING_FUNCTION_PREFIX + "getTemperature"
 
@@ -126,7 +108,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 
 	output := map[string]string{"body": `{"inside":500,"inside_today":400}`}
 
-	t.Run("matches only the content variable carrying every queried aspect", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("matches only the content variable carrying every queried aspect", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -135,7 +117,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNodeIds:    []string{"inside_air", "today"},
 	}, 400.0))
 
-	t.Run("covers the subtree of every queried aspect", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("covers the subtree of every queried aspect", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -144,7 +126,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNodeIds:    []string{"air", "electricity"},
 	}, 400.0))
 
-	t.Run("matches every content variable carrying the single queried aspect", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("matches every content variable carrying the single queried aspect", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -153,7 +135,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNodeIds:    []string{"inside_air"},
 	}, []interface{}{400.0, 500.0}))
 
-	t.Run("reads the deprecated aspect node id as a list with one element", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("reads the deprecated aspect node id as a list with one element", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -162,7 +144,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNodeId:     "today",
 	}, 400.0))
 
-	t.Run("reads the deprecated aspect node as a list with one element", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("reads the deprecated aspect node as a list with one element", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -171,7 +153,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNode:       model.AspectNode{Id: "today", RootId: "electricity", ParentId: "consumption"},
 	}, 400.0))
 
-	t.Run("adds the deprecated aspect node id to the queried aspect list", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("adds the deprecated aspect node id to the queried aspect list", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -181,7 +163,7 @@ func TestUnmarshalAspectIds(t *testing.T) {
 		AspectNodeIds:    []string{"inside_air"},
 	}, 400.0))
 
-	t.Run("finds no path if no content variable carries every queried aspect", testUnmarshalNoPath(apiurl, messages.UnmarshallingV2Request{
+	t.Run("finds no path if no content variable carries every queried aspect", testUnmarshalNoPath(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -199,7 +181,7 @@ func TestUnmarshalDeprecatedContentVariableAspectId(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	functionId := model.MEASURING_FUNCTION_PREFIX + "getTemperature"
 
@@ -252,7 +234,7 @@ func TestUnmarshalDeprecatedContentVariableAspectId(t *testing.T) {
 
 	output := map[string]string{"body": `{"inside":400,"outside":500}`}
 
-	t.Run("matches the deprecated aspect id of a content variable by aspect list", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("matches the deprecated aspect id of a content variable by aspect list", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -261,7 +243,7 @@ func TestUnmarshalDeprecatedContentVariableAspectId(t *testing.T) {
 		AspectNodeIds:    []string{"outside_air"},
 	}, 500.0))
 
-	t.Run("matches the deprecated aspect id of a content variable by deprecated aspect node id", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("matches the deprecated aspect id of a content variable by deprecated aspect node id", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Celsius,
@@ -279,7 +261,7 @@ func TestMarshalAspectNodes(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	functionId := model.CONTROLLING_FUNCTION_PREFIX + "setTemperature"
 	insideAir := model.AspectNode{Id: "inside_air", RootId: "air", ParentId: "air", AncestorIds: []string{"air"}}
@@ -336,7 +318,7 @@ func TestMarshalAspectNodes(t *testing.T) {
 		},
 	}
 
-	t.Run("writes only to the content variable carrying every queried aspect", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("writes only to the content variable carrying every queried aspect", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -349,7 +331,7 @@ func TestMarshalAspectNodes(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":12,"inside_today":27}`}))
 
-	t.Run("reads the deprecated aspect node as a list with one element", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("reads the deprecated aspect node as a list with one element", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{
@@ -362,7 +344,7 @@ func TestMarshalAspectNodes(t *testing.T) {
 		},
 	}, map[string]string{"body": `{"inside":12,"inside_today":27}`}))
 
-	t.Run("adds the deprecated aspect node to the queried aspect list", testMarshal(apiurl, messages.MarshallingV2Request{
+	t.Run("adds the deprecated aspect node to the queried aspect list", testMarshal(c, messages.MarshallingV2Request{
 		Service:  service,
 		Protocol: protocol,
 		Data: []model.MarshallingV2RequestData{

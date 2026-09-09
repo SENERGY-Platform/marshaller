@@ -17,12 +17,8 @@
 package tests
 
 import (
-	"fmt"
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
-	"io"
-	"log"
-	"net/url"
-	"strings"
 )
 
 func Example_api_Unmarshal1() {
@@ -30,20 +26,10 @@ func Example_api_Unmarshal1() {
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //Danfoss Radiator Thermostat getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
-	resp, err := post(
-		ServerUrl+"/unmarshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId),
-		"application/json",
-		strings.NewReader(
-			`{"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"}}`,
-		),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	fmt.Println(err, string(result))
+	result, err, code := TestClient.UnmarshalForService(serviceId, characteristicId, requestFromJson[messages.UnmarshallingRequest](
+		`{"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"}}`,
+	))
+	printJson(result, err, code)
 
 	//output:
 	//<nil> 294.15
@@ -53,24 +39,14 @@ func Example_api_Unmarshal1() {
 func Example_api_Unmarshal2() {
 	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
-	resp, err := post(
-		ServerUrl+"/unmarshal",
-		"application/json",
-		strings.NewReader(
-			`{
+	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+		`{
 					"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": `+danfossTemperatureService+`
+					"service": ` + danfossTemperatureService + `
 				}`,
-		),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	fmt.Println(err, string(result))
+	))
+	printJson(result, err, code)
 
 	//output:
 	//<nil> 294.15
@@ -78,25 +54,15 @@ func Example_api_Unmarshal2() {
 }
 
 func Example_api_Unmarshal3() {
-	resp, err := post(
-		ServerUrl+"/unmarshal",
-		"application/json",
-		strings.NewReader(
-			`{
+	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+		`{
 					"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": `+danfossTemperatureService+`,
-					"protocol": `+protocolJson+`
+					"service": ` + danfossTemperatureService + `,
+					"protocol": ` + protocolJson + `
 				}`,
-		),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	fmt.Println(err, string(result))
+	))
+	printJson(result, err, code)
 
 	//output:
 	//<nil> 294.15
@@ -104,30 +70,16 @@ func Example_api_Unmarshal3() {
 }
 
 func Example_api_UnmarshalWithHints1() {
-	resp, err := post(
-		ServerUrl+"/unmarshal",
-		"application/json",
-		strings.NewReader(
-			`{
+	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+		`{
 					"message": {"data":"{\"level1\":21,\"level2\":22,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": `+danfossTemperatureServiceForHints+`,
-					"protocol": `+protocolJson+`,
+					"service": ` + danfossTemperatureServiceForHints + `,
+					"protocol": ` + protocolJson + `,
 					"content_variable_hints": ["urn:infai:ses:content-variable:c504db64-05ea-4736-89fb-8a7a04d5c468_1", "foo", "bar"]
 				}`,
-		),
-	)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(err, string(result))
+	))
+	printJson(result, err, code)
 
 	//output:
 	//<nil> 294.15
@@ -135,30 +87,16 @@ func Example_api_UnmarshalWithHints1() {
 }
 
 func Example_api_UnmarshalWithHints2() {
-	resp, err := post(
-		ServerUrl+"/unmarshal",
-		"application/json",
-		strings.NewReader(
-			`{
+	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+		`{
 					"message": {"data":"{\"level1\":21,\"level2\":22,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": `+danfossTemperatureServiceForHints+`,
-					"protocol": `+protocolJson+`,
+					"service": ` + danfossTemperatureServiceForHints + `,
+					"protocol": ` + protocolJson + `,
 					"content_variable_hints": ["urn:infai:ses:content-variable:c504db64-05ea-4736-89fb-8a7a04d5c468_2", "foo", "bar"]
 				}`,
-		),
-	)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer resp.Body.Close()
-	result, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(err, string(result))
+	))
+	printJson(result, err, code)
 
 	//output:
 	//<nil> 295.15

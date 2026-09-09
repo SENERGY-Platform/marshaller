@@ -17,17 +17,14 @@
 package tests
 
 import (
-	"bytes"
 	"encoding/json"
+	"reflect"
+	"testing"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
-	"io/ioutil"
-	"net/http"
-	"reflect"
-	"testing"
-	"time"
 )
 
 func TestPathOptionsTemperatureCelsiusArray(t *testing.T) {
@@ -879,8 +876,7 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 
 func testPathOptions(deviceTypes []string, functionId string, aspect string, characteristicsFilter []string, withoutEnvelope bool, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
-		buff := bytes.Buffer{}
-		err := json.NewEncoder(&buff).Encode(messages.PathOptionsQuery{
+		result, err, code := TestClient.GetPathOptions(messages.PathOptionsQuery{
 			DeviceTypeIds:          deviceTypes,
 			FunctionId:             functionId,
 			AspectId:               aspect,
@@ -888,33 +884,7 @@ func testPathOptions(deviceTypes []string, functionId string, aspect string, cha
 			WithoutEnvelope:        withoutEnvelope,
 		})
 		if err != nil {
-			t.Error(err.Error())
-			return
-		}
-		req, err := http.NewRequest("POST", ServerUrl+"/query/path-options", &buff)
-		if err != nil {
-			t.Error(err.Error())
-			return
-		}
-		client := &http.Client{
-			Timeout: 10 * time.Second,
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Error(err.Error())
-			return
-		}
-
-		if resp.StatusCode != 200 {
-			temp, _ := ioutil.ReadAll(resp.Body)
-			t.Error(resp.StatusCode, string(temp))
-			return
-		}
-
-		result := map[string][]marshaller.PathOptionsResultElement{}
-		err = json.NewDecoder(resp.Body).Decode(&result)
-		if err != nil {
-			t.Error(err.Error())
+			t.Error(code, err)
 			return
 		}
 		if !reflect.DeepEqual(expectedResult, result) {

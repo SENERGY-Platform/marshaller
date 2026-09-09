@@ -17,22 +17,19 @@
 package tests
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"flag"
-	"io"
-	"log"
-	"net/http"
+	"fmt"
 	"net/http/httptest"
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
+	"github.com/SENERGY-Platform/marshaller/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/controller"
@@ -43,6 +40,11 @@ import (
 )
 
 var ServerUrl string
+
+// TestClient drives the service the way a consumer does. The tests use it instead of
+// hand-built requests, so a client method that calls the wrong endpoint fails here too and
+// not only in the client package's own test.
+var TestClient client.Interface
 
 var example = struct {
 	Brightness string
@@ -110,6 +112,7 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 	ctrl := controller.New(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil)
 	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, ctrl, metrics.NewMetrics(config.Config{})))
 	ServerUrl = server.URL
+	TestClient = client.NewClient(server.URL, nil)
 	go func() {
 		<-ctx.Done()
 		server.Close()
@@ -129,67 +132,32 @@ var TestFindConfigurables = func(notCharacteristicId string, services []model.Se
 	return nil, errors.New("todo")
 }
 
-func post(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
-	req, err := http.NewRequest("POST", url, body)
-	if err != nil {
-		return nil, err
+func requestFromJson[T any](body string) T {
+	result := new(T)
+	if err := json.Unmarshal([]byte(body), result); err != nil {
+		panic(err)
 	}
-	req.Header.Set("Content-Type", contentType)
-
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err = client.Do(req)
-	if err == nil && resp.StatusCode == 401 {
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-		resp.Body.Close()
-		log.Println(buf.String())
-		err = errors.New("access denied")
-	}
-	return
+	return *result
 }
 
-func postJSON(url string, body interface{}, result interface{}) (err error) {
-	b := new(bytes.Buffer)
-	err = json.NewEncoder(b).Encode(body)
+// printJson renders a client answer the way the raw response body was printed before, so
+// the expected output of an example stays what it was and does not depend on how Go
+// happens to print a map.
+func printJson(result interface{}, err error, code int) {
 	if err != nil {
+		fmt.Println(code, err)
 		return
 	}
-	resp, err := post(url, "application/json", b)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if result != nil {
-		err = json.NewDecoder(resp.Body).Decode(result)
-	}
-	return
+	body, err := json.Marshal(result)
+	fmt.Println(err, string(body))
 }
 
-func get(url string) (resp *http.Response, err error) {
-	req, err := http.NewRequest("GET", url, nil)
+// printJsonWithCode additionally prints the status, for the examples that documented it.
+func printJsonWithCode(result interface{}, err error, code int) {
 	if err != nil {
-		return nil, err
+		fmt.Println(code, err)
+		return
 	}
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err = client.Do(req)
-	if err == nil && resp.StatusCode == 401 {
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-		log.Println(buf.String())
-		err = errors.New("access denied")
-	}
-	return
-}
-
-func getJSON(url string, result interface{}) (err error) {
-	resp, err := get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return json.NewDecoder(resp.Body).Decode(result)
+	body, err := json.Marshal(result)
+	fmt.Println(err, code, string(body))
 }

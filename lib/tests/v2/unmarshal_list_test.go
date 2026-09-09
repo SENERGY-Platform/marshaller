@@ -30,7 +30,7 @@ func TestUnmarshalListCharacteristic(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -91,7 +91,7 @@ func TestUnmarshalListCharacteristic(t *testing.T) {
 		},
 	}
 
-	t.Run("test", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("test", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: "urn:infai:ses:characteristic:f48d7985-7ee7-4119-a791-bc16a953f440",
@@ -106,7 +106,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -159,7 +159,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 
 	output := map[string]string{"body": `[400,500]`}
 
-	t.Run("0 path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("0 path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -167,7 +167,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		Path:             "temperature.0",
 	}, 673.15))
 
-	t.Run("1 path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("1 path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -175,7 +175,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		Path:             "temperature.1",
 	}, 773.15))
 
-	t.Run("0 criteria", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("0 criteria", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -184,7 +184,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		AspectNodeId:     "inside_air",
 	}, 673.15))
 
-	t.Run("1 criteria", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("1 criteria", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -193,7 +193,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		AspectNodeId:     "outside_air",
 	}, 773.15))
 
-	t.Run("air criteria", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("air criteria", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -202,7 +202,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		AspectNodeId:     "air",
 	}, []interface{}{673.15, 773.15}))
 
-	t.Run("0 no cast", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("0 no cast", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:      service,
 		Protocol:     protocol,
 		Message:      output,
@@ -210,7 +210,7 @@ func TestUnmarshalListIndexed(t *testing.T) {
 		AspectNodeId: "inside_air",
 	}, 400.0))
 
-	t.Run("inside °C", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("inside °C", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		Message:          output,
@@ -225,7 +225,7 @@ func TestUnarshalListVariable(t *testing.T) {
 	defer wg.Wait()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	apiurl := setup(ctx, wg)
+	c := setup(ctx, wg)
 
 	protocol := model.Protocol{
 		Id:      "p1",
@@ -269,7 +269,7 @@ func TestUnarshalListVariable(t *testing.T) {
 
 	output := map[string]string{"body": `[400,500]`}
 
-	t.Run("temperature path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("temperature path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: "",
@@ -277,7 +277,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		Path:             "temperature",
 	}, []interface{}{400.0, 500.0}))
 
-	t.Run("* path", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("* path", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -285,7 +285,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		Path:             "temperature.*",
 	}, []interface{}{673.15, 773.15}))
 
-	t.Run("0 path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("0 path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -293,7 +293,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		Path:             "temperature.0",
 	}, 673.15))
 
-	t.Run("1 path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("1 path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -301,7 +301,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		Path:             "temperature.1",
 	}, 773.15))
 
-	t.Run("99 path", testUnmarshal(apiurl, messages.UnmarshallingV2Request{
+	t.Run("99 path", testUnmarshal(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -309,7 +309,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		Path:             "temperature.99",
 	}, nil))
 
-	t.Run("inside_air criteria", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("inside_air criteria", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -318,7 +318,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		AspectNodeId:     "inside_air",
 	}, []interface{}{673.15, 773.15}))
 
-	t.Run("air criteria", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("air criteria", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		CharacteristicId: characteristics.Kelvin,
@@ -327,7 +327,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		AspectNodeId:     "air",
 	}, []interface{}{673.15, 773.15}))
 
-	t.Run("inside_air no cast", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("inside_air no cast", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:      service,
 		Protocol:     protocol,
 		Message:      output,
@@ -335,7 +335,7 @@ func TestUnarshalListVariable(t *testing.T) {
 		AspectNodeId: "inside_air",
 	}, []interface{}{400.0, 500.0}))
 
-	t.Run("inside_air °C", testUnmarshalAny(apiurl, messages.UnmarshallingV2Request{
+	t.Run("inside_air °C", testUnmarshalAny(c, messages.UnmarshallingV2Request{
 		Service:          service,
 		Protocol:         protocol,
 		Message:          output,
