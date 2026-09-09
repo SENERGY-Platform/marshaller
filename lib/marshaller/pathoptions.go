@@ -29,10 +29,10 @@ type PathOptionsResultElement struct {
 	PathToCharacteristicId map[string]string `json:"path_to_characteristic_id"`
 }
 
-func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string, aspectId string, characteristicIdFilter []string, withEnvelope bool) (result map[string][]PathOptionsResultElement, err error, code int) {
+func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result map[string][]PathOptionsResultElement, err error, code int) {
 	result = map[string][]PathOptionsResultElement{}
 	for _, deviceTypeId := range deviceTypeIds {
-		result[deviceTypeId], err, code = this.getPathOptionForDeviceType(deviceTypeId, functionId, aspectId, characteristicIdFilter, withEnvelope)
+		result[deviceTypeId], err, code = this.getPathOptionForDeviceType(deviceTypeId, functionId, aspectIds, characteristicIdFilter, withEnvelope)
 		if err != nil {
 			return
 		}
@@ -40,13 +40,13 @@ func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string,
 	return result, nil, http.StatusOK
 }
 
-func (this *Marshaller) getPathOptionForDeviceType(deviceTypeId string, functionId string, aspectId string, characteristicIdFilter []string, withEnvelope bool) (result []PathOptionsResultElement, err error, code int) {
+func (this *Marshaller) getPathOptionForDeviceType(deviceTypeId string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result []PathOptionsResultElement, err error, code int) {
 	result = []PathOptionsResultElement{}
 	dt, err, code := this.devicerepo.GetDeviceType(deviceTypeId)
 	if err != nil {
 		return nil, err, code
 	}
-	services, err := this.filterMatchingServices(dt.Services, functionId, aspectId)
+	services, err := this.filterMatchingServices(dt.Services, functionId, aspectIds)
 	if err != nil {
 		return nil, err, http.StatusInternalServerError
 	}
@@ -142,46 +142,61 @@ func intersection(alist []string, blist []string) (result []string) {
 	return
 }
 
-func (this *Marshaller) filterMatchingServices(services []model.Service, functionId string, aspectId string) (result []model.Service, err error) {
-	var aspectNode model.AspectNode
-	if aspectId != "" {
-		aspectNode, err = this.devicerepo.GetAspectNode(aspectId)
+func (this *Marshaller) filterMatchingServices(services []model.Service, functionId string, aspectIds []string) (result []model.Service, err error) {
+	aspectNodes := []model.AspectNode{}
+	for _, aspectId := range aspectIds {
+		if aspectId == "" || model.ContainsAspectNode(aspectNodes, aspectId) {
+			continue
+		}
+		aspectNode, err := this.devicerepo.GetAspectNode(aspectId)
 		if err != nil {
 			return result, err
 		}
+		aspectNodes = append(aspectNodes, aspectNode)
 	}
 	for _, service := range services {
-		if this.serviceMatches(service, functionId, aspectNode) {
+		if this.serviceMatches(service, functionId, aspectNodes) {
 			result = append(result, service)
 		}
 	}
 	return
 }
 
-func (this *Marshaller) serviceMatches(service model.Service, functionId string, aspectNode model.AspectNode) (match bool) {
+func (this *Marshaller) serviceMatches(service model.Service, functionId string, aspectNodes []model.AspectNode) (match bool) {
 	for _, content := range service.Inputs {
-		if contentVariableMatches(content.ContentVariable, functionId, aspectNode) {
+		if contentVariableMatches(content.ContentVariable, functionId, aspectNodes) {
 			return true
 		}
 	}
 	for _, content := range service.Outputs {
-		if contentVariableMatches(content.ContentVariable, functionId, aspectNode) {
+		if contentVariableMatches(content.ContentVariable, functionId, aspectNodes) {
 			return true
 		}
 	}
 	return false
 }
 
-func contentVariableMatches(variable model.ContentVariable, functionId string, aspectNode model.AspectNode) bool {
-	if variable.FunctionId == functionId && (variable.AspectId == aspectNode.Id || contains(aspectNode.DescendentIds, variable.AspectId)) {
+func contentVariableMatches(variable model.ContentVariable, functionId string, aspectNodes []model.AspectNode) bool {
+	if variable.FunctionId == functionId && aspectsMatch(variable, aspectNodes) {
 		return true
 	}
 	for _, sub := range variable.SubContentVariables {
-		if contentVariableMatches(sub, functionId, aspectNode) {
+		if contentVariableMatches(sub, functionId, aspectNodes) {
 			return true
 		}
 	}
 	return false
+}
+
+// aspectsMatch keeps the behavior a path-options query without an aspect always had: it
+// matches only content variables that carry no aspect either. Every other case is the
+// shared AND match over the queried aspect nodes.
+func aspectsMatch(variable model.ContentVariable, aspectNodes []model.AspectNode) bool {
+	aspectIds := model.ContentVariableAspectIds(variable)
+	if len(aspectNodes) == 0 {
+		return len(aspectIds) == 0
+	}
+	return model.AspectMatchLevel(aspectIds, aspectNodes) > -1
 }
 
 func contains(ids []string, id string) bool {

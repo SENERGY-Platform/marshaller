@@ -24,6 +24,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -55,7 +56,14 @@ func PathOptions(router *httprouter.Router, config config.Config, marshaller *ma
 		characteristicIdFilter := strings.Split(strings.ReplaceAll(characteristicIdFilterStr, " ", ""), ",")
 
 		functionId := strings.TrimSpace(request.URL.Query().Get("function-id"))
-		aspectId := strings.TrimSpace(request.URL.Query().Get("aspect-id"))
+
+		//aspect-id is deprecated in favor of aspect-ids and is an alias for a list with one element
+		aspectIds := []string{}
+		aspectIdsStr := strings.TrimSpace(request.URL.Query().Get("aspect-ids"))
+		if aspectIdsStr != "" {
+			aspectIds = strings.Split(strings.ReplaceAll(aspectIdsStr, " ", ""), ",")
+		}
+		aspectIds = model.AspectIdsAlias(strings.TrimSpace(request.URL.Query().Get("aspect-id")), aspectIds)
 
 		withoutEnvelope := false
 		withoutEnvelopeStr := request.URL.Query().Get("function-id")
@@ -64,7 +72,7 @@ func PathOptions(router *httprouter.Router, config config.Config, marshaller *ma
 			withoutEnvelope, err = strconv.ParseBool(strings.TrimSpace(withoutEnvelopeStr))
 		}
 
-		result, err, code := marshaller.GetPathOption(deviceTypeIds, functionId, aspectId, characteristicIdFilter, !withoutEnvelope)
+		result, err, code := marshaller.GetPathOption(deviceTypeIds, functionId, aspectIds, characteristicIdFilter, !withoutEnvelope)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -82,7 +90,7 @@ func PathOptions(router *httprouter.Router, config config.Config, marshaller *ma
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		result, err, code := marshaller.GetPathOption(query.DeviceTypeIds, query.FunctionId, query.AspectId, query.CharacteristicIdFilter, !query.WithoutEnvelope)
+		result, err, code := marshaller.GetPathOption(query.DeviceTypeIds, query.FunctionId, query.GetAspectIds(), query.CharacteristicIdFilter, !query.WithoutEnvelope)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

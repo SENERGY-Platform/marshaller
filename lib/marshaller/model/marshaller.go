@@ -17,9 +17,19 @@
 package model
 
 type MarshallingV2RequestData struct {
-	Value            interface{} `json:"value"`
-	CharacteristicId string      `json:"characteristic_id"`
-	Paths            []string    `json:"paths"`                 //semi-optional, may be determent by FunctionId
-	FunctionId       string      `json:"function_id"`           //semi-optional, to determine Paths if they are not set
-	AspectNode       *AspectNode `json:"aspect_node,omitempty"` //optional, to determine Paths if they are not set, may be empty if only FunctionId should be searched
+	Value            interface{}  `json:"value"`
+	CharacteristicId string       `json:"characteristic_id"`
+	Paths            []string     `json:"paths"`                  //semi-optional, may be determent by FunctionId
+	FunctionId       string       `json:"function_id"`            //semi-optional, to determine Paths if they are not set
+	AspectNode       *AspectNode  `json:"aspect_node,omitempty"`  //deprecated: please use AspectNodes
+	AspectNodes      []AspectNode `json:"aspect_nodes,omitempty"` //optional, to determine Paths if they are not set, may be empty if only FunctionId should be searched
+}
+
+// GetAspectNodes returns the aspect nodes the request data asks for. The deprecated
+// AspectNode is an alias for a list with one element.
+func (this MarshallingV2RequestData) GetAspectNodes() []AspectNode {
+	if this.AspectNode == nil {
+		return this.AspectNodes
+	}
+	return AspectNodesAlias(*this.AspectNode, this.AspectNodes)
 }

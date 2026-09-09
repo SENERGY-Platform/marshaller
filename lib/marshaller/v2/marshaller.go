@@ -51,18 +51,18 @@ type Converter interface {
 	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error)
 }
 
-func (this *Marshaller) GetInputPaths(service model.Service, functionId string, aspectNode *model.AspectNode) (result []string) {
-	return this.getPathsFromContentsByCriteria(service.Inputs, functionId, aspectNode)
+func (this *Marshaller) GetInputPaths(service model.Service, functionId string, aspectNodes []model.AspectNode) (result []string) {
+	return this.getPathsFromContentsByCriteria(service.Inputs, functionId, aspectNodes)
 }
 
-func (this *Marshaller) GetOutputPaths(service model.Service, functionId string, aspectNode *model.AspectNode) (result []string) {
-	return this.getPathsFromContentsByCriteria(service.Outputs, functionId, aspectNode)
+func (this *Marshaller) GetOutputPaths(service model.Service, functionId string, aspectNodes []model.AspectNode) (result []string) {
+	return this.getPathsFromContentsByCriteria(service.Outputs, functionId, aspectNodes)
 }
 
-func (this *Marshaller) getPathsFromContentsByCriteria(contents []model.Content, functionId string, aspectNode *model.AspectNode) (result []string) {
+func (this *Marshaller) getPathsFromContentsByCriteria(contents []model.Content, functionId string, aspectNodes []model.AspectNode) (result []string) {
 	withDistance := []pathWithDistance{}
 	for _, c := range contents {
-		subResults := this.getPathsFromVariableByCriteriaWithDistance(c.ContentVariable, functionId, aspectNode, []string{})
+		subResults := this.getPathsFromVariableByCriteriaWithDistance(c.ContentVariable, functionId, aspectNodes, []string{})
 		if len(subResults) > 0 {
 			withDistance = append(withDistance, subResults...)
 		}
@@ -81,19 +81,10 @@ type pathWithDistance struct {
 	distance int
 }
 
-func (this *Marshaller) getPathsFromVariableByCriteriaWithDistance(variable model.ContentVariable, functionId string, aspectNode *model.AspectNode, currentPath []string) (result []pathWithDistance) {
+func (this *Marshaller) getPathsFromVariableByCriteriaWithDistance(variable model.ContentVariable, functionId string, aspectNodes []model.AspectNode, currentPath []string) (result []pathWithDistance) {
 	currentPath = append(currentPath, variable.Name)
 	result = []pathWithDistance{}
-	aspectDistanceLevel := -1
-	if aspectNode == nil {
-		aspectDistanceLevel = 0
-	} else if variable.AspectId == aspectNode.Id {
-		aspectDistanceLevel = 0
-	} else if contains(aspectNode.ChildIds, variable.AspectId) {
-		aspectDistanceLevel = 1
-	} else if contains(aspectNode.DescendentIds, variable.AspectId) {
-		aspectDistanceLevel = 2
-	}
+	aspectDistanceLevel := model.AspectMatchLevel(model.ContentVariableAspectIds(variable), aspectNodes)
 	functionMatches := false
 	if functionId == "" || variable.FunctionId == functionId {
 		functionMatches = true
@@ -107,19 +98,10 @@ func (this *Marshaller) getPathsFromVariableByCriteriaWithDistance(variable mode
 		}
 	}
 	for _, sub := range variable.SubContentVariables {
-		subResults := this.getPathsFromVariableByCriteriaWithDistance(sub, functionId, aspectNode, currentPath)
+		subResults := this.getPathsFromVariableByCriteriaWithDistance(sub, functionId, aspectNodes, currentPath)
 		if len(subResults) > 0 {
 			result = append(result, subResults...)
 		}
 	}
 	return result
-}
-
-func contains(ids []string, id string) bool {
-	for _, element := range ids {
-		if element == id {
-			return true
-		}
-	}
-	return false
 }

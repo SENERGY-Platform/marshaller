@@ -65,10 +65,28 @@ type UnmarshallingV2Request struct {
 	Message          map[string]string      `json:"message"`           //semi-optional; may be needed to create serialized_output
 	SerializedOutput map[string]interface{} `json:"serialized_output"` //semi-optional; may be created from message
 
-	Path         string           `json:"path"`           //semi-optional, may be determent by FunctionId and AspectNode
-	FunctionId   string           `json:"function_id"`    //semi-optional, to determine Path if not set
-	AspectNode   model.AspectNode `json:"aspect_node"`    //semi-optional, to determine Path if not set, may itself be determent by AspectNodeId
-	AspectNodeId string           `json:"aspect_node_id"` //semi-optional, to determine AspectNode if not set
+	Path          string             `json:"path"`                      //semi-optional, may be determent by FunctionId and AspectNodes
+	FunctionId    string             `json:"function_id"`               //semi-optional, to determine Path if not set
+	AspectNode    model.AspectNode   `json:"aspect_node"`               //deprecated: please use AspectNodes
+	AspectNodeId  string             `json:"aspect_node_id"`            //deprecated: please use AspectNodeIds
+	AspectNodes   []model.AspectNode `json:"aspect_nodes,omitempty"`    //semi-optional, to determine Path if not set, may themselves be determent by AspectNodeIds
+	AspectNodeIds []string           `json:"aspect_node_ids,omitempty"` //semi-optional, to determine AspectNodes if not set
+}
+
+// GetAspectNodeIds returns the aspect ids that still have to be resolved to aspect nodes.
+// The deprecated AspectNodeId is an alias for a list with one element and is only used if
+// the deprecated AspectNode is unset, the way it was before the lists existed.
+func (this UnmarshallingV2Request) GetAspectNodeIds() []string {
+	if this.AspectNode.Id != "" {
+		return this.AspectNodeIds
+	}
+	return model.AspectIdsAlias(this.AspectNodeId, this.AspectNodeIds)
+}
+
+// GetAspectNodes returns the aspect nodes the request carries. The deprecated AspectNode is
+// an alias for a list with one element.
+func (this UnmarshallingV2Request) GetAspectNodes() []model.AspectNode {
+	return model.AspectNodesAlias(this.AspectNode, this.AspectNodes)
 }
 
 type FindConfigurablesRequest struct {
@@ -79,7 +97,14 @@ type FindConfigurablesRequest struct {
 type PathOptionsQuery struct {
 	DeviceTypeIds          []string `json:"device_type_ids"`
 	FunctionId             string   `json:"function_id"`
-	AspectId               string   `json:"aspect_id"`
+	AspectId               string   `json:"aspect_id"` //deprecated: please use AspectIds
+	AspectIds              []string `json:"aspect_ids,omitempty"`
 	CharacteristicIdFilter []string `json:"characteristic_id_filter"`
 	WithoutEnvelope        bool     `json:"without_envelope"`
+}
+
+// GetAspectIds returns the aspects the query asks for. The deprecated AspectId is an alias
+// for a list with one element.
+func (this PathOptionsQuery) GetAspectIds() []string {
+	return model.AspectIdsAlias(this.AspectId, this.AspectIds)
 }

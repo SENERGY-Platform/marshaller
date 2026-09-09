@@ -55,21 +55,14 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 			return errors.New("expect service to reference given protocol")
 		}
 		if request.Path == "" {
-			var aspect *model.AspectNode
-			if request.AspectNode.Id == "" && request.AspectNodeId != "" {
-				var err error
-				request.AspectNode, err = deviceRepo.GetAspectNode(request.AspectNodeId)
-				if err != nil {
-					return err
-				}
+			aspects, err := requestAspectNodes(deviceRepo, *request)
+			if err != nil {
+				return err
 			}
-			if request.AspectNode.Id != "" {
-				aspect = &request.AspectNode
-			}
-			paths := marshallerV2.GetOutputPaths(request.Service, request.FunctionId, aspect)
+			paths := marshallerV2.GetOutputPaths(request.Service, request.FunctionId, aspects)
 			if len(paths) > 1 {
 				var err error
-				paths, err = marshallerV2.SortPathsByAspectDistance(deviceRepo, request.Service, aspect, paths)
+				paths, err = marshallerV2.SortPathsByAspectDistance(deviceRepo, request.Service, aspects, paths)
 				if err != nil {
 					config.GetLogger().Error("unable to sort paths by aspect distance", "error", err)
 					debug.PrintStack()
@@ -151,4 +144,22 @@ func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller
 		metrics.LogUnmarshallingRequest(request, resource, msg, time.Since(start))
 	})
 
+}
+
+// requestAspectNodes collects the aspect nodes a request asks for and resolves the aspect
+// ids among them. Both deprecated single fields are aliases for a list with one element,
+// folded in by the request itself.
+func requestAspectNodes(deviceRepo DeviceRepository, request messages.UnmarshallingV2Request) (result []model.AspectNode, err error) {
+	result = request.GetAspectNodes()
+	for _, aspectNodeId := range request.GetAspectNodeIds() {
+		if aspectNodeId == "" || model.ContainsAspectNode(result, aspectNodeId) {
+			continue
+		}
+		aspectNode, err := deviceRepo.GetAspectNode(aspectNodeId)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, aspectNode)
+	}
+	return result, nil
 }
