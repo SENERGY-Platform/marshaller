@@ -171,7 +171,7 @@ func getOpenidToken(token *OpenidToken, config Config) (err error) {
 	requesttime := TimeNow()
 	resp, err := http.PostForm(config.AuthEndpoint+"/auth/realms/master/protocol/openid-connect/token", url.Values{
 		"client_id":     {config.AuthClientId},
-		"client_secret": {config.AuthClientSecret},
+		"client_secret": {config.AuthClientSecret.Value()},
 		"grant_type":    {"client_credentials"},
 	})
 
@@ -195,7 +195,7 @@ func refreshOpenidToken(token *OpenidToken, config Config) (err error) {
 	requesttime := TimeNow()
 	resp, err := http.PostForm(config.AuthEndpoint+"/auth/realms/master/protocol/openid-connect/token", url.Values{
 		"client_id":     {config.AuthClientId},
-		"client_secret": {config.AuthClientSecret},
+		"client_secret": {config.AuthClientSecret.Value()},
 		"refresh_token": {token.RefreshToken},
 		"grant_type":    {"refresh_token"},
 	})

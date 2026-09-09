@@ -29,25 +29,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SENERGY-Platform/go-service-base/config-hdl/types"
 	struct_logger "github.com/SENERGY-Platform/go-service-base/struct-logger"
 )
 
 type Config struct {
-	ServerPort                   string   `json:"server_port"`
-	PrometheusPort               string   `json:"prometheus_port"`
-	AuthExpirationTimeBuffer     float64  `json:"auth_expiration_time_buffer"`
-	AuthEndpoint                 string   `json:"auth_endpoint"`
-	AuthClientId                 string   `json:"auth_client_id"`
-	AuthClientSecret             string   `json:"auth_client_secret"`
-	DeviceRepositoryUrl          string   `json:"device_repository_url"`
-	ConceptRepoRefreshInterval   int64    `json:"concept_repo_refresh_interval"`
-	ConverterUrl                 string   `json:"converter_url"`
-	ReturnUnknownPathAsNull      bool     `json:"return_unknown_path_as_null"`
-	Debug                        bool     `json:"debug"`
-	KafkaUrl                     string   `json:"kafka_url"`                       //optional, used for cache invalidation
-	CacheInvalidationKafkaTopics []string `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
-	InitTopics                   bool     `json:"init_topics"`
-	EnableSwaggerUi              bool     `json:"enable_swagger_ui"` //optional, serves the swagger ui under /swagger; the spec itself is always served under /doc
+	ServerPort                   string       `json:"server_port"`
+	PrometheusPort               string       `json:"prometheus_port"`
+	AuthExpirationTimeBuffer     float64      `json:"auth_expiration_time_buffer"`
+	AuthEndpoint                 string       `json:"auth_endpoint"`
+	AuthClientId                 string       `json:"auth_client_id"`
+	AuthClientSecret             types.Secret `json:"auth_client_secret"`
+	DeviceRepositoryUrl          string       `json:"device_repository_url"`
+	ConceptRepoRefreshInterval   int64        `json:"concept_repo_refresh_interval"`
+	ConverterUrl                 string       `json:"converter_url"`
+	ReturnUnknownPathAsNull      bool         `json:"return_unknown_path_as_null"`
+	Debug                        bool         `json:"debug"`
+	KafkaUrl                     string       `json:"kafka_url"`                       //optional, used for cache invalidation
+	CacheInvalidationKafkaTopics []string     `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
+	InitTopics                   bool         `json:"init_topics"`
+	EnableSwaggerUi              bool         `json:"enable_swagger_ui"` //optional, serves the swagger ui under /swagger; the spec itself is always served under /doc
 
 	LogLevel string       `json:"log_level"`
 	logger   *slog.Logger `json:"-"`
@@ -94,7 +95,10 @@ func handleEnvironmentVars(config *Config) {
 		envName := fieldNameToEnvName(fieldName)
 		envValue := os.Getenv(envName)
 		if envValue != "" {
-			fmt.Println("use environment variable: ", envName, " = ", envValue)
+			//only the name, never the value: this runs before the logger exists and
+			//printed every value in clear text, AUTH_CLIENT_SECRET included, on every
+			//start of a container that sets it
+			fmt.Println("use environment variable: ", envName)
 			if configValue.FieldByName(fieldName).Kind() == reflect.Int64 {
 				i, _ := strconv.ParseInt(envValue, 10, 64)
 				configValue.FieldByName(fieldName).SetInt(i)
