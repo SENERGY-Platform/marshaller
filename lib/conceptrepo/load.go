@@ -19,7 +19,7 @@ package conceptrepo
 import (
 	"net/url"
 
-	"github.com/SENERGY-Platform/device-repository/lib/client"
+	"github.com/SENERGY-Platform/device-repository/v2/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/models/go/models"
 )
