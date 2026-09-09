@@ -17,107 +17,45 @@
 package api
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
-	endpoints = append(endpoints, Marshalling)
+	endpoints = append(endpoints, &Marshalling{})
 }
 
-func Marshalling(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
-	resource := "/marshal"
+type Marshalling struct{}
 
-	normalizeRequest := func(request *messages.MarshallingRequest) error {
-		if request.Protocol == nil {
-			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
-			if err != nil {
-				return err
-			}
-			request.Protocol = &protocol
-		}
-		if request.Service.ProtocolId != request.Protocol.Id {
-			return errors.New("expect service to reference given protocol")
-		}
-		return nil
-	}
-
-	marshal := func(request messages.MarshallingRequest) (map[string]string, error) {
-		return marshaller.MarshalInputs(*request.Protocol, request.Service, request.Data, request.CharacteristicId, request.PathAllowList, request.Configurables...)
-	}
-
-	router.POST(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := messages.MarshallingRequest{}
-		serviceId := params.ByName("serviceId")
-		if serviceId == "" {
-			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
+func (this *Marshalling) Marshal(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("POST /marshal", func(writer http.ResponseWriter, request *http.Request) {
+		msg, ok := decodeBody[messages.MarshallingRequest](writer, request)
+		if !ok {
 			return
 		}
-		characteristicId := params.ByName("characteristicId")
-		if characteristicId == "" {
-			http.Error(writer, "expect characteristicId as parameter in path", http.StatusBadRequest)
-			return
-		}
-		err := json.NewDecoder(request.Body).Decode(&msg)
+		result, err, code := ctrl.Marshal(msg)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		msg.CharacteristicId = characteristicId
-		msg.Service, err = deviceRepo.GetService(serviceId)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = normalizeRequest(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		result, err := marshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
+		writeJson(config, writer, result)
 	})
+}
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := messages.MarshallingRequest{}
-		err := json.NewDecoder(request.Body).Decode(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+func (this *Marshalling) MarshalForService(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("POST /marshal/{serviceId}/{characteristicId}", func(writer http.ResponseWriter, request *http.Request) {
+		msg, ok := decodeBody[messages.MarshallingRequest](writer, request)
+		if !ok {
 			return
 		}
-		err = normalizeRequest(&msg)
+		result, err, code := ctrl.MarshalForService(request.PathValue("serviceId"), request.PathValue("characteristicId"), msg)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		result, err := marshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
+		writeJson(config, writer, result)
 	})
-
 }

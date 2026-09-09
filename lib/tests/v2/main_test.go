@@ -21,6 +21,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/api"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/controller"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
@@ -37,7 +38,8 @@ func setup(ctx context.Context, done *sync.WaitGroup) (serverUrl string) {
 	marshallerv2 := v2.New(config.Config{ReturnUnknownPathAsNull: true, Debug: true}, mocks.Converter{}, conceptRepo)
 	configurableService := configurables.New(conceptRepo)
 	done.Add(1)
-	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil, nil))
+	ctrl := controller.New(config.Config{ReturnUnknownPathAsNull: true, Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil)
+	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, ctrl, nil))
 	serverUrl = server.URL
 	go func() {
 		<-ctx.Done()

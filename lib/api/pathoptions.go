@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,87 +17,77 @@
 package api
 
 import (
-	"encoding/json"
-	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
-	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
-	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
+	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
+	"github.com/SENERGY-Platform/marshaller/lib/config"
+	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 func init() {
-	endpoints = append(endpoints, PathOptions)
+	endpoints = append(endpoints, &PathOptions{})
 }
 
-func PathOptions(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, service *configurables.ConfigurableService, repo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
+type PathOptions struct{}
 
-	router.GET("/path-options", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		deviceTypeIdsStr := request.URL.Query().Get("device-type-ids")
-		if deviceTypeIdsStr == "" {
-			writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-			json.NewEncoder(writer).Encode(map[string]interface{}{})
+func (this *PathOptions) GetPathOptions(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("GET /path-options", func(writer http.ResponseWriter, request *http.Request) {
+		//an absent device-type or characteristic filter is an empty query here and is
+		//answered with an empty result, unlike the request-body form where an absent
+		//characteristic filter means "do not filter"
+		if request.URL.Query().Get("device-type-ids") == "" || request.URL.Query().Get("characteristic-filter") == "" {
+			writeJson(config, writer, map[string]interface{}{})
 			return
 		}
-		deviceTypeIds := strings.Split(strings.ReplaceAll(deviceTypeIdsStr, " ", ""), ",")
-
-		characteristicIdFilterStr := request.URL.Query().Get("characteristic-filter")
-		if characteristicIdFilterStr == "" {
-			writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-			json.NewEncoder(writer).Encode(map[string]interface{}{})
-			return
+		query := messages.PathOptionsQuery{
+			DeviceTypeIds:          splitList(request.URL.Query().Get("device-type-ids")),
+			CharacteristicIdFilter: splitList(request.URL.Query().Get("characteristic-filter")),
+			FunctionId:             strings.TrimSpace(request.URL.Query().Get("function-id")),
+			//aspect-id is deprecated in favor of aspect-ids and is an alias for a list with one element
+			AspectIds: model.AspectIdsAlias(strings.TrimSpace(request.URL.Query().Get("aspect-id")), splitList(request.URL.Query().Get("aspect-ids"))),
 		}
-		characteristicIdFilter := strings.Split(strings.ReplaceAll(characteristicIdFilterStr, " ", ""), ",")
-
-		functionId := strings.TrimSpace(request.URL.Query().Get("function-id"))
-
-		//aspect-id is deprecated in favor of aspect-ids and is an alias for a list with one element
-		aspectIds := []string{}
-		aspectIdsStr := strings.TrimSpace(request.URL.Query().Get("aspect-ids"))
-		if aspectIdsStr != "" {
-			aspectIds = strings.Split(strings.ReplaceAll(aspectIdsStr, " ", ""), ",")
-		}
-		aspectIds = model.AspectIdsAlias(strings.TrimSpace(request.URL.Query().Get("aspect-id")), aspectIds)
-
-		withoutEnvelope := false
-		withoutEnvelopeStr := request.URL.Query().Get("function-id")
-		var err error
+		withoutEnvelopeStr := strings.TrimSpace(request.URL.Query().Get("without-envelope"))
 		if withoutEnvelopeStr != "" {
-			withoutEnvelope, err = strconv.ParseBool(strings.TrimSpace(withoutEnvelopeStr))
+			withoutEnvelope, err := strconv.ParseBool(withoutEnvelopeStr)
+			if err != nil {
+				http.Error(writer, "expect bool in without-envelope: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			query.WithoutEnvelope = withoutEnvelope
 		}
-
-		result, err, code := marshaller.GetPathOption(deviceTypeIds, functionId, aspectIds, characteristicIdFilter, !withoutEnvelope)
+		result, err, code := ctrl.GetPathOptions(query)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
-		} else {
-			writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-			json.NewEncoder(writer).Encode(result)
-			return
 		}
+		writeJson(config, writer, result)
 	})
+}
 
-	router.POST("/query/path-options", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		query := messages.PathOptionsQuery{}
-		err := json.NewDecoder(request.Body).Decode(&query)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+func (this *PathOptions) QueryPathOptions(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("POST /query/path-options", func(writer http.ResponseWriter, request *http.Request) {
+		query, ok := decodeBody[messages.PathOptionsQuery](writer, request)
+		if !ok {
 			return
 		}
-		result, err, code := marshaller.GetPathOption(query.DeviceTypeIds, query.FunctionId, query.GetAspectIds(), query.CharacteristicIdFilter, !query.WithoutEnvelope)
+		result, err, code := ctrl.GetPathOptions(query)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
-		} else {
-			writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-			json.NewEncoder(writer).Encode(result)
-			return
 		}
+		writeJson(config, writer, result)
 	})
+}
+
+// splitList reads a comma separated query parameter. An empty parameter is no filter
+// rather than a filter for the empty string.
+func splitList(value string) []string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	return strings.Split(strings.ReplaceAll(value, " ", ""), ",")
 }

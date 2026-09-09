@@ -25,6 +25,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/conceptrepo"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
+	"github.com/SENERGY-Platform/marshaller/lib/controller"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
 	"github.com/SENERGY-Platform/marshaller/lib/devicerepository"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
@@ -64,7 +65,9 @@ func Start(ctx context.Context, conf config.Config) (closed context.Context, err
 
 	marshallerV2 := v2.New(conf, converter, conceptRepo)
 
-	closed = api.Start(childCtx, conf, marshaller, marshallerV2, configurableService, devicerepo, converter)
+	ctrl := controller.New(conf, marshaller, marshallerV2, configurableService, devicerepo, converter)
+
+	closed = api.Start(childCtx, conf, ctrl)
 	go func() {
 		<-closed.Done()
 		cancel()

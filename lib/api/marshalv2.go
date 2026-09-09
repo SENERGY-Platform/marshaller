@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2022 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,107 +17,55 @@
 package api
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
-	endpoints = append(endpoints, MarshallingV2)
+	endpoints = append(endpoints, &MarshallingV2{})
 }
 
-func MarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
+type MarshallingV2 struct{}
+
+func (this *MarshallingV2) MarshalV2(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	resource := "/v2/marshal"
-
-	normalizeRequest := func(request *messages.MarshallingV2Request) error {
-		if request.Protocol.Id == "" {
-			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
-			if err != nil {
-				return err
-			}
-			request.Protocol = protocol
-		}
-		if request.Service.ProtocolId != request.Protocol.Id {
-			return errors.New("expect service to reference given protocol")
-		}
-		return nil
-	}
-
-	marshal := func(request messages.MarshallingV2Request) (map[string]string, error) {
-		return marshallerV2.Marshal(request.Protocol, request.Service, request.Data)
-	}
-
-	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	router.HandleFunc("POST "+resource, func(writer http.ResponseWriter, request *http.Request) {
 		start := time.Now()
-		msg := messages.MarshallingV2Request{}
-		serviceId := params.ByName("serviceId")
-		if serviceId == "" {
-			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
+		msg, ok := decodeBody[messages.MarshallingV2Request](writer, request)
+		if !ok {
 			return
 		}
-		err := json.NewDecoder(request.Body).Decode(&msg)
+		result, err, code := ctrl.MarshalV2(msg)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		msg.Service, err = deviceRepo.GetService(serviceId)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = normalizeRequest(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		result, err := marshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
-		metrics.LogMarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
+		writeJson(config, writer, result)
+		m.LogMarshallingRequest(request, resource, msg, time.Since(start))
 	})
+}
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func (this *MarshallingV2) MarshalV2ForService(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	resource := "/v2/marshal"
+	router.HandleFunc("POST "+resource+"/{serviceId}", func(writer http.ResponseWriter, request *http.Request) {
 		start := time.Now()
-		msg := messages.MarshallingV2Request{}
-		err := json.NewDecoder(request.Body).Decode(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+		msg, ok := decodeBody[messages.MarshallingV2Request](writer, request)
+		if !ok {
 			return
 		}
-		err = normalizeRequest(&msg)
+		result, err, code := ctrl.MarshalV2ForService(request.PathValue("serviceId"), msg)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		result, err := marshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
-		metrics.LogMarshallingRequest(request, resource, msg, time.Since(start))
+		writeJson(config, writer, result)
+		//the metric label keeps the old httprouter spelling on purpose: it is a label
+		//value existing dashboards query by, and renaming it would start a new time
+		//series and silently empty every panel built on the old one
+		m.LogMarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
 	})
-
 }

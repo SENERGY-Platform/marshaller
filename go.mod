@@ -5,7 +5,6 @@ go 1.26
 require (
 	github.com/SENERGY-Platform/converter v0.0.12
 	github.com/clbanning/mxj v1.8.4
-	github.com/julienschmidt/httprouter v1.3.0
 )
 
 require (

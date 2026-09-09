@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,46 +17,25 @@
 package api
 
 import (
-	"encoding/json"
+	"net/http"
+
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 func init() {
-	endpoints = append(endpoints, CharacteristicPathEndpoint)
+	endpoints = append(endpoints, &CharacteristicPaths{})
 }
 
-func CharacteristicPathEndpoint(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
-	resource := "/characteristic-paths"
+type CharacteristicPaths struct{}
 
-	router.GET(resource+"/:serviceId/:characteristicId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		serviceId := params.ByName("serviceId")
-		if serviceId == "" {
-			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
-			return
-		}
-		characteristicId := params.ByName("characteristicId")
-		if characteristicId == "" {
-			http.Error(writer, "expect characteristicId as parameter in path", http.StatusBadRequest)
-			return
-		}
-		service, err, code := deviceRepo.GetServiceWithErrCode(serviceId)
+func (this *CharacteristicPaths) GetCharacteristicPaths(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("GET /characteristic-paths/{serviceId}/{characteristicId}", func(writer http.ResponseWriter, request *http.Request) {
+		result, err, code := ctrl.GetCharacteristicPaths(request.PathValue("serviceId"), request.PathValue("characteristicId"))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
 		}
-		result, err, code := marshaller.GetServiceCharacteristicPath(service, characteristicId)
-		if err != nil {
-			http.Error(writer, err.Error(), code)
-			return
-		}
-		json.NewEncoder(writer).Encode(result)
+		writeJson(config, writer, result)
 	})
-
 }

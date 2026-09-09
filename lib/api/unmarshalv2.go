@@ -17,149 +17,53 @@
 package api
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
-	"runtime/debug"
 	"time"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
-	endpoints = append(endpoints, UnmarshallingV2)
+	endpoints = append(endpoints, &UnmarshallingV2{})
 }
 
-func UnmarshallingV2(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
+type UnmarshallingV2 struct{}
+
+func (this *UnmarshallingV2) UnmarshalV2(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	resource := "/v2/unmarshal"
-
-	normalizeRequest := func(request *messages.UnmarshallingV2Request) error {
-		config.GetLogger().Debug("UnmarshallingV2Request", "request", fmt.Sprintf("%#v", request))
-		if request.Protocol.Id == "" {
-			protocol, err := deviceRepo.GetProtocol(request.Service.ProtocolId)
-			if err != nil {
-				return err
-			}
-			request.Protocol = protocol
-		}
-		if request.Service.ProtocolId != request.Protocol.Id {
-			return errors.New("expect service to reference given protocol")
-		}
-		if request.Path == "" {
-			aspects, err := requestAspectNodes(deviceRepo, *request)
-			if err != nil {
-				return err
-			}
-			paths := marshallerV2.GetOutputPaths(request.Service, request.FunctionId, aspects)
-			if len(paths) > 1 {
-				var err error
-				paths, err = marshallerV2.SortPathsByAspectDistance(deviceRepo, request.Service, aspects, paths)
-				if err != nil {
-					config.GetLogger().Error("unable to sort paths by aspect distance", "error", err)
-					debug.PrintStack()
-					return err
-				}
-				config.GetLogger().Debug("WARNING: only one path found by FunctionId and AspectNode is used for Unmarshal", "paths", fmt.Sprintf("%#v", paths))
-			}
-			if len(paths) == 0 {
-				return errors.New("no output path found for criteria")
-			}
-			request.Path = paths[0]
-		}
-		return nil
-	}
-
-	unmarshal := func(request messages.UnmarshallingV2Request) (interface{}, error) {
-		return marshallerV2.Unmarshal(request.Protocol, request.Service, request.CharacteristicId, request.Path, request.Message, request.SerializedOutput)
-	}
-
-	router.POST(resource+"/:serviceId", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	router.HandleFunc("POST "+resource, func(writer http.ResponseWriter, request *http.Request) {
 		start := time.Now()
-		msg := messages.UnmarshallingV2Request{}
-		serviceId := params.ByName("serviceId")
-		if serviceId == "" {
-			http.Error(writer, "expect serviceId as parameter in path", http.StatusBadRequest)
+		msg, ok := decodeBody[messages.UnmarshallingV2Request](writer, request)
+		if !ok {
 			return
 		}
-		err := json.NewDecoder(request.Body).Decode(&msg)
+		result, err, code := ctrl.UnmarshalV2(msg)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		msg.Service, err = deviceRepo.GetService(serviceId)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = normalizeRequest(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		result, err := unmarshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
-		metrics.LogUnmarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
+		writeJson(config, writer, result)
+		m.LogUnmarshallingRequest(request, resource, msg, time.Since(start))
 	})
-
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		start := time.Now()
-		msg := messages.UnmarshallingV2Request{}
-		err := json.NewDecoder(request.Body).Decode(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		err = normalizeRequest(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		result, err := unmarshal(msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
-		metrics.LogUnmarshallingRequest(request, resource, msg, time.Since(start))
-	})
-
 }
 
-// requestAspectNodes collects the aspect nodes a request asks for and resolves the aspect
-// ids among them. Both deprecated single fields are aliases for a list with one element,
-// folded in by the request itself.
-func requestAspectNodes(deviceRepo DeviceRepository, request messages.UnmarshallingV2Request) (result []model.AspectNode, err error) {
-	result = request.GetAspectNodes()
-	for _, aspectNodeId := range request.GetAspectNodeIds() {
-		if aspectNodeId == "" || model.ContainsAspectNode(result, aspectNodeId) {
-			continue
+func (this *UnmarshallingV2) UnmarshalV2ForService(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	resource := "/v2/unmarshal"
+	router.HandleFunc("POST "+resource+"/{serviceId}", func(writer http.ResponseWriter, request *http.Request) {
+		start := time.Now()
+		msg, ok := decodeBody[messages.UnmarshallingV2Request](writer, request)
+		if !ok {
+			return
 		}
-		aspectNode, err := deviceRepo.GetAspectNode(aspectNodeId)
+		result, err, code := ctrl.UnmarshalV2ForService(request.PathValue("serviceId"), msg)
 		if err != nil {
-			return nil, err
+			http.Error(writer, err.Error(), code)
+			return
 		}
-		result = append(result, aspectNode)
-	}
-	return result, nil
+		writeJson(config, writer, result)
+		//the metric label keeps the old httprouter spelling, see marshalv2.go
+		m.LogUnmarshallingRequest(request, resource+"/:serviceId", msg, time.Since(start))
+	})
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2019 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,82 +17,46 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
-	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
-	endpoints = append(endpoints, Configurables)
+	endpoints = append(endpoints, &Configurables{})
 }
 
-func Configurables(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, converter *converter.Converter, metrics *metrics.Metrics) {
-	resource := "/configurables"
+type Configurables struct{}
 
-	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		characteristicId := request.URL.Query().Get("characteristicId")
-		if characteristicId == "" {
-			http.Error(writer, "expect characteristicId as query-parameter", http.StatusBadRequest)
-			return
+func (this *Configurables) GetConfigurables(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("GET /configurables", func(writer http.ResponseWriter, request *http.Request) {
+		serviceIds := []string{}
+		if serviceIdsStr := request.URL.Query().Get("serviceIds"); serviceIdsStr != "" {
+			serviceIds = strings.Split(serviceIdsStr, ",")
 		}
-		serviceIdsStr := request.URL.Query().Get("serviceIds")
-		if serviceIdsStr == "" {
-			http.Error(writer, "expect serviceIds as query-parameter", http.StatusBadRequest)
-			return
-		}
-		serviceIds := strings.Split(serviceIdsStr, ",")
-		services := []model.Service{}
-		for _, id := range serviceIds {
-			service, err := deviceRepo.GetService(strings.TrimSpace(id))
-			if err != nil {
-				http.Error(writer, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			services = append(services, service)
-		}
-		result, err := configurableService.Find(characteristicId, services)
+		result, err, code := ctrl.FindConfigurablesForServiceIds(request.URL.Query().Get("characteristicId"), serviceIds)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
+		writeJson(config, writer, result)
 	})
+}
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		msg := messages.FindConfigurablesRequest{}
-		err := json.NewDecoder(request.Body).Decode(&msg)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+func (this *Configurables) FindConfigurables(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("POST /configurables", func(writer http.ResponseWriter, request *http.Request) {
+		msg, ok := decodeBody[messages.FindConfigurablesRequest](writer, request)
+		if !ok {
 			return
 		}
-		if msg.CharacteristicId == "" {
-			http.Error(writer, "expect characteristic_id as field in body", http.StatusBadRequest)
+		result, err, code := ctrl.FindConfigurables(msg.CharacteristicId, msg.Services)
+		if err != nil {
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		result, err := configurableService.Find(msg.CharacteristicId, msg.Services)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
+		writeJson(config, writer, result)
 	})
-
 }

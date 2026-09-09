@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 InfAI (CC SES)
+ * Copyright 2023 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,41 +22,29 @@ import (
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
-	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
-	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
-	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
-	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
-	endpoints = append(endpoints, ConversionExtensionEndpoints)
+	endpoints = append(endpoints, &ConverterExtension{})
 }
 
-func ConversionExtensionEndpoints(router *httprouter.Router, config config.Config, marshaller *marshaller.Marshaller, marshallerV2 *v2.Marshaller, configurableService *configurables.ConfigurableService, deviceRepo DeviceRepository, c *converter.Converter, metrics *metrics.Metrics) {
-	resource := "/converter/extension-call"
+type ConverterExtension struct{}
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, ps httprouter.Params) {
-		r := converter.ExtensionCall{}
-		err := json.NewDecoder(request.Body).Decode(&r)
-		if err != nil {
+func (this *ConverterExtension) TryConverterExtension(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
+	router.HandleFunc("POST /converter/extension-call", func(writer http.ResponseWriter, request *http.Request) {
+		call := converter.ExtensionCall{}
+		//this endpoint answers a decode failure with its own wording rather than the
+		//decoder's, the way it did before
+		if err := json.NewDecoder(request.Body).Decode(&call); err != nil {
 			http.Error(writer, "expect valid json in request body", http.StatusBadRequest)
 			return
 		}
-		if c == nil {
-			http.Error(writer, "api initialized without converter", http.StatusInternalServerError)
+		result, err, code := ctrl.TryConverterExtension(call)
+		if err != nil {
+			http.Error(writer, err.Error(), code)
 			return
 		}
-		result, err := c.TryExtension(r)
-		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			config.GetLogger().Error("unable to encode response", "error", err)
-		}
+		writeJson(config, writer, result)
 	})
-
 }
