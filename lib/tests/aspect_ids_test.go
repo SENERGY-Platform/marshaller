@@ -255,3 +255,95 @@ func checkPathOptionsResponse(t *testing.T, req *http.Request, expectedResult ma
 		return
 	}
 }
+
+// TestPathOptionsWithoutEnvelope covers the without-envelope query parameter of
+// GET /path-options. It used to be read from the function-id parameter, so the envelope
+// could not be switched off at all through the query-parameter form.
+func TestPathOptionsWithoutEnvelope(t *testing.T) {
+	functionId := "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b"
+	deviceTypeId := "TestPathOptionsWithoutEnvelope"
+	serviceId := deviceTypeId + ".temperature"
+
+	mocks.DeviceRepo.SetDeviceType(model.DeviceType{
+		Id:   deviceTypeId,
+		Name: deviceTypeId,
+		Services: []model.Service{
+			{
+				Id:      serviceId,
+				LocalId: serviceId,
+				Name:    serviceId,
+				Outputs: []model.Content{
+					{
+						ContentVariable: model.ContentVariable{
+							Name:             "temperature",
+							Type:             model.Float,
+							CharacteristicId: temperature.Celsius,
+							FunctionId:       functionId,
+							AspectIds:        []string{"inside_air"},
+						},
+					},
+				},
+			},
+		},
+	})
+
+	expected := func(path string) map[string][]marshaller.PathOptionsResultElement {
+		return map[string][]marshaller.PathOptionsResultElement{
+			deviceTypeId: {
+				{
+					ServiceId:              serviceId,
+					JsonPath:               []string{path},
+					PathToCharacteristicId: map[string]string{path: temperature.Celsius},
+				},
+			},
+		}
+	}
+
+	t.Run("keeps the envelope by default", testPathOptionsGetRaw(
+		deviceTypeId, functionId, "", expected("value.temperature")))
+
+	t.Run("drops the envelope when without-envelope is true", testPathOptionsGetRaw(
+		deviceTypeId, functionId, "true", expected("temperature")))
+
+	t.Run("keeps the envelope when without-envelope is false", testPathOptionsGetRaw(
+		deviceTypeId, functionId, "false", expected("value.temperature")))
+
+	t.Run("rejects a without-envelope that is not a bool", func(t *testing.T) {
+		query := url.Values{}
+		query.Set("device-type-ids", deviceTypeId)
+		query.Set("characteristic-filter", temperature.Celsius)
+		query.Set("function-id", functionId)
+		query.Set("aspect-ids", "inside_air")
+		query.Set("without-envelope", "not-a-bool")
+		resp, err := (&http.Client{Timeout: 10 * time.Second}).Get(ServerUrl + "/path-options?" + query.Encode())
+		if err != nil {
+			t.Error(err.Error())
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Error("expected 400, got", resp.StatusCode)
+		}
+	})
+}
+
+func testPathOptionsGetRaw(deviceTypeId string, functionId string, withoutEnvelope string, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
+	return func(t *testing.T) {
+		query := url.Values{}
+		query.Set("device-type-ids", deviceTypeId)
+		query.Set("characteristic-filter", temperature.Celsius)
+		query.Set("function-id", functionId)
+		//the aspect has to be named: a v1 path-options query without one matches only
+		//content variables that carry no aspect either
+		query.Set("aspect-ids", "inside_air")
+		if withoutEnvelope != "" {
+			query.Set("without-envelope", withoutEnvelope)
+		}
+		req, err := http.NewRequest("GET", ServerUrl+"/path-options?"+query.Encode(), nil)
+		if err != nil {
+			t.Error(err.Error())
+			return
+		}
+		checkPathOptionsResponse(t, req, expectedResult)
+	}
+}
