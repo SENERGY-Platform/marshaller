@@ -23,6 +23,7 @@ import (
 	"math"
 	"reflect"
 	"runtime/debug"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -34,7 +35,7 @@ import (
 func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
 	for _, value := range data {
 		if len(value.Paths) == 0 && value.FunctionId != "" {
-			value.Paths = this.GetInputPaths(service, value.FunctionId, value.GetAspectNodes())
+			value.Paths = this.selectInputPaths(service, value.FunctionId, value.GetAspectNodes())
 		}
 		service.Inputs, err = this.setContentVariableValues(service.Inputs, value.Paths, value.CharacteristicId, value.Value)
 		if err != nil {
@@ -44,15 +45,18 @@ func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, 
 	return this.contentsToMessage(protocol, service.Inputs)
 }
 
+// setContentVariableValues writes the value to every path. Each path is applied to the
+// result of the one before, so the inputs keep every value written and appear once each;
+// without any path they are returned as they are.
 func (this *Marshaller) setContentVariableValues(inputs []model.Content, paths []string, characteristic string, value interface{}) (result []model.Content, err error) {
+	result = slices.Clone(inputs)
 	for _, path := range paths {
 		pathParts := strings.Split(path, ".")
-		for _, input := range inputs {
-			input.ContentVariable, err = this.setContentVariableValue(input.ContentVariable, []string{}, pathParts, characteristic, value, nil)
+		for i, input := range result {
+			result[i].ContentVariable, err = this.setContentVariableValue(input.ContentVariable, []string{}, pathParts, characteristic, value, nil)
 			if err != nil {
 				return result, err
 			}
-			result = append(result, input)
 		}
 	}
 	return result, nil

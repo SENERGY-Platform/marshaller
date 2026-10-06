@@ -51,8 +51,41 @@ type Converter interface {
 	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error)
 }
 
+// InputPathSelectionMode decides which of the input paths matching the function and the
+// aspects of a marshal request receive its value, when the request names no path itself.
+type InputPathSelectionMode int
+
+const (
+	// ClosestInputPaths writes only the matching paths whose aspects lie closest to the
+	// queried aspects in the aspect tree, like an unmarshal reads only the closest output.
+	// Paths at the same distance are all written, so a request without aspects still writes
+	// every variable of its function.
+	ClosestInputPaths InputPathSelectionMode = iota
+	// AllInputPaths writes every matching path, including the ones whose aspects only
+	// descend from a queried aspect: a request for air sets inside_air and outside_air alike.
+	AllInputPaths
+)
+
+// InputPathSelection is the mode Marshal uses. It is a variable and not a constant because
+// controlling functions only recently got combined with aspects, and which paths a command
+// for a parent aspect should set may still change.
+var InputPathSelection = ClosestInputPaths
+
 func (this *Marshaller) GetInputPaths(service model.Service, functionId string, aspectNodes []model.AspectNode) (result []string) {
 	return this.getPathsFromContentsByCriteria(service.Inputs, functionId, aspectNodes)
+}
+
+// selectInputPaths returns the input paths Marshal writes for a request without paths,
+// according to InputPathSelection.
+func (this *Marshaller) selectInputPaths(service model.Service, functionId string, aspectNodes []model.AspectNode) (result []string) {
+	withDistance := this.getPathsWithDistanceFromContentsByCriteria(service.Inputs, functionId, aspectNodes)
+	for _, element := range withDistance {
+		if InputPathSelection == ClosestInputPaths && element.distance > withDistance[0].distance {
+			break
+		}
+		result = append(result, element.path)
+	}
+	return result
 }
 
 func (this *Marshaller) GetOutputPaths(service model.Service, functionId string, aspectNodes []model.AspectNode) (result []string) {
@@ -60,20 +93,26 @@ func (this *Marshaller) GetOutputPaths(service model.Service, functionId string,
 }
 
 func (this *Marshaller) getPathsFromContentsByCriteria(contents []model.Content, functionId string, aspectNodes []model.AspectNode) (result []string) {
-	withDistance := []pathWithDistance{}
+	for _, element := range this.getPathsWithDistanceFromContentsByCriteria(contents, functionId, aspectNodes) {
+		result = append(result, element.path)
+	}
+	return result
+}
+
+// getPathsWithDistanceFromContentsByCriteria returns the matching paths sorted by their
+// aspect distance, closest first.
+func (this *Marshaller) getPathsWithDistanceFromContentsByCriteria(contents []model.Content, functionId string, aspectNodes []model.AspectNode) (withDistance []pathWithDistance) {
+	withDistance = []pathWithDistance{}
 	for _, c := range contents {
 		subResults := this.getPathsFromVariableByCriteriaWithDistance(c.ContentVariable, functionId, aspectNodes, []string{})
 		if len(subResults) > 0 {
 			withDistance = append(withDistance, subResults...)
 		}
 	}
-	sort.Slice(withDistance, func(i, j int) bool {
+	sort.SliceStable(withDistance, func(i, j int) bool {
 		return withDistance[i].distance < withDistance[j].distance
 	})
-	for _, element := range withDistance {
-		result = append(result, element.path)
-	}
-	return result
+	return withDistance
 }
 
 type pathWithDistance struct {

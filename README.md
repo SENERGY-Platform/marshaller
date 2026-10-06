@@ -18,6 +18,8 @@ service's own particularities:
 - [behavior preserved through the router rewrite](docs/behavior-preserved-through-the-router-rewrite.md)
   — three oddities kept on purpose and two changes made on purpose, so neither gets
   "fixed" or repeated by accident
+- [marshal writes the closest input paths](docs/marshal-writes-the-closest-input-paths.md)
+  — which input variables a function with aspects sets, and the switch to set all of them
 
 The spec itself is served under `/doc`; set `enable_swagger_ui` to also serve the swagger
 ui under `/swagger`.
