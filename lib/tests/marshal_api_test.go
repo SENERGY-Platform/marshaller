@@ -17,17 +17,18 @@
 package tests
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 )
 
 func Example_api_MarshalEmpty() {
-	result, err, code := TestClient.Marshal(requestFromJson[messages.MarshallingRequest](
+	result, err, code := TestClient.Marshal(context.Background(), requestFromJson[messages.MarshallingRequest](
 		`{
 					"data": null,
 					"characteristic_id": "",
-					"service": ` + offServiceStr + `,
-					"protocol": ` + protocolJson + `
+					"service": `+offServiceStr+`,
+					"protocol": `+protocolJson+`
 				}`,
 	))
 	printJson(result, err, code)
@@ -42,7 +43,7 @@ func Example_api_Marshal1() {
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
-	result, err, code := TestClient.MarshalForService(serviceId, characteristicId, requestFromJson[messages.MarshallingRequest](`{"data": "#ff00ff"}`))
+	result, err, code := TestClient.MarshalForService(context.Background(), serviceId, characteristicId, requestFromJson[messages.MarshallingRequest](`{"data": "#ff00ff"}`))
 	printJson(result, err, code)
 
 	//output:
@@ -55,7 +56,7 @@ func Example_api_Marshal2() {
 	serviceId := "urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70"               //Philips-Extended-Color-Light setColorService
 	characteristicId := "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8" //color hex
 
-	result, err, code := TestClient.MarshalForService(serviceId, characteristicId, requestFromJson[messages.MarshallingRequest](
+	result, err, code := TestClient.MarshalForService(context.Background(), serviceId, characteristicId, requestFromJson[messages.MarshallingRequest](
 		`{
 					"data": "#ff00ff",
 					"configurables": [{
@@ -78,11 +79,11 @@ func Example_api_Marshal2() {
 func Example_api_Marshal3() {
 	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
-	result, err, code := TestClient.Marshal(requestFromJson[messages.MarshallingRequest](
+	result, err, code := TestClient.Marshal(context.Background(), requestFromJson[messages.MarshallingRequest](
 		`{
 					"data": "#ff00ff",
 					"characteristic_id": "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8",
-					"service": ` + philipsHueServiceStr + `,
+					"service": `+philipsHueServiceStr+`,
 					"configurables": [{
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{
@@ -101,12 +102,12 @@ func Example_api_Marshal3() {
 }
 
 func Example_api_Marshal4() {
-	result, err, code := TestClient.Marshal(requestFromJson[messages.MarshallingRequest](
+	result, err, code := TestClient.Marshal(context.Background(), requestFromJson[messages.MarshallingRequest](
 		`{
 					"data": "#ff00ff",
 					"characteristic_id": "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8",
-					"service": ` + philipsHueServiceStr + `,
-					"protocol": ` + protocolJson + `,
+					"service": `+philipsHueServiceStr+`,
+					"protocol": `+protocolJson+`,
 					"configurables": [{
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{
@@ -125,12 +126,12 @@ func Example_api_Marshal4() {
 }
 
 func Example_api_MarshalWithUnusedConfigurable() {
-	result, err, code := TestClient.Marshal(requestFromJson[messages.MarshallingRequest](
+	result, err, code := TestClient.Marshal(context.Background(), requestFromJson[messages.MarshallingRequest](
 		`{
 					"data": "#ff00ff",
 					"characteristic_id": "urn:infai:ses:characteristic:0fc343ce-4627-4c88-b1e0-d3ed29754af8",
-					"service": ` + philipsHueServiceStr + `,
-					"protocol": ` + protocolJson + `,
+					"service": `+philipsHueServiceStr+`,
+					"protocol": `+protocolJson+`,
 					"configurables": [{
 						"characteristic_id": "urn:infai:ses:characteristic:9e1024da-3b60-4531-9f29-464addccb13c",
 						"values": [{

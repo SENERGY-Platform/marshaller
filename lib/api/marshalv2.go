@@ -51,7 +51,7 @@ func (this *MarshallingV2) MarshalV2(config config.Config, router *http.ServeMux
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.MarshalV2(msg)
+		result, err, code := ctrl.MarshalV2(request.Context(), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -82,7 +82,7 @@ func (this *MarshallingV2) MarshalV2ForService(config config.Config, router *htt
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.MarshalV2ForService(request.PathValue("serviceId"), msg)
+		result, err, code := ctrl.MarshalV2ForService(request.Context(), request.PathValue("serviceId"), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

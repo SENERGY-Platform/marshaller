@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
@@ -31,54 +32,54 @@ import (
 // Controller does.
 type controllerStub struct{}
 
-func (this *controllerStub) Marshal(request messages.MarshallingRequest) (map[string]string, error, int) {
+func (this *controllerStub) Marshal(ctx context.Context, request messages.MarshallingRequest) (map[string]string, error, int) {
 	return map[string]string{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) MarshalForService(serviceId string, characteristicId string, request messages.MarshallingRequest) (map[string]string, error, int) {
+func (this *controllerStub) MarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.MarshallingRequest) (map[string]string, error, int) {
 	return map[string]string{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) Unmarshal(request messages.UnmarshallingRequest) (interface{}, error, int) {
+func (this *controllerStub) Unmarshal(ctx context.Context, request messages.UnmarshallingRequest) (interface{}, error, int) {
 	return nil, nil, http.StatusOK
 }
 
-func (this *controllerStub) UnmarshalForService(serviceId string, characteristicId string, request messages.UnmarshallingRequest) (interface{}, error, int) {
+func (this *controllerStub) UnmarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.UnmarshallingRequest) (interface{}, error, int) {
 	return nil, nil, http.StatusOK
 }
 
-func (this *controllerStub) MarshalV2(request messages.MarshallingV2Request) (map[string]string, error, int) {
+func (this *controllerStub) MarshalV2(ctx context.Context, request messages.MarshallingV2Request) (map[string]string, error, int) {
 	return map[string]string{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) MarshalV2ForService(serviceId string, request messages.MarshallingV2Request) (map[string]string, error, int) {
+func (this *controllerStub) MarshalV2ForService(ctx context.Context, serviceId string, request messages.MarshallingV2Request) (map[string]string, error, int) {
 	return map[string]string{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) UnmarshalV2(request messages.UnmarshallingV2Request) (interface{}, error, int) {
+func (this *controllerStub) UnmarshalV2(ctx context.Context, request messages.UnmarshallingV2Request) (interface{}, error, int) {
 	return nil, nil, http.StatusOK
 }
 
-func (this *controllerStub) UnmarshalV2ForService(serviceId string, request messages.UnmarshallingV2Request) (interface{}, error, int) {
+func (this *controllerStub) UnmarshalV2ForService(ctx context.Context, serviceId string, request messages.UnmarshallingV2Request) (interface{}, error, int) {
 	return nil, nil, http.StatusOK
 }
 
-func (this *controllerStub) GetCharacteristicPaths(serviceId string, characteristicId string) (marshaller.CharacteristicsPathResponse, error, int) {
+func (this *controllerStub) GetCharacteristicPaths(ctx context.Context, serviceId string, characteristicId string) (marshaller.CharacteristicsPathResponse, error, int) {
 	return marshaller.CharacteristicsPathResponse{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) GetPathOptions(query messages.PathOptionsQuery) (map[string][]marshaller.PathOptionsResultElement, error, int) {
+func (this *controllerStub) GetPathOptions(ctx context.Context, query messages.PathOptionsQuery) (map[string][]marshaller.PathOptionsResultElement, error, int) {
 	return map[string][]marshaller.PathOptionsResultElement{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) FindConfigurables(characteristicId string, services []model.Service) (configurables.Configurables, error, int) {
+func (this *controllerStub) FindConfigurables(ctx context.Context, characteristicId string, services []model.Service) (configurables.Configurables, error, int) {
 	return configurables.Configurables{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) FindConfigurablesForServiceIds(characteristicId string, serviceIds []string) (configurables.Configurables, error, int) {
+func (this *controllerStub) FindConfigurablesForServiceIds(ctx context.Context, characteristicId string, serviceIds []string) (configurables.Configurables, error, int) {
 	return configurables.Configurables{}, nil, http.StatusOK
 }
 
-func (this *controllerStub) TryConverterExtension(call converter.ExtensionCall) (converter.ExtensionCallResponse, error, int) {
+func (this *controllerStub) TryConverterExtension(ctx context.Context, call converter.ExtensionCall) (converter.ExtensionCallResponse, error, int) {
 	return converter.ExtensionCallResponse{}, nil, http.StatusOK
 }

@@ -59,7 +59,7 @@ func setup(t *testing.T, ctx context.Context, wg *sync.WaitGroup) Interface {
 		server.Close()
 		wg.Done()
 	}()
-	return NewClient(server.URL, nil)
+	return NewClient(server.URL, Options{})
 }
 
 // TestClientReachesEveryEndpoint calls every method of the interface and rejects a 404 or
@@ -103,51 +103,51 @@ func TestClientReachesEveryEndpoint(t *testing.T) {
 	//subject of the api and controller tests, not of this one
 	calls := map[string]func() (error, int){
 		"Marshal": func() (error, int) {
-			_, err, code := c.Marshal(messages.MarshallingRequest{Service: service, Protocol: &protocol, CharacteristicId: characteristics.Celsius, Data: 1})
+			_, err, code := c.Marshal(context.Background(), messages.MarshallingRequest{Service: service, Protocol: &protocol, CharacteristicId: characteristics.Celsius, Data: 1})
 			return err, code
 		},
 		"MarshalForService": func() (error, int) {
-			_, err, code := c.MarshalForService("sid", characteristics.Celsius, messages.MarshallingRequest{Data: 1})
+			_, err, code := c.MarshalForService(context.Background(), "sid", characteristics.Celsius, messages.MarshallingRequest{Data: 1})
 			return err, code
 		},
 		"Unmarshal": func() (error, int) {
-			_, err, code := c.Unmarshal(messages.UnmarshallingRequest{Service: service, Protocol: &protocol, CharacteristicId: characteristics.Celsius, Message: map[string]string{"body": `{"value":1}`}})
+			_, err, code := c.Unmarshal(context.Background(), messages.UnmarshallingRequest{Service: service, Protocol: &protocol, CharacteristicId: characteristics.Celsius, Message: map[string]string{"body": `{"value":1}`}})
 			return err, code
 		},
 		"UnmarshalForService": func() (error, int) {
-			_, err, code := c.UnmarshalForService("sid", characteristics.Celsius, messages.UnmarshallingRequest{Message: map[string]string{"body": `{"value":1}`}})
+			_, err, code := c.UnmarshalForService(context.Background(), "sid", characteristics.Celsius, messages.UnmarshallingRequest{Message: map[string]string{"body": `{"value":1}`}})
 			return err, code
 		},
 		"MarshalV2": func() (error, int) {
-			_, err, code := c.MarshalV2(messages.MarshallingV2Request{Service: service, Protocol: protocol, Data: []model.MarshallingV2RequestData{{Value: 1, CharacteristicId: characteristics.Celsius, Paths: []string{"value"}}}})
+			_, err, code := c.MarshalV2(context.Background(), messages.MarshallingV2Request{Service: service, Protocol: protocol, Data: []model.MarshallingV2RequestData{{Value: 1, CharacteristicId: characteristics.Celsius, Paths: []string{"value"}}}})
 			return err, code
 		},
 		"MarshalV2ForService": func() (error, int) {
-			_, err, code := c.MarshalV2ForService("sid", messages.MarshallingV2Request{Data: []model.MarshallingV2RequestData{{Value: 1, CharacteristicId: characteristics.Celsius, Paths: []string{"value"}}}})
+			_, err, code := c.MarshalV2ForService(context.Background(), "sid", messages.MarshallingV2Request{Data: []model.MarshallingV2RequestData{{Value: 1, CharacteristicId: characteristics.Celsius, Paths: []string{"value"}}}})
 			return err, code
 		},
 		"UnmarshalV2": func() (error, int) {
-			_, err, code := c.UnmarshalV2(messages.UnmarshallingV2Request{Service: service, Protocol: protocol, CharacteristicId: characteristics.Celsius, Path: "value", Message: map[string]string{"body": `{"value":1}`}})
+			_, err, code := c.UnmarshalV2(context.Background(), messages.UnmarshallingV2Request{Service: service, Protocol: protocol, CharacteristicId: characteristics.Celsius, Path: "value", Message: map[string]string{"body": `{"value":1}`}})
 			return err, code
 		},
 		"UnmarshalV2ForService": func() (error, int) {
-			_, err, code := c.UnmarshalV2ForService("sid", messages.UnmarshallingV2Request{CharacteristicId: characteristics.Celsius, Path: "value", Message: map[string]string{"body": `{"value":1}`}})
+			_, err, code := c.UnmarshalV2ForService(context.Background(), "sid", messages.UnmarshallingV2Request{CharacteristicId: characteristics.Celsius, Path: "value", Message: map[string]string{"body": `{"value":1}`}})
 			return err, code
 		},
 		"GetCharacteristicPaths": func() (error, int) {
-			_, err, code := c.GetCharacteristicPaths("sid", characteristics.Celsius)
+			_, err, code := c.GetCharacteristicPaths(context.Background(), "sid", characteristics.Celsius)
 			return err, code
 		},
 		"GetPathOptions": func() (error, int) {
-			_, err, code := c.GetPathOptions(messages.PathOptionsQuery{})
+			_, err, code := c.GetPathOptions(context.Background(), messages.PathOptionsQuery{})
 			return err, code
 		},
 		"FindConfigurables": func() (error, int) {
-			_, err, code := c.FindConfigurables(characteristics.Celsius, []model.Service{service})
+			_, err, code := c.FindConfigurables(context.Background(), characteristics.Celsius, []model.Service{service})
 			return err, code
 		},
 		"FindConfigurablesForServiceIds": func() (error, int) {
-			_, err, code := c.FindConfigurablesForServiceIds(characteristics.Celsius, []string{"sid"})
+			_, err, code := c.FindConfigurablesForServiceIds(context.Background(), characteristics.Celsius, []string{"sid"})
 			return err, code
 		},
 	}
@@ -174,7 +174,7 @@ func TestTryConverterExtensionReachesEndpoint(t *testing.T) {
 	defer cancel()
 	c := setup(t, ctx, wg)
 
-	_, _, code := c.TryConverterExtension(converterExtensionCall())
+	_, _, code := c.TryConverterExtension(context.Background(), converterExtensionCall())
 	if code == http.StatusNotFound || code == http.StatusMethodNotAllowed {
 		t.Error("client did not reach the converter extension endpoint, got", code)
 	}

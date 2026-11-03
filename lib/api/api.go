@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/SENERGY-Platform/gin-middleware/otelx"
 	"github.com/SENERGY-Platform/marshaller/lib/api/metrics"
 	"github.com/SENERGY-Platform/marshaller/lib/api/util"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
@@ -43,7 +44,7 @@ func Start(ctx context.Context, config config.Config, ctrl Controller) (closed c
 	if err != nil {
 		config.GetLogger().Warn("unable to serve metrics", "error", err)
 	}
-	handler := GetRouter(config, ctrl, m)
+	handler := withTracing(config, GetRouter(config, ctrl, m))
 	config.GetLogger().Info("listen on port", "port", config.ServerPort)
 	srv := &http.Server{Addr: ":" + config.ServerPort, Handler: handler}
 	closed, close := context.WithCancel(context.Background())
@@ -81,6 +82,23 @@ func GetRouter(config config.Config, ctrl Controller, m *metrics.Metrics) http.H
 	corsHandler := util.NewCors(handler)
 	config.GetLogger().Info("add logging")
 	return accesslog.New(corsHandler)
+}
+
+// withTracing starts a span per request, continuing the trace of the caller, and exports it to
+// config.OtelEndpoint; with config.OtelEndpointOff no exporter is started and the handler stays
+// as it is. Only Start adds it, so tests that mount GetRouter export nothing.
+func withTracing(conf config.Config, handler http.Handler) http.Handler {
+	if conf.OtelEndpoint == config.OtelEndpointOff {
+		conf.GetLogger().Info("tracing off")
+		return handler
+	}
+	conf.GetLogger().Info("add tracing")
+	traced, err := otelx.HTTPOpenTelemetry(context.Background(), conf.OtelEndpoint, "marshaller", handler)
+	if err != nil {
+		conf.GetLogger().Warn("unable to add tracing", "error", err)
+		return handler
+	}
+	return traced
 }
 
 // GetRouterWithoutMiddleware returns the routes without cors and access logging. It exists

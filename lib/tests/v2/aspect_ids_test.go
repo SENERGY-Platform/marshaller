@@ -33,7 +33,7 @@ import (
 // output path at all.
 func testUnmarshalNoPath(c client.Interface, request messages.UnmarshallingV2Request) func(t *testing.T) {
 	return func(t *testing.T) {
-		_, err, code := c.UnmarshalV2(request)
+		_, err, code := c.UnmarshalV2(context.Background(), request)
 		if code != http.StatusBadRequest {
 			t.Error("expected 400, got", code, err)
 			return

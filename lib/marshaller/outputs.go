@@ -17,6 +17,7 @@
 package marshaller
 
 import (
+	"context"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/mapping"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -24,7 +25,7 @@ import (
 	"runtime/debug"
 )
 
-func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId, pathAllowList []string, hints ...string) (result interface{}, err error) {
+func (this *Marshaller) UnmarshalOutputs(ctx context.Context, protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId CharacteristicId, pathAllowList []string, hints ...string) (result interface{}, err error) {
 	if outputCharacteristicId == "" {
 		return nil, nil
 	}
@@ -63,7 +64,7 @@ func (this *Marshaller) UnmarshalOutputs(protocol model.Protocol, service model.
 
 	normalized, err := normalize(serviceCharacteristicValue)
 
-	result, err = this.converter.Cast(normalized, serviceCharacteristic.Id, outputCharacteristicId)
+	result, err = this.converter.Cast(ctx, normalized, serviceCharacteristic.Id, outputCharacteristicId)
 	return
 }
 

@@ -17,6 +17,7 @@
 package converter
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	"github.com/SENERGY-Platform/models/go/models"
@@ -32,7 +33,7 @@ func New(config config.Config, access *config.Access) *Converter {
 	return &Converter{config: config, access: access}
 }
 
-func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
+func (this *Converter) Cast(ctx context.Context, in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
 	if from == to {
 		return in, nil
 	}
@@ -40,11 +41,11 @@ func (this *Converter) Cast(in interface{}, from marshaller.CharacteristicId, to
 	if err != nil {
 		return out, err
 	}
-	err = token.PostJSON(this.config.ConverterUrl+"/conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), in, &out)
+	err = token.PostJSON(ctx, this.config.ConverterUrl+"/conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), in, &out)
 	return out, err
 }
 
-func (this *Converter) CastWithExtension(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error) {
+func (this *Converter) CastWithExtension(ctx context.Context, in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error) {
 	if from == to {
 		return in, nil
 	}
@@ -52,19 +53,19 @@ func (this *Converter) CastWithExtension(in interface{}, from marshaller.Charact
 	if err != nil {
 		return out, err
 	}
-	err = token.PostJSON(this.config.ConverterUrl+"/extended-conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), map[string]interface{}{
+	err = token.PostJSON(ctx, this.config.ConverterUrl+"/extended-conversions/"+url.PathEscape(from)+"/"+url.PathEscape(to), map[string]interface{}{
 		"input":      in,
 		"extensions": extensions,
 	}, &out)
 	return out, err
 }
 
-func (this *Converter) TryExtension(call ExtensionCall) (resp ExtensionCallResponse, err error) {
+func (this *Converter) TryExtension(ctx context.Context, call ExtensionCall) (resp ExtensionCallResponse, err error) {
 	token, err := this.access.Ensure()
 	if err != nil {
 		return resp, err
 	}
-	err = token.PostJSON(this.config.ConverterUrl+"/extension-call", call, &resp)
+	err = token.PostJSON(ctx, this.config.ConverterUrl+"/extension-call", call, &resp)
 	return resp, err
 }
 

@@ -105,14 +105,18 @@ func setupMock(ctx context.Context, done *sync.WaitGroup) {
 	marshaller := marshaller.New(mocks.Converter{}, conceptRepo, mocks.DeviceRepo)
 	marshallerv2 := v2.New(config.Config{}, mocks.Converter{}, conceptRepo)
 	configurableService := configurables.New(conceptRepo)
-	TestMarshalInputs = marshaller.MarshalInputs
-	TestUnmarshalOutputs = marshaller.UnmarshalOutputs
+	TestMarshalInputs = func(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId string, pathAllowList []string, configurables ...configurables.Configurable) (result map[string]string, err error) {
+		return marshaller.MarshalInputs(ctx, protocol, service, input, inputCharacteristicId, pathAllowList, configurables...)
+	}
+	TestUnmarshalOutputs = func(protocol model.Protocol, service model.Service, outputMap map[string]string, outputCharacteristicId string, pathAllowList []string, hints ...string) (result interface{}, err error) {
+		return marshaller.UnmarshalOutputs(ctx, protocol, service, outputMap, outputCharacteristicId, pathAllowList, hints...)
+	}
 	TestFindConfigurables = configurableService.Find
 	done.Add(1)
 	ctrl := controller.New(config.Config{Debug: true}, marshaller, marshallerv2, configurableService, mocks.DeviceRepo, nil)
 	server := httptest.NewServer(api.GetRouter(config.Config{Debug: true}, ctrl, metrics.NewMetrics(config.Config{})))
 	ServerUrl = server.URL
-	TestClient = client.NewClient(server.URL, nil)
+	TestClient = client.NewClient(server.URL, client.Options{})
 	go func() {
 		<-ctx.Done()
 		server.Close()

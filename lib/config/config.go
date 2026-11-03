@@ -33,6 +33,9 @@ import (
 	struct_logger "github.com/SENERGY-Platform/go-service-base/struct-logger"
 )
 
+// OtelEndpointOff as otel_endpoint switches tracing off, e.g. locally without a collector
+const OtelEndpointOff = "off"
+
 type Config struct {
 	ServerPort                   string       `json:"server_port"`
 	PrometheusPort               string       `json:"prometheus_port"`
@@ -49,6 +52,7 @@ type Config struct {
 	CacheInvalidationKafkaTopics []string     `json:"cache_invalidation_kafka_topics"` //optional, used for cache invalidation
 	InitTopics                   bool         `json:"init_topics"`
 	EnableSwaggerUi              bool         `json:"enable_swagger_ui"` //optional, serves the swagger ui under /swagger; the spec itself is always served under /doc
+	OtelEndpoint                 string       `json:"otel_endpoint"`     //OTLP gRPC collector for traces; empty: default of gin-middleware/otelx; OtelEndpointOff: no tracing
 
 	LogLevel string       `json:"log_level"`
 	logger   *slog.Logger `json:"-"`

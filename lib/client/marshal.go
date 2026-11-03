@@ -17,39 +17,40 @@
 package client
 
 import (
+	"context"
 	"net/url"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 )
 
-func (c *Client) Marshal(request messages.MarshallingRequest) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/marshal", request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) Marshal(ctx context.Context, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
+	return post[map[string]string](ctx, c, "/marshal", request)
 }
 
-func (c *Client) MarshalForService(serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/marshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) MarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
+	return post[map[string]string](ctx, c, "/marshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request)
 }
 
-func (c *Client) MarshalV2(request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/v2/marshal", request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) MarshalV2(ctx context.Context, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
+	return post[map[string]string](ctx, c, "/v2/marshal", request)
 }
 
-func (c *Client) MarshalV2ForService(serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
-	return post[map[string]string](c.baseUrl, "/v2/marshal/"+url.PathEscape(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) MarshalV2ForService(ctx context.Context, serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
+	return post[map[string]string](ctx, c, "/v2/marshal/"+url.PathEscape(serviceId), request)
 }
 
-func (c *Client) Unmarshal(request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/unmarshal", request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) Unmarshal(ctx context.Context, request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
+	return post[interface{}](ctx, c, "/unmarshal", request)
 }
 
-func (c *Client) UnmarshalForService(serviceId string, characteristicId string, request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/unmarshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) UnmarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.UnmarshallingRequest) (result interface{}, err error, code int) {
+	return post[interface{}](ctx, c, "/unmarshal/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), request)
 }
 
-func (c *Client) UnmarshalV2(request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/v2/unmarshal", request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) UnmarshalV2(ctx context.Context, request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
+	return post[interface{}](ctx, c, "/v2/unmarshal", request)
 }
 
-func (c *Client) UnmarshalV2ForService(serviceId string, request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
-	return post[interface{}](c.baseUrl, "/v2/unmarshal/"+url.PathEscape(serviceId), request, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) UnmarshalV2ForService(ctx context.Context, serviceId string, request messages.UnmarshallingV2Request) (result interface{}, err error, code int) {
+	return post[interface{}](ctx, c, "/v2/unmarshal/"+url.PathEscape(serviceId), request)
 }

@@ -49,5 +49,5 @@ func setup(ctx context.Context, done *sync.WaitGroup) (c client.Interface) {
 		server.Close()
 		done.Done()
 	}()
-	return client.NewClient(server.URL, nil)
+	return client.NewClient(server.URL, client.Options{})
 }

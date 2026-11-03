@@ -17,6 +17,7 @@
 package client
 
 import (
+	"context"
 	"net/url"
 	"strings"
 
@@ -27,32 +28,32 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func (c *Client) GetCharacteristicPaths(serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int) {
-	return get[marshaller.CharacteristicsPathResponse](c.baseUrl, "/characteristic-paths/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId), c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) GetCharacteristicPaths(ctx context.Context, serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int) {
+	return get[marshaller.CharacteristicsPathResponse](ctx, c, "/characteristic-paths/"+url.PathEscape(serviceId)+"/"+url.PathEscape(characteristicId))
 }
 
 // GetPathOptions uses the request-body form of the endpoint, because it is the one whose
 // semantics do not depend on which parameters are present: an empty characteristic filter
 // means "do not filter" there, while an absent characteristic-filter query parameter makes
 // the GET form answer with an empty result.
-func (c *Client) GetPathOptions(query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int) {
-	return post[map[string][]marshaller.PathOptionsResultElement](c.baseUrl, "/query/path-options", query, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) GetPathOptions(ctx context.Context, query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int) {
+	return post[map[string][]marshaller.PathOptionsResultElement](ctx, c, "/query/path-options", query)
 }
 
-func (c *Client) FindConfigurables(characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int) {
-	return post[configurables.Configurables](c.baseUrl, "/configurables", messages.FindConfigurablesRequest{
+func (c *Client) FindConfigurables(ctx context.Context, characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int) {
+	return post[configurables.Configurables](ctx, c, "/configurables", messages.FindConfigurablesRequest{
 		CharacteristicId: characteristicId,
 		Services:         services,
-	}, c.optionalAuthTokenForApiGatewayRequest)
+	})
 }
 
-func (c *Client) FindConfigurablesForServiceIds(characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int) {
+func (c *Client) FindConfigurablesForServiceIds(ctx context.Context, characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int) {
 	query := url.Values{}
 	query.Set("characteristicId", characteristicId)
 	query.Set("serviceIds", strings.Join(serviceIds, ","))
-	return get[configurables.Configurables](c.baseUrl, "/configurables?"+query.Encode(), c.optionalAuthTokenForApiGatewayRequest)
+	return get[configurables.Configurables](ctx, c, "/configurables?"+query.Encode())
 }
 
-func (c *Client) TryConverterExtension(call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int) {
-	return post[converter.ExtensionCallResponse](c.baseUrl, "/converter/extension-call", call, c.optionalAuthTokenForApiGatewayRequest)
+func (c *Client) TryConverterExtension(ctx context.Context, call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int) {
+	return post[converter.ExtensionCallResponse](ctx, c, "/converter/extension-call", call)
 }

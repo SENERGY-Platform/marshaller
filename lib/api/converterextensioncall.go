@@ -52,7 +52,7 @@ func (this *ConverterExtension) TryConverterExtension(config config.Config, rout
 			http.Error(writer, "expect valid json in request body", http.StatusBadRequest)
 			return
 		}
-		result, err, code := ctrl.TryConverterExtension(call)
+		result, err, code := ctrl.TryConverterExtension(request.Context(), call)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

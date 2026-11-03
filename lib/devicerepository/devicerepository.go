@@ -17,23 +17,28 @@
 package devicerepository
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"errors"
+	"net/http"
+	"time"
+
+	"github.com/SENERGY-Platform/device-repository/v3/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/service-commons/pkg/cache"
 	"github.com/SENERGY-Platform/service-commons/pkg/signal"
-	"net/http"
-	"net/url"
-	"runtime/debug"
-	"time"
 )
 
+// timeout bounds every request to the device-repository
+const timeout = 10 * time.Second
+
+// DeviceRepository reads through the device-repository client with the token of this service, so
+// that a read continues the trace of the request that caused it; answers are cached for a minute
+// and cleared by the cache invalidation signals.
 type DeviceRepository struct {
-	cache   *cache.Cache
-	repoUrl string
-	access  *config.Access
+	cache  *cache.Cache
+	client client.Interface
+	access *config.Access
 }
 
 func New(config config.Config, access *config.Access) (*DeviceRepository, error) {
@@ -49,12 +54,24 @@ func New(config config.Config, access *config.Access) (*DeviceRepository, error)
 	if err != nil {
 		return nil, err
 	}
-	return &DeviceRepository{repoUrl: config.DeviceRepositoryUrl, cache: c, access: access}, nil
+	repo := &DeviceRepository{cache: c, access: access}
+	repo.client = client.NewClient(config.DeviceRepositoryUrl, client.Options{Timeout: timeout, OptionalAuthTokenForApiGatewayRequest: repo.token})
+	return repo, nil
 }
 
-func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err error) {
+func (this *DeviceRepository) token() (string, error) {
+	token, err := this.access.Ensure()
+	return string(token), err
+}
+
+func (this *DeviceRepository) GetProtocol(ctx context.Context, id string) (result model.Protocol, err error) {
 	return cache.Use(this.cache, "protocol."+id, func() (model.Protocol, error) {
-		return this.getProtocol(id)
+		token, err := this.token()
+		if err != nil {
+			return model.Protocol{}, err
+		}
+		protocol, err, _ := this.client.ReadProtocol(ctx, id, token)
+		return protocol, err
 	}, func(protocol model.Protocol) error {
 		if protocol.Id == "" {
 			return errors.New("invalid protocol loaded from cache")
@@ -63,19 +80,15 @@ func (this *DeviceRepository) GetProtocol(id string) (result model.Protocol, err
 	}, time.Minute)
 }
 
-func (this *DeviceRepository) getProtocol(id string) (result model.Protocol, err error) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return result, err
-	}
-	err = token.GetJSON(this.repoUrl+"/protocols/"+url.QueryEscape(id), &result)
-	return
-}
-
-func (this *DeviceRepository) GetDeviceType(id string) (result model.DeviceType, err error, code int) {
+func (this *DeviceRepository) GetDeviceType(ctx context.Context, id string) (result model.DeviceType, err error, code int) {
 	code = http.StatusOK
 	result, err = cache.Use(this.cache, "device-type."+id, func() (dt model.DeviceType, terr error) {
-		dt, terr, code = this.getDeviceType(id)
+		token, terr := this.token()
+		if terr != nil {
+			code = http.StatusInternalServerError
+			return dt, terr
+		}
+		dt, terr, code = this.client.ReadDeviceType(ctx, id, token)
 		return dt, terr
 	}, func(deviceType model.DeviceType) error {
 		if deviceType.Id == "" {
@@ -86,45 +99,15 @@ func (this *DeviceRepository) GetDeviceType(id string) (result model.DeviceType,
 	return result, err, code
 }
 
-func (this *DeviceRepository) getDeviceType(id string) (result model.DeviceType, err error, code int) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	req, err := http.NewRequest("GET", this.repoUrl+"/device-types/"+url.PathEscape(id), nil)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	req.Header.Set("Authorization", string(token))
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	if resp.StatusCode == http.StatusNotFound {
-		return result, errors.New("device-type not found"), resp.StatusCode
-	}
-	if resp.StatusCode >= 300 {
-		return result, errors.New("unexpected status code"), resp.StatusCode
-	}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
+func (this *DeviceRepository) GetService(ctx context.Context, id string) (result model.Service, err error) {
+	result, err, _ = this.GetServiceWithErrCode(ctx, id)
 	return
 }
 
-func (this *DeviceRepository) GetService(id string) (result model.Service, err error) {
-	result, err, _ = this.GetServiceWithErrCode(id)
-	return
-}
-
-func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Service, err error, code int) {
+func (this *DeviceRepository) GetServiceWithErrCode(ctx context.Context, id string) (result model.Service, err error, code int) {
 	code = http.StatusOK
 	result, err = cache.Use(this.cache, "service."+id, func() (service model.Service, terr error) {
-		service, terr, code = this.getServiceWithErrCode(id)
+		service, terr, code = this.client.GetService(ctx, id)
 		return service, terr
 	}, func(service model.Service) error {
 		if service.Id == "" {
@@ -135,67 +118,14 @@ func (this *DeviceRepository) GetServiceWithErrCode(id string) (result model.Ser
 	return result, err, code
 }
 
-func (this *DeviceRepository) getServiceWithErrCode(id string) (result model.Service, err error, code int) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	req, err := http.NewRequest("GET", this.repoUrl+"/services/"+url.PathEscape(id), nil)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	req.Header.Set("Authorization", string(token))
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	if resp.StatusCode == http.StatusNotFound {
-		return result, errors.New("service not found"), resp.StatusCode
-	}
-	if resp.StatusCode >= 300 {
-		return result, errors.New("unexpected status code"), resp.StatusCode
-	}
-	err = json.NewDecoder(resp.Body).Decode(&result)
-	if err != nil {
-		return result, err, http.StatusInternalServerError
-	}
-	return
-}
-
-func (this *DeviceRepository) GetAspectNode(id string) (result model.AspectNode, err error) {
-	result, err = cache.Use(this.cache, "aspect-nodes."+id, func() (aspect model.AspectNode, terr error) {
-		token, err := this.access.Ensure()
-		if err != nil {
-			return aspect, err
-		}
-		req, err := http.NewRequest("GET", this.repoUrl+"/aspect-nodes/"+url.PathEscape(id), nil)
-		if err != nil {
-			debug.PrintStack()
-			return aspect, err
-		}
-		req.Header.Set("Authorization", string(token))
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			debug.PrintStack()
-			return aspect, err
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode >= 300 {
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(resp.Body)
-			debug.PrintStack()
-			return aspect, errors.New(buf.String())
-		}
-		err = json.NewDecoder(resp.Body).Decode(&aspect)
-		return aspect, err
+func (this *DeviceRepository) GetAspectNode(ctx context.Context, id string) (result model.AspectNode, err error) {
+	return cache.Use(this.cache, "aspect-nodes."+id, func() (aspect model.AspectNode, terr error) {
+		aspect, terr, _ = this.client.GetAspectNode(ctx, id)
+		return aspect, terr
 	}, func(aspectNode model.AspectNode) error {
 		if aspectNode.Id == "" {
 			return errors.New("invalid aspect-node loaded from cache")
 		}
 		return nil
 	}, time.Minute)
-	return result, err
 }

@@ -17,6 +17,7 @@
 package v2
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"math"
@@ -34,16 +35,16 @@ type PathAspectInfo struct {
 }
 
 type DeviceRepository interface {
-	GetAspectNode(id string) (model.AspectNode, error)
+	GetAspectNode(ctx context.Context, id string) (model.AspectNode, error)
 }
 
-func (this *Marshaller) SortPathsByAspectDistance(repo DeviceRepository, service model.Service, aspects []model.AspectNode, paths []string) (result []string, err error) {
+func (this *Marshaller) SortPathsByAspectDistance(ctx context.Context, repo DeviceRepository, service model.Service, aspects []model.AspectNode, paths []string) (result []string, err error) {
 	if len(aspects) == 0 {
 		return paths, nil
 	}
 	distancesPerAspect := []map[string]int{}
 	for _, aspect := range aspects {
-		distances, err := getAspectDistances(repo, aspect)
+		distances, err := getAspectDistances(ctx, repo, aspect)
 		if err != nil {
 			return result, err
 		}
@@ -89,7 +90,7 @@ func pathAspectDistance(pathAspects []string, distancesPerAspect []map[string]in
 	return result
 }
 
-func getAspectDistances(repo DeviceRepository, aspect model.AspectNode) (result map[string]int, err error) {
+func getAspectDistances(ctx context.Context, repo DeviceRepository, aspect model.AspectNode) (result map[string]int, err error) {
 	result = map[string]int{
 		aspect.Id: 0,
 	}
@@ -98,11 +99,11 @@ func getAspectDistances(repo DeviceRepository, aspect model.AspectNode) (result 
 	}
 	if len(aspect.ChildIds) != len(aspect.DescendentIds) {
 		for _, child := range aspect.ChildIds {
-			childAspect, err := repo.GetAspectNode(child)
+			childAspect, err := repo.GetAspectNode(ctx, child)
 			if err != nil {
 				return result, err
 			}
-			temp, err := getAspectDistances(repo, childAspect)
+			temp, err := getAspectDistances(ctx, repo, childAspect)
 			if err != nil {
 				return result, err
 			}

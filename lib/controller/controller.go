@@ -21,6 +21,8 @@
 package controller
 
 import (
+	"context"
+
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -31,10 +33,10 @@ import (
 
 // DeviceRepository is the part of the device-repository this service reads.
 type DeviceRepository interface {
-	GetService(serviceId string) (model.Service, error)
-	GetProtocol(id string) (model.Protocol, error)
-	GetServiceWithErrCode(serviceId string) (model.Service, error, int)
-	GetAspectNode(id string) (model.AspectNode, error)
+	GetService(ctx context.Context, serviceId string) (model.Service, error)
+	GetProtocol(ctx context.Context, id string) (model.Protocol, error)
+	GetServiceWithErrCode(ctx context.Context, serviceId string) (model.Service, error, int)
+	GetAspectNode(ctx context.Context, id string) (model.AspectNode, error)
 }
 
 type Controller struct {

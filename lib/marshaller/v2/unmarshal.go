@@ -17,6 +17,7 @@
 package v2
 
 import (
+	"context"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/serialization"
@@ -28,7 +29,7 @@ import (
 
 var PathNotFoundInMessage = errors.New("path not found in message")
 
-func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service, characteristicId string, path string, msg map[string]string, outputObjectMap map[string]interface{}) (result interface{}, err error) {
+func (this *Marshaller) Unmarshal(ctx context.Context, protocol model.Protocol, service model.Service, characteristicId string, path string, msg map[string]string, outputObjectMap map[string]interface{}) (result interface{}, err error) {
 	path = substitudeVariableLenPlaceholderInPath(path)
 
 	if outputObjectMap == nil || len(outputObjectMap) == 0 {
@@ -62,7 +63,7 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 		return result, errors.New("path not found in service")
 	}
 
-	value, err = this.variableStructureToCharacteristicsStructure(pathToCharacteristic, path, value)
+	value, err = this.variableStructureToCharacteristicsStructure(ctx, pathToCharacteristic, path, value)
 	if err != nil {
 		return result, err
 	}
@@ -83,9 +84,9 @@ func (this *Marshaller) Unmarshal(protocol model.Protocol, service model.Service
 			}
 		}
 		if len(castExtensions) == 0 {
-			return this.converter.Cast(value, variableCharacteristic, characteristicId)
+			return this.converter.Cast(ctx, value, variableCharacteristic, characteristicId)
 		} else {
-			return this.converter.CastWithExtension(value, variableCharacteristic, characteristicId, castExtensions)
+			return this.converter.CastWithExtension(ctx, value, variableCharacteristic, characteristicId, castExtensions)
 		}
 	}
 }
@@ -194,7 +195,7 @@ func serializeOutput(output map[string]string, service model.Service, protocol m
 	return
 }
 
-func (this *Marshaller) variableStructureToCharacteristicsStructure(variablePathToCharacteristic map[string]string, variablePath string, value interface{}) (result interface{}, err error) {
+func (this *Marshaller) variableStructureToCharacteristicsStructure(ctx context.Context, variablePathToCharacteristic map[string]string, variablePath string, value interface{}) (result interface{}, err error) {
 	value, err = normalize(value)
 	if err != nil {
 		return result, err
@@ -244,7 +245,7 @@ func (this *Marshaller) variableStructureToCharacteristicsStructure(variablePath
 
 	pseudoVariable := characteristicToPseudoVariable(characteristic)
 	for characteristicsPath, subValue := range characteristicsPathToValue {
-		pseudoVariable, err = this.setContentVariableValue(pseudoVariable, []string{}, strings.Split(characteristicsPath, "."), "", subValue, nil)
+		pseudoVariable, err = this.setContentVariableValue(ctx, pseudoVariable, []string{}, strings.Split(characteristicsPath, "."), "", subValue, nil)
 		if err != nil {
 			return result, err
 		}

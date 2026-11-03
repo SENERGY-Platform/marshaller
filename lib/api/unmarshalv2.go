@@ -51,7 +51,7 @@ func (this *UnmarshallingV2) UnmarshalV2(config config.Config, router *http.Serv
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.UnmarshalV2(msg)
+		result, err, code := ctrl.UnmarshalV2(request.Context(), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -82,7 +82,7 @@ func (this *UnmarshallingV2) UnmarshalV2ForService(config config.Config, router 
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.UnmarshalV2ForService(request.PathValue("serviceId"), msg)
+		result, err, code := ctrl.UnmarshalV2ForService(request.Context(), request.PathValue("serviceId"), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

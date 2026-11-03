@@ -17,11 +17,12 @@
 package marshaller
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
 type Converter interface {
-	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
+	Cast(ctx context.Context, in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
 }
 
 type ConceptRepo interface {
@@ -32,8 +33,8 @@ type ConceptRepo interface {
 }
 
 type DeviceRepository interface {
-	GetDeviceType(id string) (result model.DeviceType, err error, code int)
-	GetAspectNode(id string) (result model.AspectNode, err error)
+	GetDeviceType(ctx context.Context, id string) (result model.DeviceType, err error, code int)
+	GetAspectNode(ctx context.Context, id string) (result model.AspectNode, err error)
 }
 
 type Marshaller struct {

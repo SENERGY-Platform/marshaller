@@ -44,7 +44,7 @@ type CharacteristicPaths struct{}
 // @Router       /characteristic-paths/{serviceId}/{characteristicId} [GET]
 func (this *CharacteristicPaths) GetCharacteristicPaths(config config.Config, router *http.ServeMux, ctrl Controller, m *metrics.Metrics) {
 	router.HandleFunc("GET /characteristic-paths/{serviceId}/{characteristicId}", func(writer http.ResponseWriter, request *http.Request) {
-		result, err, code := ctrl.GetCharacteristicPaths(request.PathValue("serviceId"), request.PathValue("characteristicId"))
+		result, err, code := ctrl.GetCharacteristicPaths(request.Context(), request.PathValue("serviceId"), request.PathValue("characteristicId"))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

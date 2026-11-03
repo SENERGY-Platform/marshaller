@@ -17,6 +17,7 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -24,14 +25,14 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 )
 
-func (this *Controller) GetCharacteristicPaths(serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int) {
+func (this *Controller) GetCharacteristicPaths(ctx context.Context, serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int) {
 	if serviceId == "" {
 		return result, errors.New("expect serviceId as parameter in path"), http.StatusBadRequest
 	}
 	if characteristicId == "" {
 		return result, errors.New("expect characteristicId as parameter in path"), http.StatusBadRequest
 	}
-	service, err, code := this.deviceRepo.GetServiceWithErrCode(serviceId)
+	service, err, code := this.deviceRepo.GetServiceWithErrCode(ctx, serviceId)
 	if err != nil {
 		return result, err, code
 	}
@@ -44,6 +45,6 @@ func (this *Controller) GetCharacteristicPaths(serviceId string, characteristicI
 // An empty CharacteristicIdFilter means "do not filter" and yields every characteristic of
 // the function — it is not the same as an absent characteristic-filter query parameter,
 // which the GET endpoint answers with an empty result before it gets here.
-func (this *Controller) GetPathOptions(query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int) {
-	return this.marshaller.GetPathOption(query.DeviceTypeIds, query.FunctionId, query.GetAspectIds(), query.CharacteristicIdFilter, !query.WithoutEnvelope)
+func (this *Controller) GetPathOptions(ctx context.Context, query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int) {
+	return this.marshaller.GetPathOption(ctx, query.DeviceTypeIds, query.FunctionId, query.GetAspectIds(), query.CharacteristicIdFilter, !query.WithoutEnvelope)
 }

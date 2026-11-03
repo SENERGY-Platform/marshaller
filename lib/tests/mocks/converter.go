@@ -17,6 +17,8 @@
 package mocks
 
 import (
+	"context"
+
 	converterService "github.com/SENERGY-Platform/converter/lib/converter"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller"
 	v2 "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
@@ -25,7 +27,7 @@ import (
 
 type Converter struct{}
 
-func (this Converter) CastWithExtension(in interface{}, from v2.CharacteristicId, to v2.CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error) {
+func (this Converter) CastWithExtension(_ context.Context, in interface{}, from v2.CharacteristicId, to v2.CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error) {
 	converter, err := converterService.New()
 	if err != nil {
 		return nil, err
@@ -33,7 +35,7 @@ func (this Converter) CastWithExtension(in interface{}, from v2.CharacteristicId
 	return converter.CastWithExtension(in, from, to, extensions)
 }
 
-func (this Converter) Cast(in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
+func (this Converter) Cast(_ context.Context, in interface{}, from marshaller.CharacteristicId, to marshaller.CharacteristicId) (out interface{}, err error) {
 	converter, err := converterService.New()
 	if err != nil {
 		return nil, err

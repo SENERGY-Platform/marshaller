@@ -17,6 +17,7 @@
 package marshaller
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"net/http"
 	"sort"
@@ -29,10 +30,10 @@ type PathOptionsResultElement struct {
 	PathToCharacteristicId map[string]string `json:"path_to_characteristic_id"`
 }
 
-func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result map[string][]PathOptionsResultElement, err error, code int) {
+func (this *Marshaller) GetPathOption(ctx context.Context, deviceTypeIds []string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result map[string][]PathOptionsResultElement, err error, code int) {
 	result = map[string][]PathOptionsResultElement{}
 	for _, deviceTypeId := range deviceTypeIds {
-		result[deviceTypeId], err, code = this.getPathOptionForDeviceType(deviceTypeId, functionId, aspectIds, characteristicIdFilter, withEnvelope)
+		result[deviceTypeId], err, code = this.getPathOptionForDeviceType(ctx, deviceTypeId, functionId, aspectIds, characteristicIdFilter, withEnvelope)
 		if err != nil {
 			return
 		}
@@ -40,13 +41,13 @@ func (this *Marshaller) GetPathOption(deviceTypeIds []string, functionId string,
 	return result, nil, http.StatusOK
 }
 
-func (this *Marshaller) getPathOptionForDeviceType(deviceTypeId string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result []PathOptionsResultElement, err error, code int) {
+func (this *Marshaller) getPathOptionForDeviceType(ctx context.Context, deviceTypeId string, functionId string, aspectIds []string, characteristicIdFilter []string, withEnvelope bool) (result []PathOptionsResultElement, err error, code int) {
 	result = []PathOptionsResultElement{}
-	dt, err, code := this.devicerepo.GetDeviceType(deviceTypeId)
+	dt, err, code := this.devicerepo.GetDeviceType(ctx, deviceTypeId)
 	if err != nil {
 		return nil, err, code
 	}
-	services, err := this.filterMatchingServices(dt.Services, functionId, aspectIds)
+	services, err := this.filterMatchingServices(ctx, dt.Services, functionId, aspectIds)
 	if err != nil {
 		return nil, err, http.StatusInternalServerError
 	}
@@ -142,13 +143,13 @@ func intersection(alist []string, blist []string) (result []string) {
 	return
 }
 
-func (this *Marshaller) filterMatchingServices(services []model.Service, functionId string, aspectIds []string) (result []model.Service, err error) {
+func (this *Marshaller) filterMatchingServices(ctx context.Context, services []model.Service, functionId string, aspectIds []string) (result []model.Service, err error) {
 	aspectNodes := []model.AspectNode{}
 	for _, aspectId := range aspectIds {
 		if aspectId == "" || model.ContainsAspectNode(aspectNodes, aspectId) {
 			continue
 		}
-		aspectNode, err := this.devicerepo.GetAspectNode(aspectId)
+		aspectNode, err := this.devicerepo.GetAspectNode(ctx, aspectId)
 		if err != nil {
 			return result, err
 		}

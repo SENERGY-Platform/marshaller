@@ -17,15 +17,20 @@
 package conceptrepo
 
 import (
-	"net/url"
+	"context"
+	"time"
 
-	"github.com/SENERGY-Platform/device-repository/v2/lib/client"
+	"github.com/SENERGY-Platform/device-repository/v3/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/models/go/models"
 )
 
+// Load runs at the start and periodically outside any request, so its reads start no trace of a
+// caller; the token of this service goes with every read.
 func (this *ConceptRepo) Load() error {
-	conceptIds, err := this.loadConceptIds()
+	ctx := context.Background()
+	c := client.NewClient(this.config.DeviceRepositoryUrl, client.Options{Timeout: 10 * time.Second, OptionalAuthTokenForApiGatewayRequest: this.token})
+	conceptIds, err := this.loadConceptIds(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -37,7 +42,7 @@ func (this *ConceptRepo) Load() error {
 	temp := []Temp{}
 
 	for _, conceptId := range conceptIds {
-		concept, err := this.loadConcept(conceptId)
+		concept, err := this.loadConcept(ctx, c, conceptId)
 		if err != nil {
 			return err
 		}
@@ -45,7 +50,7 @@ func (this *ConceptRepo) Load() error {
 			Concept: concept,
 		}
 		for _, characteristicId := range concept.CharacteristicIds {
-			characteristic, err := this.loadCharacteristic(characteristicId)
+			characteristic, err := this.loadCharacteristic(ctx, c, characteristicId)
 			if err != nil {
 				return err
 			}
@@ -54,7 +59,7 @@ func (this *ConceptRepo) Load() error {
 		temp = append(temp, element)
 	}
 
-	functionInfos, err := this.loadFunctions()
+	functionInfos, err := this.loadFunctions(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -105,13 +110,17 @@ type IdWrapper struct {
 	Id string `json:"id"`
 }
 
-func (this *ConceptRepo) loadConceptIds() (ids []string, err error) {
+func (this *ConceptRepo) token() (string, error) {
+	token, err := this.access.Ensure()
+	return string(token), err
+}
+
+func (this *ConceptRepo) loadConceptIds(ctx context.Context, c client.Interface) (ids []string, err error) {
 	limit := 1000
 	offset := 0
 	temp := []models.Concept{}
-	c := client.NewClient(this.config.DeviceRepositoryUrl, nil)
 	for len(temp) == limit || offset == 0 {
-		temp, _, err, _ = c.ListConcepts(client.ConceptListOptions{
+		temp, _, err, _ = c.ListConcepts(ctx, client.ConceptListOptions{
 			Limit:  int64(limit),
 			Offset: int64(offset),
 			SortBy: "name.asc",
@@ -132,14 +141,13 @@ type FunctionInfo struct {
 	ConceptId string `json:"concept_id"`
 }
 
-func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err error) {
+func (this *ConceptRepo) loadFunctions(ctx context.Context, c client.Interface) (functionInfos []FunctionInfo, err error) {
 	this.config.GetLogger().Info("load functions")
 	limit := 100
 	offset := 0
 	temp := []models.Function{}
-	c := client.NewClient(this.config.DeviceRepositoryUrl, nil)
 	for len(temp) == limit || offset == 0 {
-		temp, _, err, _ = c.ListFunctions(client.FunctionListOptions{
+		temp, _, err, _ = c.ListFunctions(ctx, client.FunctionListOptions{
 			Limit:  int64(limit),
 			Offset: int64(offset),
 			SortBy: "name.asc",
@@ -158,20 +166,12 @@ func (this *ConceptRepo) loadFunctions() (functionInfos []FunctionInfo, err erro
 	return functionInfos, err
 }
 
-func (this *ConceptRepo) loadConcept(id string) (result model.Concept, err error) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return result, err
-	}
-	err = token.GetJSON(this.config.DeviceRepositoryUrl+"/concepts/"+url.PathEscape(id), &result)
+func (this *ConceptRepo) loadConcept(ctx context.Context, c client.Interface, id string) (result model.Concept, err error) {
+	result, err, _ = c.GetConceptWithoutCharacteristics(ctx, id)
 	return
 }
 
-func (this *ConceptRepo) loadCharacteristic(id string) (result model.Characteristic, err error) {
-	token, err := this.access.Ensure()
-	if err != nil {
-		return result, err
-	}
-	err = token.GetJSON(this.config.DeviceRepositoryUrl+"/characteristics/"+url.PathEscape(id), &result)
+func (this *ConceptRepo) loadCharacteristic(ctx context.Context, c client.Interface, id string) (result model.Characteristic, err error) {
+	result, err, _ = c.GetCharacteristic(ctx, id)
 	return
 }

@@ -401,7 +401,7 @@ func TestRootOmitEmptyMarshalling(t *testing.T) {
 
 func testMarshal(c client.Interface, request messages.MarshallingV2Request, expectedResult map[string]string) func(t *testing.T) {
 	return func(t *testing.T) {
-		result, err, code := c.MarshalV2(request)
+		result, err, code := c.MarshalV2(context.Background(), request)
 		if err != nil {
 			t.Error(code, err)
 			return

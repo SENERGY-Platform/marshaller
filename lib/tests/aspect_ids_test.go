@@ -17,6 +17,7 @@
 package tests
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -192,7 +193,7 @@ func TestPathOptionsDeprecatedContentVariableAspectId(t *testing.T) {
 
 func testPathOptionsQuery(query messages.PathOptionsQuery, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
-		result, err, code := TestClient.GetPathOptions(query)
+		result, err, code := TestClient.GetPathOptions(context.Background(), query)
 		if err != nil {
 			t.Error(code, err)
 			return

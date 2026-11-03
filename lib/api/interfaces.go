@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/configurables"
 	"github.com/SENERGY-Platform/marshaller/lib/converter"
@@ -30,25 +31,28 @@ import (
 //
 // The error code accompanying every result is the http status the operation would answer
 // with, the way the device-repository controller reports it.
+//
+// ctx carries the trace of the caller: the api passes the context of the request, the client
+// sends it along with the request.
 type Controller interface {
-	Marshal(request messages.MarshallingRequest) (result map[string]string, err error, code int)
-	MarshalForService(serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int)
+	Marshal(ctx context.Context, request messages.MarshallingRequest) (result map[string]string, err error, code int)
+	MarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int)
 
-	Unmarshal(request messages.UnmarshallingRequest) (result interface{}, err error, code int)
-	UnmarshalForService(serviceId string, characteristicId string, request messages.UnmarshallingRequest) (result interface{}, err error, code int)
+	Unmarshal(ctx context.Context, request messages.UnmarshallingRequest) (result interface{}, err error, code int)
+	UnmarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.UnmarshallingRequest) (result interface{}, err error, code int)
 
-	MarshalV2(request messages.MarshallingV2Request) (result map[string]string, err error, code int)
-	MarshalV2ForService(serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int)
+	MarshalV2(ctx context.Context, request messages.MarshallingV2Request) (result map[string]string, err error, code int)
+	MarshalV2ForService(ctx context.Context, serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int)
 
-	UnmarshalV2(request messages.UnmarshallingV2Request) (result interface{}, err error, code int)
-	UnmarshalV2ForService(serviceId string, request messages.UnmarshallingV2Request) (result interface{}, err error, code int)
+	UnmarshalV2(ctx context.Context, request messages.UnmarshallingV2Request) (result interface{}, err error, code int)
+	UnmarshalV2ForService(ctx context.Context, serviceId string, request messages.UnmarshallingV2Request) (result interface{}, err error, code int)
 
-	GetCharacteristicPaths(serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int)
+	GetCharacteristicPaths(ctx context.Context, serviceId string, characteristicId string) (result marshaller.CharacteristicsPathResponse, err error, code int)
 
-	GetPathOptions(query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int)
+	GetPathOptions(ctx context.Context, query messages.PathOptionsQuery) (result map[string][]marshaller.PathOptionsResultElement, err error, code int)
 
-	FindConfigurables(characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int)
-	FindConfigurablesForServiceIds(characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int)
+	FindConfigurables(ctx context.Context, characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int)
+	FindConfigurablesForServiceIds(ctx context.Context, characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int)
 
-	TryConverterExtension(call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int)
+	TryConverterExtension(ctx context.Context, call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int)
 }

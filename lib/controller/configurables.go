@@ -17,6 +17,7 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -26,7 +27,7 @@ import (
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 )
 
-func (this *Controller) FindConfigurables(characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int) {
+func (this *Controller) FindConfigurables(ctx context.Context, characteristicId string, services []model.Service) (result configurables.Configurables, err error, code int) {
 	if characteristicId == "" {
 		return result, errors.New("expect characteristic_id as field in body"), http.StatusBadRequest
 	}
@@ -39,7 +40,7 @@ func (this *Controller) FindConfigurables(characteristicId string, services []mo
 
 // FindConfigurablesForServiceIds resolves the services first, which is what the
 // query-parameter form of the endpoint does.
-func (this *Controller) FindConfigurablesForServiceIds(characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int) {
+func (this *Controller) FindConfigurablesForServiceIds(ctx context.Context, characteristicId string, serviceIds []string) (result configurables.Configurables, err error, code int) {
 	if characteristicId == "" {
 		return result, errors.New("expect characteristicId as query-parameter"), http.StatusBadRequest
 	}
@@ -48,20 +49,20 @@ func (this *Controller) FindConfigurablesForServiceIds(characteristicId string, 
 	}
 	services := []model.Service{}
 	for _, id := range serviceIds {
-		service, err := this.deviceRepo.GetService(strings.TrimSpace(id))
+		service, err := this.deviceRepo.GetService(ctx, strings.TrimSpace(id))
 		if err != nil {
 			return result, err, http.StatusInternalServerError
 		}
 		services = append(services, service)
 	}
-	return this.FindConfigurables(characteristicId, services)
+	return this.FindConfigurables(ctx, characteristicId, services)
 }
 
-func (this *Controller) TryConverterExtension(call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int) {
+func (this *Controller) TryConverterExtension(ctx context.Context, call converter.ExtensionCall) (result converter.ExtensionCallResponse, err error, code int) {
 	if this.converter == nil {
 		return result, errors.New("api initialized without converter"), http.StatusInternalServerError
 	}
-	result, err = this.converter.TryExtension(call)
+	result, err = this.converter.TryExtension(ctx, call)
 	if err != nil {
 		return result, err, http.StatusBadRequest
 	}

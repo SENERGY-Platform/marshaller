@@ -49,7 +49,7 @@ func (this *Configurables) GetConfigurables(config config.Config, router *http.S
 		if serviceIdsStr := request.URL.Query().Get("serviceIds"); serviceIdsStr != "" {
 			serviceIds = strings.Split(serviceIdsStr, ",")
 		}
-		result, err, code := ctrl.FindConfigurablesForServiceIds(request.URL.Query().Get("characteristicId"), serviceIds)
+		result, err, code := ctrl.FindConfigurablesForServiceIds(request.Context(), request.URL.Query().Get("characteristicId"), serviceIds)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -76,7 +76,7 @@ func (this *Configurables) FindConfigurables(config config.Config, router *http.
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.FindConfigurables(msg.CharacteristicId, msg.Services)
+		result, err, code := ctrl.FindConfigurables(request.Context(), msg.CharacteristicId, msg.Services)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

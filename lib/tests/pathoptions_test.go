@@ -17,6 +17,7 @@
 package tests
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"testing"
@@ -876,7 +877,7 @@ func TestPathOptionsOneServiceTemperatureCelsiusInsideAndOutside(t *testing.T) {
 
 func testPathOptions(deviceTypes []string, functionId string, aspect string, characteristicsFilter []string, withoutEnvelope bool, expectedResult map[string][]marshaller.PathOptionsResultElement) func(t *testing.T) {
 	return func(t *testing.T) {
-		result, err, code := TestClient.GetPathOptions(messages.PathOptionsQuery{
+		result, err, code := TestClient.GetPathOptions(context.Background(), messages.PathOptionsQuery{
 			DeviceTypeIds:          deviceTypes,
 			FunctionId:             functionId,
 			AspectId:               aspect,

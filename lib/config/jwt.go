@@ -18,27 +18,32 @@ package config
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"log/slog"
 	"net/http"
-	"runtime/debug"
 	"time"
 
 	"net/url"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 type Impersonate string
 
-func (this Impersonate) Post(url string, contentType string, body io.Reader) (resp *http.Response, err error) {
-	req, err := http.NewRequest("POST", url, body)
+// Post sends with ctx and its trace, so the called service continues the trace of the request
+// that caused it; without an OpenTelemetry setup the global propagator is a no-op.
+func (this Impersonate) Post(ctx context.Context, url string, contentType string, body io.Reader) (resp *http.Response, err error) {
+	req, err := http.NewRequestWithContext(ctx, "POST", url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Authorization", string(this))
 	req.Header.Set("Content-Type", contentType)
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(req.Header))
 
 	client := &http.Client{
 		Timeout: 10 * time.Second,
@@ -54,13 +59,13 @@ func (this Impersonate) Post(url string, contentType string, body io.Reader) (re
 	return
 }
 
-func (this Impersonate) PostJSON(url string, body interface{}, result interface{}) (err error) {
+func (this Impersonate) PostJSON(ctx context.Context, url string, body interface{}, result interface{}) (err error) {
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(body)
 	if err != nil {
 		return err
 	}
-	resp, err := this.Post(url, "application/json", b)
+	resp, err := this.Post(ctx, url, "application/json", b)
 	if err != nil {
 		return err
 	}
@@ -72,47 +77,6 @@ func (this Impersonate) PostJSON(url string, body interface{}, result interface{
 	defer resp.Body.Close()
 	if result != nil {
 		err = json.NewDecoder(resp.Body).Decode(result)
-	}
-	return err
-}
-
-func (this Impersonate) Get(url string) (resp *http.Response, err error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", string(this))
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err = client.Do(req)
-	if err == nil && resp.StatusCode == 401 {
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
-		log.Println(buf.String())
-		err = errors.New("access denied")
-	}
-	return
-}
-
-func (this Impersonate) GetJSON(url string, result interface{}) (err error) {
-	resp, err := this.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
-		temp, _ := io.ReadAll(resp.Body)
-		err = errors.New(string(temp))
-		slog.Error("http error response", "url", url, "status", resp.StatusCode, "error", err)
-		debug.PrintStack()
-		return err
-	}
-	err = json.NewDecoder(resp.Body).Decode(result)
-	if err != nil {
-		slog.Error("unable to decode http response", "url", url, "status", resp.StatusCode, "error", err)
-		debug.PrintStack()
-		return err
 	}
 	return err
 }

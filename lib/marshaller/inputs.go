@@ -17,6 +17,7 @@
 package marshaller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -34,7 +35,7 @@ import (
 type CharacteristicId = string
 type ConceptId = string
 
-func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, pathAllowList []string, configurables ...configurables.Configurable) (result map[string]string, err error) {
+func (this *Marshaller) MarshalInputs(ctx context.Context, protocol model.Protocol, service model.Service, input interface{}, inputCharacteristicId CharacteristicId, pathAllowList []string, configurables ...configurables.Configurable) (result map[string]string, err error) {
 	result = map[string]string{}
 	inputs := RemoveVoidVariables(service.Inputs)
 	inputs = UsePathAllowList(inputs, pathAllowList)
@@ -55,9 +56,9 @@ func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Ser
 			if err != nil {
 				return result, err
 			}
-			resultPart, err = this.partialInputMarshalling(content.ContentVariable, partial, configurable.CharacteristicId, value, content.Serialization)
+			resultPart, err = this.partialInputMarshalling(ctx, content.ContentVariable, partial, configurable.CharacteristicId, value, content.Serialization)
 		}
-		resultPart, err = this.partialInputMarshalling(content.ContentVariable, partial, inputCharacteristicId, input, content.Serialization)
+		resultPart, err = this.partialInputMarshalling(ctx, content.ContentVariable, partial, inputCharacteristicId, input, content.Serialization)
 		if err != nil {
 			return result, err
 		}
@@ -71,7 +72,7 @@ func (this *Marshaller) MarshalInputs(protocol model.Protocol, service model.Ser
 	return result, err
 }
 
-func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId models.Serialization) (result string, err error) {
+func (this *Marshaller) partialInputMarshalling(ctx context.Context, variable model.ContentVariable, partial mapping.Partial, inputCharacteristicId string, input interface{}, serializationId models.Serialization) (result string, err error) {
 	inputCharacteristic, err := this.ConceptRepo.GetCharacteristic(inputCharacteristicId)
 	if err != nil {
 		return result, err
@@ -86,13 +87,13 @@ func (this *Marshaller) partialInputMarshalling(variable model.ContentVariable, 
 			if err != nil {
 				return result, err
 			}
-			result, err = this.MarshalInput(partial, input, inputCharacteristic, variableCharacteristic, variable, serializationId)
+			result, err = this.MarshalInput(ctx, partial, input, inputCharacteristic, variableCharacteristic, variable, serializationId)
 			if err != nil {
 				return result, err
 			}
 		}
 	} else {
-		result, err = this.MarshalInput(partial, input, inputCharacteristic, model.NullCharacteristic, variable, serializationId)
+		result, err = this.MarshalInput(ctx, partial, input, inputCharacteristic, model.NullCharacteristic, variable, serializationId)
 	}
 	return
 }
@@ -158,9 +159,9 @@ func getVariableCharacteristics(variable model.ContentVariable) (result []Charac
 	return result
 }
 
-func (this *Marshaller) MarshalInput(partial mapping.Partial, inputCharacteristicValue interface{}, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId models.Serialization) (result string, err error) {
+func (this *Marshaller) MarshalInput(ctx context.Context, partial mapping.Partial, inputCharacteristicValue interface{}, inputCharacteristic model.Characteristic, serviceCharacteristic model.Characteristic, serviceVariable model.ContentVariable, serializationId models.Serialization) (result string, err error) {
 	serviceCharacteristicValue := inputCharacteristicValue
-	serviceCharacteristicValue, err = this.converter.Cast(inputCharacteristicValue, inputCharacteristic.Id, serviceCharacteristic.Id)
+	serviceCharacteristicValue, err = this.converter.Cast(ctx, inputCharacteristicValue, inputCharacteristic.Id, serviceCharacteristic.Id)
 	if err != nil {
 		return result, err
 	}

@@ -17,25 +17,26 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 )
 
-func (this *Controller) Marshal(request messages.MarshallingRequest) (result map[string]string, err error, code int) {
-	err, code = this.normalizeMarshallingRequest(&request)
+func (this *Controller) Marshal(ctx context.Context, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
+	err, code = this.normalizeMarshallingRequest(ctx, &request)
 	if err != nil {
 		return result, err, code
 	}
-	result, err = this.marshaller.MarshalInputs(*request.Protocol, request.Service, request.Data, request.CharacteristicId, request.PathAllowList, request.Configurables...)
+	result, err = this.marshaller.MarshalInputs(ctx, *request.Protocol, request.Service, request.Data, request.CharacteristicId, request.PathAllowList, request.Configurables...)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
 	return result, nil, http.StatusOK
 }
 
-func (this *Controller) MarshalForService(serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
+func (this *Controller) MarshalForService(ctx context.Context, serviceId string, characteristicId string, request messages.MarshallingRequest) (result map[string]string, err error, code int) {
 	if serviceId == "" {
 		return result, errors.New("expect serviceId as parameter in path"), http.StatusBadRequest
 	}
@@ -43,34 +44,34 @@ func (this *Controller) MarshalForService(serviceId string, characteristicId str
 		return result, errors.New("expect characteristicId as parameter in path"), http.StatusBadRequest
 	}
 	request.CharacteristicId = characteristicId
-	request.Service, err = this.deviceRepo.GetService(serviceId)
+	request.Service, err = this.deviceRepo.GetService(ctx, serviceId)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	return this.Marshal(request)
+	return this.Marshal(ctx, request)
 }
 
-func (this *Controller) MarshalV2(request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
-	err, code = this.normalizeMarshallingV2Request(&request)
+func (this *Controller) MarshalV2(ctx context.Context, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
+	err, code = this.normalizeMarshallingV2Request(ctx, &request)
 	if err != nil {
 		return result, err, code
 	}
-	result, err = this.marshallerV2.Marshal(request.Protocol, request.Service, request.Data)
+	result, err = this.marshallerV2.Marshal(ctx, request.Protocol, request.Service, request.Data)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
 	return result, nil, http.StatusOK
 }
 
-func (this *Controller) MarshalV2ForService(serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
+func (this *Controller) MarshalV2ForService(ctx context.Context, serviceId string, request messages.MarshallingV2Request) (result map[string]string, err error, code int) {
 	if serviceId == "" {
 		return result, errors.New("expect serviceId as parameter in path"), http.StatusBadRequest
 	}
-	request.Service, err = this.deviceRepo.GetService(serviceId)
+	request.Service, err = this.deviceRepo.GetService(ctx, serviceId)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	return this.MarshalV2(request)
+	return this.MarshalV2(ctx, request)
 }
 
 // normalizeMarshallingRequest fills in the protocol from the service if the caller left it
@@ -80,9 +81,9 @@ func (this *Controller) MarshalV2ForService(serviceId string, request messages.M
 // it mapped every normalization error to StatusBadRequest, a failing protocol lookup
 // included. That one is arguably a 500 — changing it is a behavior change and does not
 // belong in a refactor, so it is preserved here rather than quietly corrected.
-func (this *Controller) normalizeMarshallingRequest(request *messages.MarshallingRequest) (err error, code int) {
+func (this *Controller) normalizeMarshallingRequest(ctx context.Context, request *messages.MarshallingRequest) (err error, code int) {
 	if request.Protocol == nil {
-		protocol, err := this.deviceRepo.GetProtocol(request.Service.ProtocolId)
+		protocol, err := this.deviceRepo.GetProtocol(ctx, request.Service.ProtocolId)
 		if err != nil {
 			return err, http.StatusBadRequest
 		}
@@ -96,9 +97,9 @@ func (this *Controller) normalizeMarshallingRequest(request *messages.Marshallin
 
 // normalizeMarshallingV2Request answers 400 on both failures, see
 // normalizeMarshallingRequest.
-func (this *Controller) normalizeMarshallingV2Request(request *messages.MarshallingV2Request) (err error, code int) {
+func (this *Controller) normalizeMarshallingV2Request(ctx context.Context, request *messages.MarshallingV2Request) (err error, code int) {
 	if request.Protocol.Id == "" {
-		protocol, err := this.deviceRepo.GetProtocol(request.Service.ProtocolId)
+		protocol, err := this.deviceRepo.GetProtocol(ctx, request.Service.ProtocolId)
 		if err != nil {
 			return err, http.StatusBadRequest
 		}

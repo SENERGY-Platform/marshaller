@@ -15,8 +15,17 @@ Not about how the endpoints reach the router — that is
 types, and an http status alongside every result.
 
 ```go
-result, err, code := ctrl.MarshalV2(request)
+result, err, code := ctrl.MarshalV2(ctx, request)
 ```
+
+Every method takes a `context.Context` first (since 2026-11-03). The api passes the context
+of the request, the client builds its request with it and writes `traceparent` and
+`baggage` through the global OpenTelemetry propagator, so a caller's deadline ends the
+request and its trace continues into this service. The controller passes it on to the
+marshaller library, whose `Converter` and `DeviceRepository` interfaces take it as well, so
+the reads of device-repository (`lib/devicerepository`, through its v3 client) and the calls
+to the converter service continue the same trace. Only `lib/conceptrepo` reads without it:
+it loads at the start and then periodically, outside any request.
 
 Two things implement it. `lib/controller` does the work; `lib/client` does the same calls
 over http and is declared as `type Interface interface { api.Controller }`. A consumer can
@@ -38,7 +47,7 @@ the right name and signature. It says nothing about the **path** that method cal
 
 ```go
 //compiles; answers 404 forever
-return get[…](c.baseUrl, "/characteristic-path/"+…)
+return get[…](ctx, c, "/characteristic-path/"+…)
 ```
 
 A typo in a URL, a wrong verb, or a path that drifted when a route was renamed all compile
@@ -53,6 +62,14 @@ and endpoint agree.
 Since 2026-09-09 the tests under `lib/tests` and `lib/tests/v2` also drive the service
 through the client rather than through hand-built requests, so a mismatch fails a real
 behavior test too and not only the client's own.
+
+## Options
+
+`NewClient(url, Options{})` sends with `http.DefaultClient` and no timeout of its own, the
+same as `device-repository/v3/lib/client`. `Options.Timeout` bounds every request,
+`Options.HttpClient` replaces the default client (the timeout is set on a copy), and
+`Options.OptionalAuthTokenForApiGatewayRequest` is what used to be the second parameter of
+`NewClient`.
 
 ## Where the client is deliberately asymmetric
 

@@ -17,6 +17,7 @@
 package v2
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/config"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	"github.com/SENERGY-Platform/models/go/models"
@@ -47,8 +48,8 @@ type CharacteristicsRepo interface {
 type CharacteristicId = string
 
 type Converter interface {
-	Cast(in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
-	CastWithExtension(in interface{}, from CharacteristicId, to CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error)
+	Cast(ctx context.Context, in interface{}, from CharacteristicId, to CharacteristicId) (out interface{}, err error)
+	CastWithExtension(ctx context.Context, in interface{}, from CharacteristicId, to CharacteristicId, extensions []models.ConverterExtension) (out interface{}, err error)
 }
 
 // InputPathSelectionMode decides which of the input paths matching the function and the

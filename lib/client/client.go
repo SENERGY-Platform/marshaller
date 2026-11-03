@@ -21,13 +21,17 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/SENERGY-Platform/marshaller/lib/api"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 type Interface interface {
@@ -37,29 +41,58 @@ type Interface interface {
 type Client struct {
 	baseUrl string
 
+	//sends every request; Options.Timeout is set on it
+	httpClient *http.Client
+
 	// optionalAuthTokenForApiGatewayRequest:
 	//   - may be nil if used internally, without kong routing
 	//   - is used for requests that internally don`t need an auth token but are forced to send one if the request is routed over the SENERGY-Platform api-gateway
 	optionalAuthTokenForApiGatewayRequest func() (token string, err error)
 }
 
-// NewClient creates a new client
-// optionalAuthTokenForApiGatewayRequest:
-//   - may be nil if used internally, without kong routing
-//   - is used for requests that internally don`t need an auth token but are forced to send one if the request is routed over the SENERGY-Platform api-gateway
-func NewClient(baseUrl string, optionalAuthTokenForApiGatewayRequest func() (token string, err error)) Interface {
-	return &Client{baseUrl: baseUrl, optionalAuthTokenForApiGatewayRequest: optionalAuthTokenForApiGatewayRequest}
+// Options configure a client from NewClient. The zero value sends with http.DefaultClient, without a
+// timeout of its own and without a token for the api gateway.
+type Options struct {
+	// Timeout bounds every request including reading its answer; 0 leaves the bound to the context
+	// of the call and to HttpClient
+	Timeout time.Duration
+
+	// HttpClient sends the requests; nil means http.DefaultClient. Timeout is set on a copy, the
+	// given client stays unchanged.
+	HttpClient *http.Client
+
+	// OptionalAuthTokenForApiGatewayRequest:
+	//   - may be nil if used internally, without kong routing
+	//   - is used for requests that internally don`t need an auth token but are forced to send one if the request is routed over the SENERGY-Platform api-gateway
+	OptionalAuthTokenForApiGatewayRequest func() (token string, err error)
 }
 
-func do[T any](req *http.Request, optionalAuthTokenForApiGatewayRequest func() (token string, err error)) (result T, err error, code int) {
-	if optionalAuthTokenForApiGatewayRequest != nil && req.Header.Get("Authorization") == "" {
-		token, err := optionalAuthTokenForApiGatewayRequest()
+// NewClient creates a new client
+func NewClient(baseUrl string, options Options) Interface {
+	httpClient := options.HttpClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	if options.Timeout > 0 {
+		bounded := *httpClient
+		bounded.Timeout = options.Timeout
+		httpClient = &bounded
+	}
+	return &Client{baseUrl: baseUrl, httpClient: httpClient, optionalAuthTokenForApiGatewayRequest: options.OptionalAuthTokenForApiGatewayRequest}
+}
+
+// do adds the trace context of req to its headers, so the called service continues the trace of the caller.
+// Without an OpenTelemetry setup in the calling service the global propagator is a no-op.
+func do[T any](c *Client, req *http.Request) (result T, err error, code int) {
+	if c.optionalAuthTokenForApiGatewayRequest != nil && req.Header.Get("Authorization") == "" {
+		token, err := c.optionalAuthTokenForApiGatewayRequest()
 		if err != nil {
 			return result, err, http.StatusInternalServerError
 		}
 		req.Header.Set("Authorization", token)
 	}
-	resp, err := http.DefaultClient.Do(req)
+	otel.GetTextMapPropagator().Inject(req.Context(), propagation.HeaderCarrier(req.Header))
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
@@ -77,24 +110,24 @@ func do[T any](req *http.Request, optionalAuthTokenForApiGatewayRequest func() (
 }
 
 // post sends body as json to path and decodes the answer into T.
-func post[T any](baseUrl string, path string, body interface{}, optionalAuthTokenForApiGatewayRequest func() (token string, err error)) (result T, err error, code int) {
+func post[T any](ctx context.Context, c *Client, path string, body interface{}) (result T, err error, code int) {
 	buf := new(bytes.Buffer)
 	err = json.NewEncoder(buf).Encode(body)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	req, err := http.NewRequest(http.MethodPost, baseUrl+path, buf)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseUrl+path, buf)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return do[T](req, optionalAuthTokenForApiGatewayRequest)
+	return do[T](c, req)
 }
 
-func get[T any](baseUrl string, path string, optionalAuthTokenForApiGatewayRequest func() (token string, err error)) (result T, err error, code int) {
-	req, err := http.NewRequest(http.MethodGet, baseUrl+path, nil)
+func get[T any](ctx context.Context, c *Client, path string) (result T, err error, code int) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseUrl+path, nil)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	return do[T](req, optionalAuthTokenForApiGatewayRequest)
+	return do[T](c, req)
 }

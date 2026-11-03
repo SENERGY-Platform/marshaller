@@ -48,7 +48,7 @@ func (this *Unmarshalling) Unmarshal(config config.Config, router *http.ServeMux
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.Unmarshal(msg)
+		result, err, code := ctrl.Unmarshal(request.Context(), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -77,7 +77,7 @@ func (this *Unmarshalling) UnmarshalForService(config config.Config, router *htt
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.UnmarshalForService(request.PathValue("serviceId"), request.PathValue("characteristicId"), msg)
+		result, err, code := ctrl.UnmarshalForService(request.Context(), request.PathValue("serviceId"), request.PathValue("characteristicId"), msg)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

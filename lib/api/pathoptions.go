@@ -74,7 +74,7 @@ func (this *PathOptions) GetPathOptions(config config.Config, router *http.Serve
 			}
 			query.WithoutEnvelope = withoutEnvelope
 		}
-		result, err, code := ctrl.GetPathOptions(query)
+		result, err, code := ctrl.GetPathOptions(request.Context(), query)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -101,7 +101,7 @@ func (this *PathOptions) QueryPathOptions(config config.Config, router *http.Ser
 		if !ok {
 			return
 		}
-		result, err, code := ctrl.GetPathOptions(query)
+		result, err, code := ctrl.GetPathOptions(request.Context(), query)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

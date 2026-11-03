@@ -17,6 +17,7 @@
 package mocks
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -50,7 +51,7 @@ func (this *DeviceRepoStruct) Init() *DeviceRepoStruct {
 	return this
 }
 
-func (this *DeviceRepoStruct) GetDeviceType(id string) (result model.DeviceType, err error, code int) {
+func (this *DeviceRepoStruct) GetDeviceType(_ context.Context, id string) (result model.DeviceType, err error, code int) {
 	if dt, ok := this.deviceTypes[id]; ok {
 		return dt, nil, 200
 	} else {
@@ -63,7 +64,7 @@ func (this *DeviceRepoStruct) SetDeviceType(dt model.DeviceType) *DeviceRepoStru
 	return this
 }
 
-func (this *DeviceRepoStruct) GetService(serviceId string) (model.Service, error) {
+func (this *DeviceRepoStruct) GetService(_ context.Context, serviceId string) (model.Service, error) {
 	if service, ok := this.services[serviceId]; ok {
 		return service, nil
 	} else {
@@ -71,7 +72,7 @@ func (this *DeviceRepoStruct) GetService(serviceId string) (model.Service, error
 	}
 }
 
-func (this *DeviceRepoStruct) GetProtocol(id string) (model.Protocol, error) {
+func (this *DeviceRepoStruct) GetProtocol(_ context.Context, id string) (model.Protocol, error) {
 	if protocol, ok := this.protocols[id]; ok {
 		return protocol, nil
 	} else {
@@ -101,8 +102,8 @@ func (this *DeviceRepoStruct) SetProtocolJson(protocolStr string) *DeviceRepoStr
 	return this.SetProtocol(protocol)
 }
 
-func (this *DeviceRepoStruct) GetServiceWithErrCode(serviceId string) (result model.Service, err error, code int) {
-	result, err = this.GetService(serviceId)
+func (this *DeviceRepoStruct) GetServiceWithErrCode(ctx context.Context, serviceId string) (result model.Service, err error, code int) {
+	result, err = this.GetService(ctx, serviceId)
 	if err != nil {
 		code = http.StatusInternalServerError
 	} else {
@@ -111,7 +112,7 @@ func (this *DeviceRepoStruct) GetServiceWithErrCode(serviceId string) (result mo
 	return
 }
 
-func (this *DeviceRepoStruct) GetAspectNode(id string) (result model.AspectNode, err error) {
+func (this *DeviceRepoStruct) GetAspectNode(_ context.Context, id string) (result model.AspectNode, err error) {
 	if aspect, ok := this.aspectnodes[id]; ok {
 		return aspect, nil
 	}

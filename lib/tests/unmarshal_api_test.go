@@ -17,6 +17,7 @@
 package tests
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/marshaller/lib/api/messages"
 	"github.com/SENERGY-Platform/marshaller/lib/tests/mocks"
 )
@@ -26,7 +27,7 @@ func Example_api_Unmarshal1() {
 	serviceId := "urn:infai:ses:service:f306de41-a55b-45ed-afc9-039bbe53db1b"               //Danfoss Radiator Thermostat getTemperatureService
 	characteristicId := "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683" //temperature kelvin
 
-	result, err, code := TestClient.UnmarshalForService(serviceId, characteristicId, requestFromJson[messages.UnmarshallingRequest](
+	result, err, code := TestClient.UnmarshalForService(context.Background(), serviceId, characteristicId, requestFromJson[messages.UnmarshallingRequest](
 		`{"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"}}`,
 	))
 	printJson(result, err, code)
@@ -39,11 +40,11 @@ func Example_api_Unmarshal1() {
 func Example_api_Unmarshal2() {
 	mocks.DeviceRepo.SetProtocolJson(protocolJson)
 
-	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+	result, err, code := TestClient.Unmarshal(context.Background(), requestFromJson[messages.UnmarshallingRequest](
 		`{
 					"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": ` + danfossTemperatureService + `
+					"service": `+danfossTemperatureService+`
 				}`,
 	))
 	printJson(result, err, code)
@@ -54,12 +55,12 @@ func Example_api_Unmarshal2() {
 }
 
 func Example_api_Unmarshal3() {
-	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+	result, err, code := TestClient.Unmarshal(context.Background(), requestFromJson[messages.UnmarshallingRequest](
 		`{
 					"message": {"data":"{\"level\":21,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": ` + danfossTemperatureService + `,
-					"protocol": ` + protocolJson + `
+					"service": `+danfossTemperatureService+`,
+					"protocol": `+protocolJson+`
 				}`,
 	))
 	printJson(result, err, code)
@@ -70,12 +71,12 @@ func Example_api_Unmarshal3() {
 }
 
 func Example_api_UnmarshalWithHints1() {
-	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+	result, err, code := TestClient.Unmarshal(context.Background(), requestFromJson[messages.UnmarshallingRequest](
 		`{
 					"message": {"data":"{\"level1\":21,\"level2\":22,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": ` + danfossTemperatureServiceForHints + `,
-					"protocol": ` + protocolJson + `,
+					"service": `+danfossTemperatureServiceForHints+`,
+					"protocol": `+protocolJson+`,
 					"content_variable_hints": ["urn:infai:ses:content-variable:c504db64-05ea-4736-89fb-8a7a04d5c468_1", "foo", "bar"]
 				}`,
 	))
@@ -87,12 +88,12 @@ func Example_api_UnmarshalWithHints1() {
 }
 
 func Example_api_UnmarshalWithHints2() {
-	result, err, code := TestClient.Unmarshal(requestFromJson[messages.UnmarshallingRequest](
+	result, err, code := TestClient.Unmarshal(context.Background(), requestFromJson[messages.UnmarshallingRequest](
 		`{
 					"message": {"data":"{\"level1\":21,\"level2\":22,\"updateTime\":\"2020-01-15T07:20:01.000Z\"}"},
 					"characteristic_id": "urn:infai:ses:characteristic:75b2d113-1d03-4ef8-977a-8dbcbb31a683",
-					"service": ` + danfossTemperatureServiceForHints + `,
-					"protocol": ` + protocolJson + `,
+					"service": `+danfossTemperatureServiceForHints+`,
+					"protocol": `+protocolJson+`,
 					"content_variable_hints": ["urn:infai:ses:content-variable:c504db64-05ea-4736-89fb-8a7a04d5c468_2", "foo", "bar"]
 				}`,
 	))

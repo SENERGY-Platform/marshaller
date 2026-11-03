@@ -17,6 +17,7 @@
 package v2
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -32,12 +33,12 @@ import (
 	"github.com/SENERGY-Platform/models/go/models"
 )
 
-func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
+func (this *Marshaller) Marshal(ctx context.Context, protocol model.Protocol, service model.Service, data []model.MarshallingV2RequestData) (result map[string]string, err error) {
 	for _, value := range data {
 		if len(value.Paths) == 0 && value.FunctionId != "" {
 			value.Paths = this.selectInputPaths(service, value.FunctionId, value.GetAspectNodes())
 		}
-		service.Inputs, err = this.setContentVariableValues(service.Inputs, value.Paths, value.CharacteristicId, value.Value)
+		service.Inputs, err = this.setContentVariableValues(ctx, service.Inputs, value.Paths, value.CharacteristicId, value.Value)
 		if err != nil {
 			return result, err
 		}
@@ -48,12 +49,12 @@ func (this *Marshaller) Marshal(protocol model.Protocol, service model.Service, 
 // setContentVariableValues writes the value to every path. Each path is applied to the
 // result of the one before, so the inputs keep every value written and appear once each;
 // without any path they are returned as they are.
-func (this *Marshaller) setContentVariableValues(inputs []model.Content, paths []string, characteristic string, value interface{}) (result []model.Content, err error) {
+func (this *Marshaller) setContentVariableValues(ctx context.Context, inputs []model.Content, paths []string, characteristic string, value interface{}) (result []model.Content, err error) {
 	result = slices.Clone(inputs)
 	for _, path := range paths {
 		pathParts := strings.Split(path, ".")
 		for i, input := range result {
-			result[i].ContentVariable, err = this.setContentVariableValue(input.ContentVariable, []string{}, pathParts, characteristic, value, nil)
+			result[i].ContentVariable, err = this.setContentVariableValue(ctx, input.ContentVariable, []string{}, pathParts, characteristic, value, nil)
 			if err != nil {
 				return result, err
 			}
@@ -62,7 +63,7 @@ func (this *Marshaller) setContentVariableValues(inputs []model.Content, paths [
 	return result, nil
 }
 
-func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, currentPath []string, pathParts []string, characteristic string, value interface{}, rewrittenCharacteristics *map[string]model.Characteristic) (model.ContentVariable, error) {
+func (this *Marshaller) setContentVariableValue(ctx context.Context, variable model.ContentVariable, currentPath []string, pathParts []string, characteristic string, value interface{}, rewrittenCharacteristics *map[string]model.Characteristic) (model.ContentVariable, error) {
 	if rewrittenCharacteristics == nil {
 		rewrittenCharacteristics = &map[string]model.Characteristic{}
 	}
@@ -84,7 +85,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 	//not at the end of the correct path
 	if len(currentPath) < len(pathParts) {
 		for i, sub := range variable.SubContentVariables {
-			variable.SubContentVariables[i], err = this.setContentVariableValue(sub, currentPath, pathParts, characteristic, value, rewrittenCharacteristics)
+			variable.SubContentVariables[i], err = this.setContentVariableValue(ctx, sub, currentPath, pathParts, characteristic, value, rewrittenCharacteristics)
 			if err != nil {
 				return variable, err
 			}
@@ -110,9 +111,9 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 			}
 		}
 		if len(castExtensions) == 0 {
-			variable.Value, err = this.converter.Cast(value, characteristic, variable.CharacteristicId)
+			variable.Value, err = this.converter.Cast(ctx, value, characteristic, variable.CharacteristicId)
 		} else {
-			variable.Value, err = this.converter.CastWithExtension(value, characteristic, variable.CharacteristicId, castExtensions)
+			variable.Value, err = this.converter.CastWithExtension(ctx, value, characteristic, variable.CharacteristicId, castExtensions)
 		}
 		if err != nil {
 			return variable, err
@@ -158,7 +159,7 @@ func (this *Marshaller) setContentVariableValue(variable model.ContentVariable, 
 		for subPath, subValue := range variablePathToCharacteristicsValue {
 			subPathParts := strings.Split(subPath, ".")
 			if !reflect.DeepEqual(currentPath, subPathParts) {
-				variable, err = this.setContentVariableValue(variable, []string{}, subPathParts, "", subValue, rewrittenCharacteristics)
+				variable, err = this.setContentVariableValue(ctx, variable, []string{}, subPathParts, "", subValue, rewrittenCharacteristics)
 				if err != nil {
 					return variable, err
 				}
